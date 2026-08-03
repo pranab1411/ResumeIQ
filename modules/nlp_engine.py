@@ -26,7 +26,8 @@ NON_NAME_KEYWORDS: Set[str] = {
     "agent", "representative", "trainee", "fresher", "senior", "junior", "principal", "staff",
     "head", "vp", "ceo", "cto", "cfo", "team", "group", "department", "division", "tech",
     "technology", "solutions", "systems", "operations", "management", "business", "sales",
-    "marketing", "finance", "accounting", "recruiter", "hr", "human", "resources"
+    "marketing", "finance", "accounting", "recruiter", "hr", "human", "resources",
+    "creator", "founder", "author", "freelancer", "contributor", "owner", "partner"
 }
 
 class NLPEngine:
