@@ -262,7 +262,7 @@ class DatabaseManager:
         with self.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT * FROM resumes WHERE user_id = ? ORDER BY id ASC",
+                "SELECT * FROM resumes WHERE user_id = ? ORDER BY id DESC",
                 (user_id,)
             )
             rows = cursor.fetchall()
@@ -323,7 +323,7 @@ class DatabaseManager:
                 FROM reports r
                 JOIN resumes res ON r.resume_id = res.id
                 WHERE res.user_id = ?
-                ORDER BY r.id ASC
+                ORDER BY r.id DESC
             """, (user_id,))
             return [dict(row) for row in cursor.fetchall()]
 
