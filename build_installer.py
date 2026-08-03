@@ -39,8 +39,8 @@ def main():
         print("Cleaning previous build folder...")
         shutil.rmtree(build_dir, ignore_errors=True)
 
-    # 2. Run PyInstaller using main.spec
-    pyi_cmd = f'"{sys.executable}" -m PyInstaller --noconfirm main.spec'
+    # 2. Run PyInstaller using main.spec with --clean
+    pyi_cmd = f'"{sys.executable}" -m PyInstaller --clean --noconfirm main.spec'
     run_step("Compiling Standalone Binary with PyInstaller", pyi_cmd, cwd=base_dir)
 
     exe_path = os.path.join(dist_dir, "ResumeIQ.exe")
