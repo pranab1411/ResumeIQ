@@ -848,7 +848,8 @@ class DashboardWindow(QMainWindow):
         if not self.current_analysis_data:
             return
 
-        pdf_name = f"Report_{self.current_analysis_data['resume_id']}_{self.current_analysis_data['filename']}.pdf"
+        _base_name = os.path.splitext(self.current_analysis_data['filename'])[0]
+        pdf_name = f"Report_{self.current_analysis_data['resume_id']}_{_base_name}.pdf"
         output_path = os.path.join(REPORTS_DIR, pdf_name)
         mode = self.current_analysis_data.get("mode", "experienced")
         eval_mode_title = "Fresher Evaluation" if mode == "fresher" else "Experienced ATS Match"
