@@ -113,30 +113,22 @@ class NLPEngine:
     def extract_name_with_gemini(self, text: str) -> Optional[str]:
         """Uses Gemini AI to extract candidate name from resume text if API key is configured."""
         try:
-            import urllib.request
-            from database.database import db
-            api_key = os.environ.get("GEMINI_API_KEY") or db.get_setting("gemini_api_key")
-            if not api_key:
+            from utils.gemini_client import gemini_generate, gemini_available, GeminiError
+            if not gemini_available():
                 return None
-                
+
             lines = [line.strip() for line in text.split("\n") if line.strip()][:10]
             header_text = "\n".join(lines)
-            
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
             prompt = (
                 "Extract ONLY the candidate's real full name from this resume header. "
                 "Do NOT include job titles, emails, phone numbers, or section headers like 'About Me'. "
                 "Return ONLY the plain candidate name and nothing else.\n\nResume Header:\n" + header_text
             )
-            data = json.dumps({"contents": [{"parts": [{"text": prompt}]}]}).encode("utf-8")
-            req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
-            with urllib.request.urlopen(req, timeout=3) as resp:
-                result = json.loads(resp.read().decode())
-                raw_name = result["candidates"][0]["content"]["parts"][0]["text"].strip()
-                clean_name = raw_name.split("\n")[0].strip().strip('"\':,-_#|•')
-                if clean_name and self.is_valid_candidate_name(clean_name):
-                    logger.info(f"[GEMINI AI] Extracted candidate name: {clean_name}")
-                    return clean_name.title()
+            raw_name = gemini_generate(prompt, timeout=5)
+            clean_name = raw_name.split("\n")[0].strip().strip('"\'':,-_#|•')
+            if clean_name and self.is_valid_candidate_name(clean_name):
+                logger.info(f"[GEMINI AI] Extracted candidate name: {clean_name}")
+                return clean_name.title()
         except Exception as e:
             logger.warning(f"Gemini AI name extraction fallback: {e}")
         return None
