@@ -2,11 +2,24 @@ import os
 import json
 import re
 import spacy
-from typing import Dict, List, Set, Any
+from typing import Dict, List, Set, Any, Tuple
 from utils.logger import logger
 from utils.paths import get_asset_path
 
 SKILLS_FILE = get_asset_path("assets", "skills.json")
+NAMES_FILE = get_asset_path("assets", "names_db.json")
+
+# Strict non-name header & section label blacklist filter
+NON_NAME_KEYWORDS: Set[str] = {
+    "about", "me", "about me", "profile", "personal", "summary", "executive", "contact", 
+    "experience", "education", "skills", "curriculum", "vitae", "resume", "cv", "projects", 
+    "certifications", "work", "history", "career", "objective", "info", "information", 
+    "details", "phone", "email", "address", "linkedin", "github", "portfolio", "references", 
+    "declaration", "page", "hobbies", "languages", "technical", "professional", "qualification",
+    "qualifications", "achievements", "overview", "bio", "biography", "background", "contact info",
+    "personal profile", "work experience", "career summary", "executive summary", "key skills",
+    "soft skills", "technical skills", "academic background", "personal details"
+}
 
 class NLPEngine:
     def __init__(self):
@@ -14,6 +27,7 @@ class NLPEngine:
         self._load_spacy()
         self.known_skills_category = self._load_skills_db()
         self.known_skills_flat = self._flatten_skills()
+        self.global_first_names, self.global_last_names = self._load_names_db()
 
     def _load_spacy(self):
         try:
@@ -37,6 +51,19 @@ class NLPEngine:
                 logger.error(f"Error loading skills.json: {e}")
         return {}
 
+    def _load_names_db(self) -> Tuple[Set[str], Set[str]]:
+        if os.path.exists(NAMES_FILE):
+            try:
+                with open(NAMES_FILE, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    firsts = {x.lower() for x in data.get("first_names", [])}
+                    lasts = {x.lower() for x in data.get("last_names", [])}
+                    logger.info(f"Loaded Global Names DB: {len(firsts)} first names, {len(lasts)} last names.")
+                    return firsts, lasts
+            except Exception as e:
+                logger.error(f"Error loading names_db.json: {e}")
+        return set(), set()
+
     def _flatten_skills(self) -> Dict[str, str]:
         """Maps skill lower-case -> original display skill name."""
         flat = {}
@@ -45,8 +72,74 @@ class NLPEngine:
                 flat[skill.lower()] = skill
         return flat
 
+    def is_valid_candidate_name(self, candidate_name: str) -> bool:
+        """Validates if a string is a valid human name, excluding section headers & titles."""
+        if not candidate_name or not candidate_name.strip():
+            return False
+            
+        clean = candidate_name.strip().strip(":,-_#|•")
+        clean_lower = clean.lower()
+
+        if clean_lower in NON_NAME_KEYWORDS:
+            return False
+            
+        words = [w.strip() for w in clean_lower.split() if w.strip()]
+        if not (1 <= len(words) <= 4):
+            return False
+
+        for w in words:
+            if w in NON_NAME_KEYWORDS:
+                return False
+            if any(char.isdigit() for char in w):
+                return False
+            if "@" in w or "http" in w or "www." in w or ".com" in w:
+                return False
+
+        # Check matching against global names database or capitalized proper noun format
+        has_dict_match = any(w in self.global_first_names or w in self.global_last_names for w in words)
+        is_all_alphabetic = all(re.match(r'^[a-zA-Z\.\'-]+$', w) for w in words)
+
+        return is_all_alphabetic and (has_dict_match or all(w[0].isupper() for w in clean.split() if w))
+
+    def extract_candidate_name(self, text: str) -> str:
+        """Accurately extracts candidate name from resume header using NLP and Global Names DB."""
+        if not text:
+            return "Candidate"
+
+        lines = [line.strip() for line in text.split("\n") if line.strip()][:15]
+
+        # 1. Try spaCy PERSON entities with strict exclude validation
+        if self.nlp:
+            header_text = "\n".join(lines[:10])
+            doc = self.nlp(header_text)
+            for ent in doc.ents:
+                if ent.label_ == "PERSON":
+                    clean_ent = ent.text.split("\n")[0].strip().strip(":,-_#|•")
+                    if self.is_valid_candidate_name(clean_ent):
+                        return clean_ent.title()
+
+        # 2. Check top lines against global names database and exclude filters
+        for line in lines:
+            if "@" in line or "http" in line or "phone" in line.lower() or "resume" in line.lower():
+                continue
+            
+            parts = [p.strip() for p in re.split(r'[|•,\t]', line) if p.strip()]
+            for part in parts:
+                words = part.split()
+                if 2 <= len(words) <= 3 and self.is_valid_candidate_name(part):
+                    return part.title()
+
+        # 3. Check first non-keyword line
+        for line in lines:
+            line_clean = line.strip().strip(":,-_#|•")
+            words = line_clean.split()
+            if 2 <= len(words) <= 3 and self.is_valid_candidate_name(line_clean):
+                return line_clean.title()
+
+        return "Candidate"
+
     def extract_contact_info(self, text: str) -> Dict[str, str]:
-        """Extracts candidate email, phone, and name."""
+        """Extracts candidate email, phone, and accurately parsed candidate name."""
         email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
         phone_pattern = r'\(?\+?\d{1,4}\)?[-.\s]?\d{3,4}[-.\s]?\d{3,4}[-.\s]?\d{3,9}'
         
@@ -56,20 +149,7 @@ class NLPEngine:
         email = emails[0] if emails else "Not Found"
         phone = phones[0] if phones else "Not Found"
         
-        # Name extraction using spaCy PERSON entities
-        name = "Candidate"
-        if self.nlp:
-            doc = self.nlp(text[:500]) # Scan top header of resume
-            for ent in doc.ents:
-                if ent.label_ == "PERSON" and len(ent.text.split()) in [2, 3]:
-                    name = ent.text.split('\n')[0].strip()
-                    break
-        
-        if name == "Candidate":
-            # Fallback: check first line
-            first_line = text.split("\n")[0].strip() if text else ""
-            if first_line and len(first_line.split()) in [2, 3] and not "@" in first_line:
-                name = first_line
+        name = self.extract_candidate_name(text)
 
         return {
             "name": name,
@@ -86,7 +166,6 @@ class NLPEngine:
         text_lower = text.lower()
         
         for skill_lower, original_name in self.known_skills_flat.items():
-            # Use regex pattern to avoid false substring matches (e.g. 'c' inside 'cat')
             escaped = re.escape(skill_lower)
             pattern = r'(?:\b|(?<=\W))' + escaped + r'(?:\b|(?=\W))'
             if re.search(pattern, text_lower):
