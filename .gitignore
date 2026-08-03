@@ -8,6 +8,8 @@ build/
 dist/
 Output/*
 !Output/.gitkeep
+packages/
+*.exe
 
 # Virtual Environments
 venv/
