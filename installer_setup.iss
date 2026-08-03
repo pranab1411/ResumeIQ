@@ -1,6 +1,6 @@
 ; Script generated for Inno Setup - ResumeIQ Automated Installer
 #define MyAppName "ResumeIQ"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.5.0"
 #define MyAppPublisher "ResumeIQ AI Systems"
 #define MyAppURL "https://github.com/ResumeIQ"
 #define MyAppExeName "ResumeIQ.exe"
@@ -16,7 +16,7 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
-OutputBaseFilename=ResumeIQ_Setup_v1.0.0
+OutputBaseFilename=ResumeIQ_Setup_v1.5.0
 SetupIconFile=assets\app_icon.ico
 Compression=lzma2/ultra64
 SolidCompression=yes

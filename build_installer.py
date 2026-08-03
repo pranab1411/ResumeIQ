@@ -66,14 +66,14 @@ def main():
 
     if iscc_found:
         iscc_cmd = f'"{iscc_found}" installer_setup.iss'
-        run_step("Compiling Inno Setup Executable (ResumeIQ_Setup_v1.0.0.exe)", iscc_cmd, cwd=base_dir)
-        setup_exe = os.path.join(base_dir, "Output", "ResumeIQ_Setup_v1.0.0.exe")
+        run_step("Compiling Inno Setup Executable (ResumeIQ_Setup_v1.5.0.exe)", iscc_cmd, cwd=base_dir)
+        setup_exe = os.path.join(base_dir, "Output", "ResumeIQ_Setup_v1.5.0.exe")
         if os.path.exists(setup_exe):
             print(f"\n[SUCCESS] Installer created at: {setup_exe}")
     else:
         print("\n" + "="*60)
         print(" [INFO] Inno Setup Compiler (ISCC.exe) not found on system PATH.")
-        print("        To build the single ResumeIQ_Setup_v1.0.0.exe file:")
+        print("        To build the single ResumeIQ_Setup_v1.5.0.exe file:")
         print("        1. Download free Inno Setup 6 from: https://jrsoftware.org/isdl.php")
         print("        2. Right-click 'installer_setup.iss' and click 'Compile'.")
         print("="*60)
