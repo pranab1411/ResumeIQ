@@ -20,6 +20,7 @@ def main():
     app.setApplicationName("ResumeIQ")
     app.setOrganizationName("ResumeIQ AI Systems")
     app.setWindowIcon(QIcon(get_asset_path("assets", "logo.png")))
+    app.setQuitOnLastWindowClosed(False)
 
     # Apply global Dark Mode QSS Stylesheet
     app.setStyleSheet(DARK_THEME_QSS)
@@ -34,9 +35,12 @@ def main():
     def on_login_success(user_dict: dict):
         nonlocal dashboard_win
         logger.info(f"Launching Dashboard for user: {user_dict['email']}")
-        dashboard_win = DashboardWindow(current_user=user_dict)
-        dashboard_win.show()
-        login_win.close()
+        try:
+            dashboard_win = DashboardWindow(current_user=user_dict)
+            dashboard_win.show()
+            login_win.hide()
+        except Exception as e:
+            logger.error(f"Error launching DashboardWindow: {e}", exc_info=True)
 
     login_win.login_success.connect(on_login_success)
 
