@@ -1,0 +1,36 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+Output/*
+!Output/.gitkeep
+
+# Virtual Environments
+venv/
+.venv/
+env/
+
+# IDE & Editor settings
+.idea/
+.vscode/
+
+# Local Database & Reports
+database/*.db
+database/resumeiq.db
+reports/*.pdf
+reports/*.pdf.pdf
+resumes/*
+!resumes/.gitkeep
+
+# Temporary Test Outputs & Logs
+*.log
+star_output.txt
+test_*.pdf
+
+# Windows system files
+Thumbs.db
+Desktop.ini

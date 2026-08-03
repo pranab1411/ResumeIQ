@@ -1,0 +1,70 @@
+{
+  "skills_by_category": {
+    "IT Support & Desktop Engineering": [
+      "Active Directory", "Azure AD", "Entra ID", "Windows 10", "Windows 11", "Windows Server", "macOS", "Linux", "Group Policy", "GPO", "Microsoft Intune", "SCCM", "MECM", "JAMF", "MDM", "Office 365", "Microsoft 365", "Exchange Online", "ServiceNow", "Jira Service Desk", "Zendesk", "ITIL", "RDP", "TeamViewer", "AnyDesk", "TCP/IP", "DHCP", "DNS", "VPN", "LAN/WAN", "Wi-Fi Troubleshooting", "Hardware Diagnostics", "PC Repair", "Printer Setup", "OS Imaging", "MDT", "Sysprep", "BitLocker", "CrowdStrike", "Endpoint Protection", "Malware Removal", "MFA", "Asset Management", "VDI", "Hyper-V", "VMware", "Remote Desktop Support", "Ticket Management", "Google Workspace"
+    ],
+    "Programming & Scripting Languages": [
+      "Python", "Java", "C", "C++", "C#", "JavaScript", "TypeScript", "Go", "Rust", "Ruby", "PHP", "Kotlin", "Swift", "R", "Scala", "Dart", "HTML", "CSS", "Julia", "Perl", "Haskell", "Elixir", "Bash", "Shell", "PowerShell", "Assembly", "MATLAB", "VBA"
+    ],
+    "Web & Frontend Engineering": [
+      "React", "Angular", "Vue.js", "Svelte", "Next.js", "Nuxt.js", "Gatsby", "HTML5", "CSS3", "SASS", "SCSS", "Tailwind CSS", "Bootstrap", "Redux", "Zustand", "Webpack", "Vite", "RxJS", "WebSockets", "PWA", "WebAssembly", "Material UI", "Chakra UI"
+    ],
+    "Backend & API Development": [
+      "Node.js", "Express.js", "Django", "Flask", "FastAPI", "Spring Boot", "ASP.NET Core", "Ruby on Rails", "NestJS", "GraphQL", "REST APIs", "gRPC", "Microservices", "Celery", "RabbitMQ", "Apache Kafka", "OAuth 2.0", "JWT", "OpenID"
+    ],
+    "Mobile App Development": [
+      "React Native", "Flutter", "Android Development", "iOS Development", "SwiftUI", "Jetpack Compose", "Xamarin", "Ionic", "Mobile Security", "App Store Publishing", "Push Notifications"
+    ],
+    "Databases & Data Storage": [
+      "SQL", "MySQL", "PostgreSQL", "SQLite", "MongoDB", "Redis", "Oracle", "Microsoft SQL Server", "Cassandra", "DynamoDB", "Elasticsearch", "Neo4j", "Firebase", "MariaDB", "Supabase", "Snowflake", "BigQuery", "ClickHouse", "Pinecone", "Chroma"
+    ],
+    "Cloud & DevOps Engineering": [
+      "AWS", "Azure", "Google Cloud", "GCP", "Docker", "Kubernetes", "Git", "GitHub", "GitLab", "CI/CD", "Terraform", "Ansible", "Jenkins", "Puppet", "Chef", "Helm", "Prometheus", "Grafana", "ELK Stack", "Datadog", "Linux", "Unix", "Nginx", "Apache"
+    ],
+    "AI, Machine Learning & Data Science": [
+      "Machine Learning", "Deep Learning", "Generative AI", "LLMs", "NLP", "Computer Vision", "TensorFlow", "PyTorch", "scikit-learn", "Pandas", "NumPy", "SciPy", "Keras", "OpenCV", "Hugging Face", "LangChain", "LlamaIndex", "MLOps", "MLflow", "Feature Engineering"
+    ],
+    "Data Engineering & Big Data": [
+      "Apache Spark", "Hadoop", "Apache Flink", "Apache Airflow", "dbt", "Data Warehousing", "ETL", "ELT", "Databricks", "Hive", "Presto", "Data Modeling", "Data Governance", "Parquet"
+    ],
+    "Cybersecurity & Network Security": [
+      "Penetration Testing", "Ethical Hacking", "Network Security", "Information Security", "Cryptography", "OWASP Top 10", "SIEM", "Firewalls", "Vulnerability Assessment", "Incident Response", "Wireshark", "Metasploit", "CISSP", "ISO 27001", "SOC 2"
+    ],
+    "Quality Assurance & Testing": [
+      "Automated Testing", "Manual Testing", "Selenium", "Cypress", "Playwright", "JUnit", "PyTest", "Jest", "Mocha", "Postman", "JMeter", "Performance Testing", "Regression Testing", "TDD", "BDD"
+    ],
+    "Embedded Systems & Hardware": [
+      "Embedded C", "Microcontrollers", "Arduino", "Raspberry Pi", "RTOS", "PCB Design", "IoT", "VHDL", "Verilog", "FPGA", "Firmware Development"
+    ],
+    "Product Management & Strategy": [
+      "Product Strategy", "Product Roadmap", "User Research", "Agile", "Scrum", "Wireframing", "Feature Prioritization", "Product Analytics", "Product Lifecycle Management", "Market Research", "A/B Testing", "Competitive Analysis", "PRD Writing"
+    ],
+    "Project & Operations Management": [
+      "Project Management", "Program Management", "Operations Management", "Resource Allocation", "Risk Management", "Budgeting", "Process Optimization", "Lean Management", "Six Sigma", "PMP", "Prince2", "Stakeholder Management", "Change Management", "Supply Chain Management"
+    ],
+    "Digital Marketing & Growth": [
+      "SEO", "SEM", "Content Marketing", "Social Media Marketing", "Email Marketing", "Google Analytics", "PPC", "Growth Hacking", "Brand Strategy", "CRO", "Affiliate Marketing", "Copywriting"
+    ],
+    "Sales, Business Development & CRM": [
+      "B2B Sales", "B2C Sales", "Business Development", "Account Management", "Lead Generation", "Salesforce", "HubSpot", "Cold Outreach", "Sales Pipeline Management", "Negotiation", "Deal Closing", "Key Account Strategy"
+    ],
+    "Finance, Accounting & Banking": [
+      "Financial Modeling", "Financial Analysis", "Accounting", "Corporate Finance", "Auditing", "Risk Assessment", "Tax Compliance", "Financial Reporting", "Valuation", "Wealth Management", "GAAP", "IFRS", "QuickBooks", "SAP"
+    ],
+    "Human Resources & Talent Acquisition": [
+      "Talent Acquisition", "Technical Recruiting", "Employee Relations", "HR Policies", "Performance Management", "Onboarding", "Compensation & Benefits", "Diversity & Inclusion", "Workday", "BambooHR"
+    ],
+    "Customer Success & Support": [
+      "Customer Relationship Management", "Customer Success", "Customer Support", "Zendesk", "Freshdesk", "Ticket Management", "Customer Onboarding", "Churn Reduction", "SLA Management", "Escalation Management", "NPS Optimization"
+    ],
+    "Business Analysis & Strategy": [
+      "Business Analysis", "Requirements Gathering", "Process Mapping", "Business Intelligence", "Data Analysis", "Gap Analysis", "Strategy Consulting", "SWOT Analysis", "Feasibility Studies"
+    ],
+    "Content Writing & Graphic Design": [
+      "Content Strategy", "Technical Writing", "Copywriting", "Editing", "Graphic Design", "Figma", "Adobe Photoshop", "Adobe Illustrator", "Adobe Premiere Pro", "UI/UX Design", "User Experience", "User Interface", "Storytelling", "Brand Identity"
+    ],
+    "Soft Skills & Executive Leadership": [
+      "Leadership", "Communication", "Problem Solving", "Teamwork", "Time Management", "Critical Thinking", "Adaptability", "Emotional Intelligence", "Strategic Thinking", "Conflict Resolution", "Decision Making", "Mentorship"
+    ]
+  }
+}

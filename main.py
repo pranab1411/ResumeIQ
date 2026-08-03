@@ -1,0 +1,58 @@
+import sys
+import os
+from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon
+
+from ui.styles import DARK_THEME_QSS
+from ui.splash_screen import SplashScreen
+from ui.login_window import LoginWindow
+from ui.dashboard_window import DashboardWindow
+from database.database import db
+from utils.logger import logger
+from utils.paths import get_asset_path
+
+def main():
+    # Enable High DPI scaling
+    os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
+    
+    app = QApplication(sys.argv)
+    app.setApplicationName("ResumeIQ")
+    app.setOrganizationName("ResumeIQ AI Systems")
+    app.setWindowIcon(QIcon(get_asset_path("assets", "logo.png")))
+
+    # Apply global Dark Mode QSS Stylesheet
+    app.setStyleSheet(DARK_THEME_QSS)
+
+    # Initialize Database Schema
+    db.init_db()
+    logger.info("ResumeIQ application started.")
+
+    login_win = LoginWindow()
+    dashboard_win = None
+
+    def on_login_success(user_dict: dict):
+        nonlocal dashboard_win
+        logger.info(f"Launching Dashboard for user: {user_dict['email']}")
+        dashboard_win = DashboardWindow(current_user=user_dict)
+        dashboard_win.show()
+        login_win.close()
+
+    login_win.login_success.connect(on_login_success)
+
+    # Launch Startup Loading Splash Screen
+    splash = SplashScreen()
+    screen_geo = app.primaryScreen().geometry()
+    splash.center_on_screen(screen_geo)
+
+    def launch_main_app():
+        login_win.show()
+        splash.close()
+
+    splash.loading_complete.connect(launch_main_app)
+    splash.show()
+
+    sys.exit(app.exec())
+
+if __name__ == "__main__":
+    main()

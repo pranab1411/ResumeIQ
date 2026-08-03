@@ -1,0 +1,494 @@
+from typing import List, Dict, Any, Tuple
+import re
+from utils.logger import logger
+
+# Synonym dictionary for ATS skill normalization (Tech & Non-Tech Roles)
+SKILL_SYNONYMS = {
+    # Tech - Languages & Web
+    "js": "javascript",
+    "javascript": "javascript",
+    "js6": "javascript",
+    "es6": "javascript",
+    "ts": "typescript",
+    "typescript": "typescript",
+    "py": "python",
+    "python": "python",
+    "python3": "python",
+    "cpp": "c++",
+    "c++": "c++",
+    "csharp": "c#",
+    "c#": "c#",
+    "html": "html",
+    "html5": "html",
+    "css": "css",
+    "css3": "css",
+    "react": "react",
+    "reactjs": "react",
+    "react.js": "react",
+    "vue": "vue.js",
+    "vuejs": "vue.js",
+    "ng": "angular",
+    "angularjs": "angular",
+    "node": "node.js",
+    "nodejs": "node.js",
+    "node.js": "node.js",
+    
+    # Tech - Cloud & DevOps
+    "aws": "amazon web services",
+    "amazon web services": "amazon web services",
+    "gcp": "google cloud",
+    "google cloud platform": "google cloud",
+    "azure": "microsoft azure",
+    "k8s": "kubernetes",
+    "kubernetes": "kubernetes",
+    "docker": "docker",
+    "containers": "docker",
+    "ci/cd": "ci/cd",
+    "cicd": "ci/cd",
+    "iac": "infrastructure as code",
+    "tf": "terraform",
+    
+    # Tech - Data, AI & Databases
+    "ml": "machine learning",
+    "machine learning": "machine learning",
+    "ai": "artificial intelligence",
+    "artificial intelligence": "artificial intelligence",
+    "dl": "deep learning",
+    "nlp": "natural language processing",
+    "cv": "computer vision",
+    "llm": "large language models",
+    "llms": "large language models",
+    "genai": "generative ai",
+    "postgres": "postgresql",
+    "postgresql": "postgresql",
+    "sql": "sql",
+    "mysql": "mysql",
+    "mongo": "mongodb",
+    "mongodb": "mongodb",
+    "sklearn": "scikit-learn",
+    "tf": "tensorflow",
+    "bi": "business intelligence",
+
+    # Tech - Security, SRE & QA
+    "qa": "quality assurance",
+    "sre": "site reliability engineering",
+    "infosec": "information security",
+    "secops": "security operations",
+    "devsecops": "devsecops",
+    "pen testing": "penetration testing",
+    
+    # Tech - IT Support & Desktop Engineering
+    "ad": "active directory",
+    "active directory": "active directory",
+    "azure ad": "azure ad",
+    "entra": "entra id",
+    "gpo": "group policy",
+    "o365": "office 365",
+    "m365": "microsoft 365",
+    "itsm": "it service management",
+    "itil": "itil",
+    "sccm": "sccm",
+    "mecm": "mecm",
+    "mdm": "mobile device management",
+    "vdi": "virtual desktop infrastructure",
+    "rdp": "remote desktop support",
+    "vpn": "vpn",
+    "dhcp": "dhcp",
+    "dns": "dns",
+    "wds": "windows deployment services",
+    "mdt": "microsoft deployment toolkit",
+    "mfa": "mfa",
+    "2fa": "mfa",
+    
+    # Non-Tech - Business, Marketing & Operations
+    "seo": "search engine optimization",
+    "sem": "search engine marketing",
+    "ppc": "pay-per-click",
+    "cro": "conversion rate optimization",
+    "crm": "customer relationship management",
+    "sfa": "sales force automation",
+    "hris": "human resources information system",
+    "ats": "applicant tracking system",
+    "pmp": "project management professional",
+    "scrum": "scrum",
+    "agile": "agile",
+    "prd": "product requirement document",
+    "ux": "user experience",
+    "ui": "user interface",
+    "nps": "net promoter score",
+    "csat": "customer satisfaction",
+    "sla": "service level agreement",
+    "kpi": "key performance indicator",
+    "okr": "objectives and key results",
+    "gaap": "generally accepted accounting principles",
+    "ifrs": "international financial reporting standards",
+    "pr": "public relations",
+    "cx": "customer experience"
+}
+
+class ATSCalculator:
+    @staticmethod
+    def _normalize_skill(skill: str) -> str:
+        s_clean = skill.strip().lower()
+        return SKILL_SYNONYMS.get(s_clean, s_clean)
+
+    @staticmethod
+    def calculate_tf_idf_similarity(resume_text: str, jd_text: str) -> float:
+        """Calculates TF-IDF Cosine Similarity between resume text and job description."""
+        if not resume_text or not jd_text:
+            return 50.0
+        try:
+            from sklearn.feature_extraction.text import TfidfVectorizer
+            from sklearn.metrics.pairwise import cosine_similarity
+
+            vectorizer = TfidfVectorizer(stop_words='english')
+            tfidf_matrix = vectorizer.fit_transform([resume_text, jd_text])
+            similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
+            return min(100.0, max(0.0, round(float(similarity) * 100.0, 1)))
+        except Exception as e:
+            logger.warning(f"TF-IDF calculation error: {e}. Fallback to keyword density.")
+            # Fallback word overlap
+            r_words = set(re.findall(r'\w+', resume_text.lower()))
+            j_words = set(re.findall(r'\w+', jd_text.lower()))
+            if not j_words:
+                return 50.0
+            overlap = len(r_words.intersection(j_words)) / len(j_words)
+            return round(min(100.0, overlap * 100.0), 1)
+
+    @staticmethod
+    def calculate_hygiene_score(resume_text: str, contact_info: Dict[str, str] = None) -> float:
+        """Calculates formatting, structure, action verbs, and quantifiable metrics hygiene (0-100%)."""
+        if not resume_text:
+            return 50.0
+        
+        text_lower = resume_text.lower()
+        score = 0.0
+
+        # 1. Contact Info Completeness (25 pts)
+        contact_pts = 0
+        if contact_info:
+            if contact_info.get("email") and contact_info.get("email") != "Not Found":
+                contact_pts += 12.5
+            if contact_info.get("phone") and contact_info.get("phone") != "Not Found":
+                contact_pts += 12.5
+        else:
+            if re.search(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text_lower):
+                contact_pts += 12.5
+            if re.search(r'\d{10}', text_lower):
+                contact_pts += 12.5
+        score += contact_pts
+
+        # 2. Key Resume Sections Present (25 pts)
+        sections = ["experience", "employment", "work history", "education", "skills", "projects"]
+        sections_found = sum(1 for sec in sections if sec in text_lower)
+        score += min(25.0, (sections_found / 3.0) * 25.0)
+
+        # 3. Action Verbs Usage (25 pts)
+        action_verbs = ["managed", "developed", "created", "designed", "implemented", "increased", "reduced", "led", "architected", "built", "optimized", "spearheaded", "engineered"]
+        verbs_found = sum(1 for verb in action_verbs if verb in text_lower)
+        score += min(25.0, (verbs_found / 4.0) * 25.0)
+
+        # 4. Quantifiable Metrics & Numbers (25 pts)
+        metrics_pattern = r'\b\d+%\b|\$\d+|\b\d+\s+users\b|\b\d+\s+projects\b|\b\d+\+\s+years\b|\b\d+\s+team\b'
+        metrics_count = len(re.findall(metrics_pattern, text_lower))
+        if metrics_count >= 3:
+            score += 25.0
+        elif metrics_count > 0:
+            score += metrics_count * 8.0
+        else:
+            score += 5.0
+
+        return round(min(100.0, score), 1)
+
+    @staticmethod
+    def calculate_experience_score(resume_text: str, jd_text: str = "") -> float:
+        """Calculates experience and degree match alignment (0-100%)."""
+        if not resume_text:
+            return 50.0
+
+        text_lower = resume_text.lower()
+        score = 60.0 # Base score
+
+        # Degree matching (+20 pts)
+        degrees = ["bachelor", "master", "phd", "b.tech", "m.tech", "b.s.", "m.s.", "degree", "computer science", "engineering"]
+        if any(deg in text_lower for deg in degrees):
+            score += 20.0
+
+        # Years of Experience matching (+20 pts)
+        exp_pattern = r'(\d+)\+?\s*years?'
+        matches = re.findall(exp_pattern, text_lower)
+        if matches:
+            max_years = max([int(m) for m in matches if m.isdigit()])
+            if max_years >= 5:
+                score += 20.0
+            elif max_years >= 2:
+                score += 15.0
+            else:
+                score += 10.0
+        else:
+            score += 10.0
+
+        return round(min(100.0, score), 1)
+
+    @classmethod
+    def calculate_score(
+        cls,
+        resume_skills: List[str],
+        required_skills: List[str],
+        resume_text: str = "",
+        jd_text: str = "",
+        contact_info: Dict[str, str] = None
+    ) -> Tuple[float, List[str], List[str]]:
+        """
+        Calculates Industry-Grade 4-Pillar ATS Score, Matched Skills, and Missing Skills.
+        Formula: (0.40 × Skill Match) + (0.25 × TF-IDF Similarity) + (0.20 × Hygiene) + (0.15 × Exp Alignment)
+        """
+        if not required_skills:
+            matched = resume_skills
+            missing = []
+            raw_score = 100.0 if len(resume_skills) >= 5 else (len(resume_skills) * 20.0)
+            return round(raw_score, 1), matched, missing
+
+        # Pillar 1: Skill & Synonym Match (40% Weight)
+        resume_normalized = {cls._normalize_skill(s): s for s in resume_skills}
+        req_normalized = {cls._normalize_skill(s): s for s in required_skills}
+
+        matched_skills = []
+        missing_skills = []
+
+        for norm_req, orig_req in req_normalized.items():
+            if norm_req in resume_normalized:
+                matched_skills.append(orig_req)
+            else:
+                missing_skills.append(orig_req)
+
+        skill_match_pct = (len(matched_skills) / len(req_normalized)) * 100.0
+
+        # Pillar 2: TF-IDF Cosine Similarity (25% Weight)
+        semantic_pct = cls.calculate_tf_idf_similarity(resume_text, jd_text) if resume_text and jd_text else skill_match_pct
+
+        # Pillar 3: Hygiene & Formatting (20% Weight)
+        hygiene_pct = cls.calculate_hygiene_score(resume_text, contact_info) if resume_text else 80.0
+
+        # Pillar 4: Education & Experience Alignment (15% Weight)
+        exp_pct = cls.calculate_experience_score(resume_text, jd_text) if resume_text else 80.0
+
+        # Final Weighted Multi-Pillar ATS Composite Score
+        composite_score = (0.40 * skill_match_pct) + (0.25 * semantic_pct) + (0.20 * hygiene_pct) + (0.15 * exp_pct)
+        final_score = round(min(100.0, max(0.0, composite_score)), 1)
+
+        logger.info(f"[REAL ATS ENGINE] Composite Score: {final_score}% (Skills: {skill_match_pct:.1f}%, Semantic: {semantic_pct:.1f}%, Hygiene: {hygiene_pct:.1f}%, Exp: {exp_pct:.1f}%)")
+
+        return final_score, matched_skills, missing_skills
+
+    @staticmethod
+    def get_score_category(score: float) -> str:
+        if score < 50.0:
+            return "Needs Improvement"
+        elif score <= 75.0:
+            return "Average"
+        else:
+            return "Excellent"
+
+    @staticmethod
+    def get_star_rating(score: float, is_gui: bool = False) -> str:
+        """
+        Calculates granular 5-star rating based on exact ATS score percentage (0-100%).
+        Supports full, three-quarter (¾), half (½), one-quarter (¼), and empty stars.
+        """
+        raw_rating = max(0.0, min(100.0, float(score))) / 20.0  # 0.0 to 5.0
+        full_stars = int(raw_rating)
+        remainder = raw_rating - full_stars
+        
+        frac_symbol = ""
+        if remainder >= 0.875:
+            full_stars += 1
+        elif remainder >= 0.625:
+            frac_symbol = "¾"
+        elif remainder >= 0.375:
+            frac_symbol = "½"
+        elif remainder >= 0.125:
+            frac_symbol = "¼"
+            
+        full_symbol = "⭐" if is_gui else "★"
+        empty_symbol = "☆"
+        
+        empty_stars = max(0, 5 - full_stars - (1 if frac_symbol else 0))
+        stars_str = (full_symbol * full_stars) + (frac_symbol) + (empty_symbol * empty_stars)
+        return f"{stars_str} ({raw_rating:.1f}/5 Stars)"
+
+    @staticmethod
+    def get_star_rating_gui(score: float) -> str:
+        """
+        Calculates granular emoji 5-star rating for GUI displays.
+        """
+        return ATSCalculator.get_star_rating(score, is_gui=True)
+
+    @staticmethod
+    def generate_suggestions(
+        score: float,
+        matched_skills: List[str],
+        missing_skills: List[str],
+        contact_info: Dict[str, str],
+        resume_text: str,
+        mode: str = "experienced"
+    ) -> List[str]:
+        suggestions = []
+
+        if mode == "fresher":
+            suggestions.append("Structure & Section Hierarchy: Place your Name, Contact Info (Email, Phone, LinkedIn, GitHub) at the top, followed immediately by Career Objective, Education, Academic/Personal Projects, and Technical Skills.")
+            suggestions.append("Typography & Font Sizing: Use clean, professional sans-serif fonts (e.g., Calibri, Arial, or Inter). Maintain clear font hierarchy: Name (20–24pt bold), Section Headers (14–16pt bold UPPERCASE), Body text (10–11pt regular).")
+            suggestions.append("Attention-Grabbing Headline: Use bold action-oriented project titles and highlight live demo/GitHub links to immediately capture recruiter attention.")
+            suggestions.append("Visual Margins & Spacing: Keep uniform 0.75-inch to 1-inch margins with consistent bullet spacing so your 1-page fresher resume looks well-filled and balanced.")
+        else:
+            # Missing skills suggestions for experienced candidates
+            if missing_skills:
+                top_missing = ", ".join(missing_skills[:5])
+                suggestions.append(f"Add critical missing job skills to your resume: {top_missing}.")
+
+            if score < 50.0:
+                suggestions.append("Your resume ATS match score is low. Tailor your resume keywords specifically to match the target job description.")
+                suggestions.append("Include relevant tools, programming languages, and frameworks in a dedicated 'Technical Skills' section.")
+            elif score <= 75.0:
+                suggestions.append("Good start! Adding a few more key job skills and certifications will push your ATS score above 75%.")
+                suggestions.append("Ensure skills are mentioned in both your summary section and experience bullet points.")
+            else:
+                suggestions.append("Outstanding match! Your resume closely aligns with the required job qualifications.")
+
+        # Contact info checks
+        if contact_info:
+            if contact_info.get("email") == "Not Found":
+                suggestions.append("Ensure your email address is clearly visible near the header of your document.")
+            if contact_info.get("phone") == "Not Found":
+                suggestions.append("Include a valid contact phone number.")
+
+        # Action verbs check
+        action_verbs = ["managed", "developed", "created", "designed", "implemented", "increased", "reduced", "led", "architected", "built"]
+        has_verbs = any(verb in resume_text.lower() for verb in action_verbs) if resume_text else False
+        if not has_verbs:
+            suggestions.append("Use strong action verbs (e.g., 'Developed', 'Implemented', 'Created') to quantify your impact.")
+
+        # Metrics check
+        numbers_pattern = r'\b\d+%\b|\$\d+|\b\d+\s+users\b|\b\d+\s+projects\b'
+        if resume_text and not re.search(numbers_pattern, resume_text.lower()):
+            suggestions.append("Add measurable achievements (e.g., 'Built 3 projects', 'Optimized query speed by 25%').")
+
+        return suggestions
+
+    @staticmethod
+    def predict_matching_job_roles(extracted_skills: List[str], top_n: int = 4) -> List[Dict[str, Any]]:
+        """
+        Predicts top matching job roles based on skills extracted from candidate resume.
+        """
+        if not extracted_skills:
+            return [
+                {"role": "General Professional", "match_pct": 50.0, "category": "General", "matched_skills": ["Communication"], "match_count": 1}
+            ]
+
+        cand_norm = {ATSCalculator._normalize_skill(x) for x in extracted_skills}
+        results = []
+
+        for role_title, data in ROLE_SKILL_PROFILES.items():
+            role_skills = data["skills"]
+            matched = []
+            for s in role_skills:
+                norm_s = ATSCalculator._normalize_skill(s)
+                if norm_s in cand_norm:
+                    matched.append(s)
+                elif len(norm_s) > 1 and any(re.search(r'(?:\b|(?<=\W))' + re.escape(norm_s) + r'(?:\b|(?=\W))', c) for c in cand_norm):
+                    matched.append(s)
+
+            matched_unique = sorted(list(set(matched)))
+            if len(matched_unique) > 0:
+                match_pct = round(min(100.0, (len(matched_unique) / min(len(role_skills), max(3, len(cand_norm)))) * 100.0), 1)
+                results.append({
+                    "role": role_title,
+                    "match_pct": match_pct,
+                    "category": data["category"],
+                    "matched_skills": matched_unique,
+                    "match_count": len(matched_unique)
+                })
+
+        results.sort(key=lambda x: (x["match_pct"], x["match_count"]), reverse=True)
+        return results[:top_n]
+
+
+ROLE_SKILL_PROFILES: Dict[str, Dict[str, Any]] = {
+    "Full Stack Developer": {
+        "skills": ["Python", "JavaScript", "TypeScript", "React", "Node.js", "SQL", "PostgreSQL", "HTML", "CSS", "Git", "REST APIs", "Docker", "MongoDB"],
+        "category": "Software Engineering"
+    },
+    "Software Engineer": {
+        "skills": ["Python", "Java", "C++", "C#", "SQL", "Git", "REST APIs", "Linux", "Data Structures", "Algorithms", "Object-Oriented Programming"],
+        "category": "Software Engineering"
+    },
+    "Frontend Developer": {
+        "skills": ["JavaScript", "TypeScript", "React", "Angular", "Vue.js", "HTML", "HTML5", "CSS", "CSS3", "SASS", "Tailwind CSS", "Redux", "Vite", "Webpack", "UI/UX Design"],
+        "category": "Frontend Development"
+    },
+    "Backend Developer": {
+        "skills": ["Python", "Java", "Node.js", "Django", "Flask", "FastAPI", "Spring Boot", "SQL", "PostgreSQL", "MySQL", "MongoDB", "Redis", "Docker", "REST APIs", "Microservices"],
+        "category": "Backend Development"
+    },
+    "Data Scientist": {
+        "skills": ["Python", "R", "SQL", "Machine Learning", "Deep Learning", "Pandas", "NumPy", "scikit-learn", "TensorFlow", "PyTorch", "Data Analysis", "Matplotlib"],
+        "category": "Data Science & AI"
+    },
+    "Data Engineer": {
+        "skills": ["Python", "SQL", "Apache Spark", "Hadoop", "Apache Airflow", "dbt", "Data Warehousing", "Snowflake", "BigQuery", "Kafka", "ETL", "Databricks"],
+        "category": "Data Engineering"
+    },
+    "DevOps / Cloud Engineer": {
+        "skills": ["AWS", "Azure", "Google Cloud", "GCP", "Docker", "Kubernetes", "Terraform", "Ansible", "Jenkins", "CI/CD", "Linux", "Bash", "Prometheus"],
+        "category": "Cloud & DevOps"
+    },
+    "Desktop Support Engineer": {
+        "skills": ["Active Directory", "Windows 10", "Windows 11", "Group Policy", "GPO", "Microsoft Intune", "SCCM", "Office 365", "RDP", "ServiceNow", "TCP/IP", "VPN", "Hardware Diagnostics", "BitLocker"],
+        "category": "IT Support & Infrastructure"
+    },
+    "IT Support Engineer": {
+        "skills": ["Active Directory", "Azure AD", "Windows Server", "Office 365", "Exchange Online", "ServiceNow", "Jira Service Desk", "TCP/IP", "DHCP", "DNS", "VPN", "LAN/WAN", "Ticket Management"],
+        "category": "IT Support & Infrastructure"
+    },
+    "AI / ML Engineer": {
+        "skills": ["Python", "Machine Learning", "Deep Learning", "Generative AI", "LLMs", "NLP", "TensorFlow", "PyTorch", "Computer Vision", "OpenCV", "Hugging Face", "LangChain"],
+        "category": "AI & Data Science"
+    },
+    "QA & Test Automation Engineer": {
+        "skills": ["Automated Testing", "Manual Testing", "Selenium", "Cypress", "Playwright", "JUnit", "PyTest", "Jest", "Postman", "Regression Testing", "TDD", "BDD"],
+        "category": "QA & Software Testing"
+    },
+    "Product Manager": {
+        "skills": ["Product Strategy", "Product Roadmap", "User Research", "Agile", "Scrum", "Wireframing", "Feature Prioritization", "Product Analytics", "A/B Testing", "PRD Writing"],
+        "category": "Product Management"
+    },
+    "Project Manager / Scrum Master": {
+        "skills": ["Project Management", "Program Management", "Agile", "Scrum", "PMP", "Risk Management", "Resource Allocation", "Budgeting", "Jira", "Stakeholder Management"],
+        "category": "Project & Operations Management"
+    },
+    "Digital Marketing Manager": {
+        "skills": ["SEO", "SEM", "Google Analytics", "Content Marketing", "Social Media Marketing", "PPC", "Growth Hacking", "Email Marketing", "Copywriting", "CRO"],
+        "category": "Digital Marketing & Growth"
+    },
+    "Sales & Business Development Executive": {
+        "skills": ["B2B Sales", "B2C Sales", "Business Development", "Account Management", "Lead Generation", "Salesforce", "HubSpot", "Cold Outreach", "Negotiation"],
+        "category": "Sales & Business Development"
+    },
+    "Financial Analyst / Accountant": {
+        "skills": ["Financial Modeling", "Financial Analysis", "Accounting", "Corporate Finance", "Auditing", "Risk Assessment", "Tax Compliance", "Financial Reporting", "Excel"],
+        "category": "Finance & Accounting"
+    },
+    "HR Specialist / Technical Recruiter": {
+        "skills": ["Talent Acquisition", "Technical Recruiting", "Employee Relations", "HR Policies", "Performance Management", "Onboarding", "Workday", "BambooHR"],
+        "category": "Human Resources & Recruiting"
+    },
+    "UI/UX Designer": {
+        "skills": ["Figma", "UI/UX Design", "User Experience", "User Interface", "Adobe Photoshop", "Adobe Illustrator", "Wireframing", "User Research", "Prototyping"],
+        "category": "Design & User Experience"
+    },
+    "Cybersecurity Analyst": {
+        "skills": ["Penetration Testing", "Ethical Hacking", "Network Security", "Information Security", "Cryptography", "OWASP Top 10", "SIEM", "Firewalls", "Wireshark"],
+        "category": "Cybersecurity"
+    }
+}
+
