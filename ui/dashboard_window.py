@@ -1507,27 +1507,23 @@ class DashboardWindow(QMainWindow):
         layout.addWidget(frame)
 
         # Feature 9: Dark / Light Theme Toggle Card
+        # App Theme Card (Permanent 100% Glassmorphism Dark Theme)
         theme_card = QFrame()
         theme_card.setObjectName("CardFrame")
         t_layout = QVBoxLayout(theme_card)
         t_layout.setContentsMargins(20, 16, 20, 16)
         t_layout.setSpacing(10)
-        t_title = QLabel("🎨 App Theme")
+        t_title = QLabel("🎨 App Theme & Visual Styling")
         t_title.setObjectName("SectionHeader")
-        t_sub = QLabel("Switch between Glassmorphism Dark Mode and Clean Light Mode.")
+        t_sub = QLabel("ResumeIQ is permanently styled in Modern Glassmorphism Dark Mode.")
         t_sub.setObjectName("SubTitle")
         t_sub.setWordWrap(True)
         theme_btn_row = QHBoxLayout()
-        btn_dark = QPushButton("🌙 Dark Mode (Glassmorphism)")
-        btn_dark.setObjectName("PrimaryButton" if self._current_theme == "dark" else "SecondaryButton")
+        btn_dark = QPushButton("🌙 Glassmorphism Dark Mode (Active)")
+        btn_dark.setObjectName("PrimaryButton")
         btn_dark.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_dark.clicked.connect(lambda: self._apply_theme("dark"))
-        btn_light = QPushButton("☀️ Light Mode")
-        btn_light.setObjectName("PrimaryButton" if self._current_theme == "light" else "SecondaryButton")
-        btn_light.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_light.clicked.connect(lambda: self._apply_theme("light"))
         theme_btn_row.addWidget(btn_dark)
-        theme_btn_row.addWidget(btn_light)
         theme_btn_row.addStretch()
         t_layout.addWidget(t_title)
         t_layout.addWidget(t_sub)
@@ -1561,15 +1557,14 @@ class DashboardWindow(QMainWindow):
         page.setLayout(layout)
         return page
 
-    def _apply_theme(self, theme: str):
-        """Feature 9: Apply dark or light theme globally."""
-        self._current_theme = theme
-        db.set_setting("app_theme", theme)
+    def _apply_theme(self, theme: str = "dark"):
+        """Enforces 100% Glassmorphism Dark Theme globally."""
+        self._current_theme = "dark"
+        db.set_setting("app_theme", "dark")
         app = QApplication.instance()
         if app:
-            app.setStyleSheet(DARK_THEME_QSS if theme == "dark" else LIGHT_THEME_QSS)
-        GlassMessageBox.success(self, "Theme Updated",
-            f"{'🌙 Dark Glassmorphism' if theme == 'dark' else '☀️ Light'} Mode activated!")
+            app.setStyleSheet(DARK_THEME_QSS)
+        GlassMessageBox.success(self, "Theme Status", "🌙 Modern Glassmorphism Dark Mode is active!")
 
 
     def handle_reset_settings(self):
