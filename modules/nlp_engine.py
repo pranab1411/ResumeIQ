@@ -9,7 +9,7 @@ from utils.paths import get_asset_path
 SKILLS_FILE = get_asset_path("assets", "skills.json")
 NAMES_FILE = get_asset_path("assets", "names_db.json")
 
-# Strict non-name header & section label blacklist filter
+# Strict non-name header, section label & job title blacklist filter
 NON_NAME_KEYWORDS: Set[str] = {
     "about", "me", "about me", "profile", "personal", "summary", "executive", "contact", 
     "experience", "education", "skills", "curriculum", "vitae", "resume", "cv", "projects", 
@@ -18,7 +18,15 @@ NON_NAME_KEYWORDS: Set[str] = {
     "declaration", "page", "hobbies", "languages", "technical", "professional", "qualification",
     "qualifications", "achievements", "overview", "bio", "biography", "background", "contact info",
     "personal profile", "work experience", "career summary", "executive summary", "key skills",
-    "soft skills", "technical skills", "academic background", "personal details"
+    "soft skills", "technical skills", "academic background", "personal details",
+    # Job Titles, Roles & Industry Blacklist
+    "support", "engineer", "developer", "designer", "manager", "analyst", "consultant",
+    "specialist", "administrator", "lead", "architect", "associate", "intern", "assistant",
+    "coordinator", "director", "officer", "helpdesk", "service", "services", "customer",
+    "agent", "representative", "trainee", "fresher", "senior", "junior", "principal", "staff",
+    "head", "vp", "ceo", "cto", "cfo", "team", "group", "department", "division", "tech",
+    "technology", "solutions", "systems", "operations", "management", "business", "sales",
+    "marketing", "finance", "accounting", "recruiter", "hr", "human", "resources"
 }
 
 class NLPEngine:
@@ -108,6 +116,12 @@ class NLPEngine:
 
         lines = [line.strip() for line in text.split("\n") if line.strip()][:15]
 
+        # Helper to clean token parts
+        def clean_token(tok: str) -> str:
+            # Strip job title words from token
+            words = [w for w in tok.split() if w.lower() not in NON_NAME_KEYWORDS]
+            return " ".join(words)
+
         # 1. Try spaCy PERSON entities with strict exclude validation
         if self.nlp:
             header_text = "\n".join(lines[:10])
@@ -115,26 +129,27 @@ class NLPEngine:
             for ent in doc.ents:
                 if ent.label_ == "PERSON":
                     clean_ent = ent.text.split("\n")[0].strip().strip(":,-_#|•")
-                    if self.is_valid_candidate_name(clean_ent):
-                        return clean_ent.title()
+                    clean_candidate = clean_token(clean_ent)
+                    if clean_candidate and self.is_valid_candidate_name(clean_candidate):
+                        return clean_candidate.title()
 
         # 2. Check top lines against global names database and exclude filters
         for line in lines:
             if "@" in line or "http" in line or "phone" in line.lower() or "resume" in line.lower():
                 continue
             
-            parts = [p.strip() for p in re.split(r'[|•,\t]', line) if p.strip()]
+            parts = [p.strip() for p in re.split(r'[|•,\t:-]', line) if p.strip()]
             for part in parts:
-                words = part.split()
-                if 2 <= len(words) <= 3 and self.is_valid_candidate_name(part):
-                    return part.title()
+                clean_part = clean_token(part)
+                if clean_part and self.is_valid_candidate_name(clean_part):
+                    return clean_part.title()
 
         # 3. Check first non-keyword line
         for line in lines:
             line_clean = line.strip().strip(":,-_#|•")
-            words = line_clean.split()
-            if 2 <= len(words) <= 3 and self.is_valid_candidate_name(line_clean):
-                return line_clean.title()
+            clean_part = clean_token(line_clean)
+            if clean_part and self.is_valid_candidate_name(clean_part):
+                return clean_part.title()
 
         return "Candidate"
 
