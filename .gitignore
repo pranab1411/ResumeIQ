@@ -20,13 +20,14 @@ env/
 .idea/
 .vscode/
 
-# Local Database & Reports
+# Local Database, Resumes & Reports
 database/*.db
 database/resumeiq.db
-reports/*.pdf
-reports/*.pdf.pdf
-resumes/*
-!resumes/.gitkeep
+reports/
+resumes/
+Output/
+*.docx
+*.pdf
 
 # Temporary Test Outputs & Logs
 *.log
@@ -36,3 +37,4 @@ test_*.pdf
 # Windows system files
 Thumbs.db
 Desktop.ini
+

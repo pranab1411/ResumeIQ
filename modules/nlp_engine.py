@@ -110,12 +110,48 @@ class NLPEngine:
 
         return is_all_alphabetic and (has_dict_match or all(w[0].isupper() for w in clean.split() if w))
 
+    def extract_name_with_gemini(self, text: str) -> Optional[str]:
+        """Uses Gemini AI to extract candidate name from resume text if API key is configured."""
+        try:
+            import urllib.request
+            from database.database import db
+            api_key = os.environ.get("GEMINI_API_KEY") or db.get_setting("gemini_api_key")
+            if not api_key:
+                return None
+                
+            lines = [line.strip() for line in text.split("\n") if line.strip()][:10]
+            header_text = "\n".join(lines)
+            
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+            prompt = (
+                "Extract ONLY the candidate's real full name from this resume header. "
+                "Do NOT include job titles, emails, phone numbers, or section headers like 'About Me'. "
+                "Return ONLY the plain candidate name and nothing else.\n\nResume Header:\n" + header_text
+            )
+            data = json.dumps({"contents": [{"parts": [{"text": prompt}]}]}).encode("utf-8")
+            req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=3) as resp:
+                result = json.loads(resp.read().decode())
+                raw_name = result["candidates"][0]["content"]["parts"][0]["text"].strip()
+                clean_name = raw_name.split("\n")[0].strip().strip('"\':,-_#|•')
+                if clean_name and self.is_valid_candidate_name(clean_name):
+                    logger.info(f"[GEMINI AI] Extracted candidate name: {clean_name}")
+                    return clean_name.title()
+        except Exception as e:
+            logger.warning(f"Gemini AI name extraction fallback: {e}")
+        return None
+
     def extract_candidate_name(self, text: str) -> str:
-        """Accurately extracts candidate name from resume header using NLP and Global Names DB."""
+        """Accurately extracts candidate name using Gemini AI + spaCy NLP + Global Names DB."""
         if not text:
             return "Candidate"
 
         lines = [line.strip() for line in text.split("\n") if line.strip()][:15]
+
+        # 0. Try Gemini AI Name Extraction if API Key is configured
+        gemini_name = self.extract_name_with_gemini(text)
+        if gemini_name:
+            return gemini_name
 
         # Helper to clean token parts
         def clean_token(tok: str) -> str:
