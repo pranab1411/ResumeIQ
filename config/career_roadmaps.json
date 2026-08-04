@@ -1,0 +1,52 @@
+{
+  "Software Engineering": {
+    "stages": [
+      {
+        "title": "Junior Developer",
+        "years": "0-2 Years",
+        "key_skills": ["Git", "Data Structures", "Algorithms", "Clean Code", "Unit Testing"],
+        "recommended_certs": ["CompTIA Security+", "AWS Certified Cloud Practitioner"]
+      },
+      {
+        "title": "Mid-Level Developer",
+        "years": "2-5 Years",
+        "key_skills": ["System Design", "REST APIs", "CI/CD", "Docker", "Database Optimization"],
+        "recommended_certs": ["AWS Certified Developer", "Azure Developer Associate"]
+      },
+      {
+        "title": "Senior Engineer",
+        "years": "5-8 Years",
+        "key_skills": ["Microservices", "Distributed Systems", "Cloud Architecture", "Mentorship"],
+        "recommended_certs": ["AWS Solutions Architect Professional", "CKA (Kubernetes)"]
+      },
+      {
+        "title": "Staff / Lead Architect",
+        "years": "8+ Years",
+        "key_skills": ["Enterprise Architecture", "Tech Strategy", "Engineering Leadership"],
+        "recommended_certs": ["TOGAF", "Google Cloud Fellow"]
+      }
+    ]
+  },
+  "Data Science & AI": {
+    "stages": [
+      {
+        "title": "Junior Data Analyst",
+        "years": "0-2 Years",
+        "key_skills": ["Python", "SQL", "Excel", "Tableau", "Statistics"],
+        "recommended_certs": ["Google Data Analytics", "IBM Data Science"]
+      },
+      {
+        "title": "Data Scientist",
+        "years": "2-5 Years",
+        "key_skills": ["Machine Learning", "Scikit-Learn", "Feature Engineering", "A/B Testing"],
+        "recommended_certs": ["TensorFlow Developer Certificate", "AWS ML Specialty"]
+      },
+      {
+        "title": "Senior AI / ML Engineer",
+        "years": "5+ Years",
+        "key_skills": ["Deep Learning", "LLMs", "PyTorch", "Model Deployment (MLOps)"],
+        "recommended_certs": ["GCP Professional Machine Learning Engineer"]
+      }
+    ]
+  }
+}

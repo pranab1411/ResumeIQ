@@ -1,6 +1,7 @@
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Optional
 import re
 from utils.logger import logger
+from modules.ats_benchmark import ATSBenchmarkEngine
 
 # Synonym dictionary for ATS skill normalization (Tech & Non-Tech Roles)
 SKILL_SYNONYMS = {
@@ -237,11 +238,14 @@ class ATSCalculator:
         required_skills: List[str],
         resume_text: str = "",
         jd_text: str = "",
-        contact_info: Dict[str, str] = None
+        contact_info: Dict[str, str] = None,
+        industry: str = "General",
+        company: Optional[str] = None
     ) -> Tuple[float, List[str], List[str]]:
         """
         Calculates Industry-Grade 4-Pillar ATS Score, Matched Skills, and Missing Skills.
         Formula: (0.40 × Skill Match) + (0.25 × TF-IDF Similarity) + (0.20 × Hygiene) + (0.15 × Exp Alignment)
+        Weights are configurable per company via ats_config.json.
         """
         if not required_skills:
             matched = resume_skills
@@ -249,7 +253,14 @@ class ATSCalculator:
             raw_score = 100.0 if len(resume_skills) >= 5 else (len(resume_skills) * 20.0)
             return round(raw_score, 1), matched, missing
 
-        # Pillar 1: Skill & Synonym Match (40% Weight)
+        # Load configurable weights (company-specific or default)
+        weights = ATSBenchmarkEngine.get_pillar_weights(company)
+        w_skills = weights.get("skills", 0.40)
+        w_keywords = weights.get("keywords", 0.25)
+        w_format = weights.get("format", 0.20)
+        w_exp = weights.get("experience", 0.15)
+
+        # Pillar 1: Skill & Synonym Match
         resume_normalized = {cls._normalize_skill(s): s for s in resume_skills}
         req_normalized = {cls._normalize_skill(s): s for s in required_skills}
 
@@ -264,22 +275,80 @@ class ATSCalculator:
 
         skill_match_pct = (len(matched_skills) / len(req_normalized)) * 100.0
 
-        # Pillar 2: TF-IDF Cosine Similarity (25% Weight)
+        # Pillar 2: TF-IDF Cosine Similarity
         semantic_pct = cls.calculate_tf_idf_similarity(resume_text, jd_text) if resume_text and jd_text else skill_match_pct
 
-        # Pillar 3: Hygiene & Formatting (20% Weight)
+        # Pillar 3: Hygiene & Formatting
         hygiene_pct = cls.calculate_hygiene_score(resume_text, contact_info) if resume_text else 80.0
 
-        # Pillar 4: Education & Experience Alignment (15% Weight)
+        # Pillar 4: Education & Experience Alignment
         exp_pct = cls.calculate_experience_score(resume_text, jd_text) if resume_text else 80.0
 
         # Final Weighted Multi-Pillar ATS Composite Score
-        composite_score = (0.40 * skill_match_pct) + (0.25 * semantic_pct) + (0.20 * hygiene_pct) + (0.15 * exp_pct)
+        composite_score = (
+            (w_skills * skill_match_pct) +
+            (w_keywords * semantic_pct) +
+            (w_format * hygiene_pct) +
+            (w_exp * exp_pct)
+        )
         final_score = round(min(100.0, max(0.0, composite_score)), 1)
 
-        logger.info(f"[REAL ATS ENGINE] Composite Score: {final_score}% (Skills: {skill_match_pct:.1f}%, Semantic: {semantic_pct:.1f}%, Hygiene: {hygiene_pct:.1f}%, Exp: {exp_pct:.1f}%)")
+        logger.info(
+            f"[ATS v2.0] Score: {final_score}% | "
+            f"Skills: {skill_match_pct:.1f}% ({w_skills:.0%}) | "
+            f"Keywords: {semantic_pct:.1f}% ({w_keywords:.0%}) | "
+            f"Format: {hygiene_pct:.1f}% ({w_format:.0%}) | "
+            f"Exp: {exp_pct:.1f}% ({w_exp:.0%}) | "
+            f"Industry: {industry} | Company: {company or 'General'}"
+        )
 
         return final_score, matched_skills, missing_skills
+
+    @classmethod
+    def calculate_full_analysis(
+        cls,
+        resume_skills: List[str],
+        required_skills: List[str],
+        resume_text: str = "",
+        jd_text: str = "",
+        contact_info: Dict[str, str] = None,
+        industry: str = "General",
+        company: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        v2.0 Full ATS Analysis — returns complete breakdown including:
+        ATS score, pillar scores, RQI, Confidence Score, Readiness Score,
+        Pass Probability, Percentile, Checklist, Company Simulation.
+        """
+        ats_score, matched_skills, missing_skills = cls.calculate_score(
+            resume_skills, required_skills, resume_text, jd_text,
+            contact_info, industry, company
+        )
+
+        weights = ATSBenchmarkEngine.get_pillar_weights(company)
+        pillar_scores = {
+            "skills": round(min(100.0, (len(matched_skills) / max(1, len(required_skills))) * 100.0), 1),
+            "keywords": cls.calculate_tf_idf_similarity(resume_text, jd_text) if resume_text and jd_text else 0.0,
+            "format": cls.calculate_hygiene_score(resume_text, contact_info),
+            "experience": cls.calculate_experience_score(resume_text, jd_text),
+        }
+
+        analysis = ATSBenchmarkEngine.build_full_analysis(
+            ats_score=ats_score,
+            pillar_scores=pillar_scores,
+            resume_text=resume_text,
+            matched_skills=matched_skills,
+            missing_skills=missing_skills,
+            contact_info=contact_info,
+            industry=industry,
+            company=company
+        )
+        analysis["matched_skills"] = matched_skills
+        analysis["missing_skills"] = missing_skills
+        analysis["score_category"] = cls.get_score_category(ats_score)
+        analysis["star_rating"] = cls.get_star_rating(ats_score)
+        analysis["pillar_weights"] = weights
+        return analysis
 
     @staticmethod
     def get_score_category(score: float) -> str:

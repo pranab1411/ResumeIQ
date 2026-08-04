@@ -17,10 +17,14 @@ class DatabaseManager:
     def get_connection(self) -> sqlite3.Connection:
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
+        try:
+            conn.execute("PRAGMA journal_mode=WAL")
+        except Exception:
+            pass
         return conn
 
     def init_db(self):
-        """Creates tables if they don't exist."""
+        """Creates tables if they don't exist and runs migrations."""
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
         with self.get_connection() as conn:
             cursor = conn.cursor()
@@ -100,9 +104,104 @@ class DatabaseManager:
                     value TEXT NOT NULL
                 )
             """)
-            
+
+            # ATS Score History table (Phase 1)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS ats_score_history (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    resume_id INTEGER NOT NULL,
+                    score REAL NOT NULL,
+                    rqi REAL DEFAULT 0.0,
+                    confidence_score REAL DEFAULT 0.0,
+                    readiness_score REAL DEFAULT 0.0,
+                    industry TEXT DEFAULT 'General',
+                    company TEXT DEFAULT '',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (resume_id) REFERENCES resumes (id) ON DELETE CASCADE
+                )
+            """)
+
+            # Resume Versions table (Phase 1)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS resume_versions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    resume_id INTEGER NOT NULL,
+                    version_number INTEGER NOT NULL,
+                    version_name TEXT DEFAULT '',
+                    extracted_text TEXT DEFAULT '',
+                    ats_score REAL DEFAULT 0.0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (resume_id) REFERENCES resumes (id) ON DELETE CASCADE
+                )
+            """)
+
+            # AI Suggestions table (Phase 15)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS ai_suggestions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    resume_id INTEGER NOT NULL,
+                    suggestion_type TEXT NOT NULL,
+                    original_text TEXT,
+                    suggested_text TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (resume_id) REFERENCES resumes (id) ON DELETE CASCADE
+                )
+            """)
+
+            # Cover Letters table (Phase 15)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS cover_letters (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    job_title TEXT,
+                    company_name TEXT,
+                    letter_text TEXT NOT NULL,
+                    file_path TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+                )
+            """)
+
+            # LinkedIn Reviews table (Phase 15)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS linkedin_reviews (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    headline TEXT,
+                    about TEXT,
+                    composite_score REAL DEFAULT 0.0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+                )
+            """)
+
+            # Job Descriptions table (Phase 15)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS job_descriptions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER NOT NULL,
+                    job_title TEXT,
+                    company_name TEXT,
+                    jd_text TEXT NOT NULL,
+                    industry TEXT DEFAULT 'General',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+                )
+            """)
+
+            # Audit Log table (Phase 15)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS audit_log (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER,
+                    action TEXT NOT NULL,
+                    details TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+
             conn.commit()
-            logger.info("Database initialized successfully.")
+            logger.info("Database initialized successfully with WAL mode & Phase 15 schema.")
 
     # --- App Settings ---
     def set_setting(self, key: str, value: str):
@@ -325,6 +424,66 @@ class DatabaseManager:
                 WHERE res.user_id = ?
                 ORDER BY r.id ASC
             """, (user_id,))
+    # --- ATS Score History & Resume Versions ---
+    def record_score_history(
+        self,
+        resume_id: int,
+        score: float,
+        rqi: float = 0.0,
+        confidence_score: float = 0.0,
+        readiness_score: float = 0.0,
+        industry: str = "General",
+        company: str = ""
+    ) -> int:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO ats_score_history
+                (resume_id, score, rqi, confidence_score, readiness_score, industry, company)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (resume_id, score, rqi, confidence_score, readiness_score, industry, company))
+            conn.commit()
+            return cursor.lastrowid
+
+    def get_score_history(self, resume_id: int) -> List[Dict[str, Any]]:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT * FROM ats_score_history
+                WHERE resume_id = ?
+                ORDER BY created_at ASC
+            """, (resume_id,))
+            return [dict(row) for row in cursor.fetchall()]
+
+    def create_resume_version(
+        self,
+        resume_id: int,
+        version_name: str,
+        extracted_text: str,
+        ats_score: float = 0.0
+    ) -> int:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT COALESCE(MAX(version_number), 0) + 1 FROM resume_versions WHERE resume_id = ?",
+                (resume_id,)
+            )
+            next_ver = cursor.fetchone()[0]
+            cursor.execute("""
+                INSERT INTO resume_versions (resume_id, version_number, version_name, extracted_text, ats_score)
+                VALUES (?, ?, ?, ?, ?)
+            """, (resume_id, next_ver, version_name, extracted_text, ats_score))
+            conn.commit()
+            return cursor.lastrowid
+
+    def get_resume_versions(self, resume_id: int) -> List[Dict[str, Any]]:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT * FROM resume_versions
+                WHERE resume_id = ?
+                ORDER BY version_number ASC
+            """, (resume_id,))
             return [dict(row) for row in cursor.fetchall()]
 
 db = DatabaseManager()

@@ -1,0 +1,44 @@
+{
+  "Tech": {
+    "subcategories": ["Software Engineering", "Frontend", "Backend", "Cloud/DevOps", "Data & AI", "QA & Testing", "IT Support"],
+    "common_skills": ["Python", "Java", "JavaScript", "React", "Node.js", "SQL", "AWS", "Docker", "Git", "REST APIs"],
+    "required_sections": ["Experience", "Education", "Skills", "Projects"],
+    "action_verbs": ["architected", "engineered", "built", "optimized", "developed", "deployed", "scaled", "automated"]
+  },
+  "Finance": {
+    "subcategories": ["Corporate Finance", "Investment Banking", "Accounting", "Financial Analysis", "Risk & Compliance"],
+    "common_skills": ["Financial Modeling", "Excel", "SQL", "Accounting", "GAAP", "IFRS", "Valuation", "Risk Analysis", "SAP"],
+    "required_sections": ["Experience", "Education", "Certifications", "Skills"],
+    "action_verbs": ["analyzed", "audited", "modeled", "forecasted", "reduced costs", "managed portfolio", "negotiated"]
+  },
+  "Healthcare": {
+    "subcategories": ["Clinical Care", "Medical Research", "Healthcare Admin", "Health IT", "Pharmacy"],
+    "common_skills": ["Patient Care", "EHR/EMR", "HIPAA", "Medical Terminology", "Clinical Diagnostics", "CPR", "BLS"],
+    "required_sections": ["Education", "Licenses & Certifications", "Experience", "Clinical Skills"],
+    "action_verbs": ["administered", "diagnosed", "treated", "managed care", "ensured compliance", "advocated"]
+  },
+  "Marketing": {
+    "subcategories": ["Digital Marketing", "Content Strategy", "SEO/SEM", "Brand Management", "Product Marketing"],
+    "common_skills": ["SEO", "SEM", "Google Analytics", "Content Marketing", "Social Media", "PPC", "Copywriting", "CRM", "A/B Testing"],
+    "required_sections": ["Experience", "Skills", "Projects & Campaigns", "Education"],
+    "action_verbs": ["increased traffic", "boosted conversion", "grew audience", "launched campaign", "spearheaded", "authored"]
+  },
+  "Sales": {
+    "subcategories": ["B2B Sales", "Account Management", "Business Development", "Inside Sales"],
+    "common_skills": ["B2B Sales", "Salesforce", "Lead Generation", "Negotiation", "Account Management", "Cold Outreach", "CRM"],
+    "required_sections": ["Experience", "Sales Achievements", "Skills", "Education"],
+    "action_verbs": ["exceeded quota", "generated revenue", "closed deals", "expanded accounts", "prospected", "secured"]
+  },
+  "HR": {
+    "subcategories": ["Talent Acquisition", "Employee Relations", "HR Operations", "Learning & Development"],
+    "common_skills": ["Talent Acquisition", "Technical Recruiting", "Workday", "HR Policies", "Onboarding", "Performance Management"],
+    "required_sections": ["Experience", "Education", "Skills", "Certifications"],
+    "action_verbs": ["recruited", "onboarded", "developed policy", "improved retention", "mediated", "trained"]
+  },
+  "General": {
+    "subcategories": ["General Administration", "Operations", "Customer Service"],
+    "common_skills": ["Communication", "Organization", "Microsoft Office", "Time Management", "Problem Solving"],
+    "required_sections": ["Experience", "Education", "Skills"],
+    "action_verbs": ["managed", "coordinated", "organized", "assisted", "supported", "delivered"]
+  }
+}

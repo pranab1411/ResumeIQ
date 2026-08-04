@@ -125,7 +125,7 @@ class NLPEngine:
                 "Return ONLY the plain candidate name and nothing else.\n\nResume Header:\n" + header_text
             )
             raw_name = gemini_generate(prompt, timeout=5)
-            clean_name = raw_name.split("\n")[0].strip().strip('"\'':,-_#|•')
+            clean_name = raw_name.split("\n")[0].strip().strip("\"':,-_#|•")
             if clean_name and self.is_valid_candidate_name(clean_name):
                 logger.info(f"[GEMINI AI] Extracted candidate name: {clean_name}")
                 return clean_name.title()
@@ -216,6 +216,81 @@ class NLPEngine:
                 found_skills.add(original_name)
                 
         return sorted(list(found_skills))
+
+    def extract_normalized_skills(self, text: str) -> List[Dict[str, Any]]:
+        """Extracts skills and returns normalized skills with confidence scores."""
+        raw_skills = self.extract_skills(text)
+        from modules.skill_normalizer import SkillNormalizer
+        return SkillNormalizer.deduplicate_skills(raw_skills)
+
+    def extract_soft_skills(self, text: str) -> List[str]:
+        """Extracts key soft skills and leadership traits."""
+        if not text:
+            return []
+        soft_skills_db = [
+            "Leadership", "Teamwork", "Communication", "Problem Solving", "Critical Thinking",
+            "Time Management", "Adaptability", "Collaboration", "Decision Making", "Conflict Resolution",
+            "Negotiation", "Mentorship", "Agile Mindset", "Ownership", "Strategic Thinking", "Emotional Intelligence"
+        ]
+        found = []
+        text_lower = text.lower()
+        for ss in soft_skills_db:
+            if re.search(r'\b' + re.escape(ss.lower()) + r'\b', text_lower):
+                found.append(ss)
+        return found
+
+    def extract_achievements(self, text: str) -> List[str]:
+        """Extracts STAR method achievement bullets and high-impact statements."""
+        if not text:
+            return []
+        lines = [line.strip() for line in text.split("\n") if line.strip()]
+        star_verbs = ["achieved", "increased", "decreased", "reduced", "improved", "developed", "spearheaded", "generated", "saved", "launched", "boosted", "optimized", "awarded"]
+        achievements = []
+        for line in lines:
+            line_lower = line.lower()
+            if any(v in line_lower for v in star_verbs) and (re.search(r'\b\d+%\b|\$\d+|\b\d+\b', line)):
+                achievements.append(line.strip("•*- "))
+        return achievements[:10]
+
+    def extract_metrics(self, text: str) -> List[str]:
+        """Extracts quantified metrics (%, $, numbers, time saved)."""
+        if not text:
+            return []
+        metric_pattern = r'\b\d+%\b|\$\d+(?:\,\d+)*(?:\.\d+)?\b|\b\d+\+\s+(?:years?|projects?|users?|clients?|teams?)\b|\b\d+x\b'
+        return list(set(re.findall(metric_pattern, text, re.IGNORECASE)))
+
+    def extract_certifications(self, text: str) -> List[str]:
+        """Extracts recognized industry certifications."""
+        if not text:
+            return []
+        certs_db = [
+            "AWS Certified", "AWS Solutions Architect", "AWS Developer", "Azure Fundamentals",
+            "Azure Administrator", "GCP Professional", "PMP", "Scrum Master", "CSM", "CKA",
+            "CompTIA Security+", "CompTIA Network+", "CompTIA A+", "CISSP", "ITIL", "CCNA",
+            "Google Data Analytics", "Meta Front-End", "TensorFlow Certified"
+        ]
+        found = []
+        text_lower = text.lower()
+        for cert in certs_db:
+            if cert.lower() in text_lower:
+                found.append(cert)
+        return found
+
+    def generate_experience_timeline(self, text: str) -> List[Dict[str, Any]]:
+        """Generates experience timeline events based on extracted date ranges."""
+        if not text:
+            return []
+        date_pattern = r'((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4}|\b20\d{2}\b)\s*(?:–|-|to)\s*((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4}|\b20\d{2}\b|Present|Current)'
+        matches = re.findall(date_pattern, text, re.IGNORECASE)
+        timeline = []
+        for i, (start, end) in enumerate(matches):
+            timeline.append({
+                "period": f"{start} - {end}",
+                "start": start,
+                "end": end,
+                "order": i + 1
+            })
+        return timeline
 
     def extract_keywords_from_jd(self, jd_text: str) -> List[str]:
         """Extracts key skills/technologies mentioned in Job Description."""

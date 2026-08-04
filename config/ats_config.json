@@ -1,0 +1,93 @@
+{
+  "pillar_weights": {
+    "skills": 0.40,
+    "keywords": 0.25,
+    "format": 0.20,
+    "experience": 0.15
+  },
+  "score_thresholds": {
+    "excellent": 80,
+    "good": 65,
+    "average": 50,
+    "poor": 0
+  },
+  "industry_benchmarks": {
+    "Technology": {"avg_score": 72, "pass_threshold": 70, "top_percentile": 90},
+    "Finance": {"avg_score": 68, "pass_threshold": 65, "top_percentile": 85},
+    "Healthcare": {"avg_score": 65, "pass_threshold": 62, "top_percentile": 82},
+    "Marketing": {"avg_score": 63, "pass_threshold": 60, "top_percentile": 80},
+    "Sales": {"avg_score": 60, "pass_threshold": 58, "top_percentile": 78},
+    "HR": {"avg_score": 61, "pass_threshold": 59, "top_percentile": 79},
+    "Operations": {"avg_score": 62, "pass_threshold": 60, "top_percentile": 80},
+    "Education": {"avg_score": 59, "pass_threshold": 57, "top_percentile": 76},
+    "General": {"avg_score": 62, "pass_threshold": 60, "top_percentile": 80}
+  },
+  "company_ats_profiles": {
+    "Google": {
+      "strict_keyword_match": true,
+      "weight_override": {"skills": 0.45, "keywords": 0.30, "format": 0.15, "experience": 0.10},
+      "min_pass_score": 75,
+      "preferred_sections": ["education", "projects", "skills", "experience"],
+      "boost_keywords": ["algorithms", "data structures", "system design", "distributed systems", "python", "java", "go"]
+    },
+    "Amazon": {
+      "strict_keyword_match": true,
+      "weight_override": {"skills": 0.40, "keywords": 0.30, "format": 0.15, "experience": 0.15},
+      "min_pass_score": 70,
+      "preferred_sections": ["experience", "skills", "education", "projects"],
+      "boost_keywords": ["leadership", "ownership", "customer obsession", "aws", "cloud", "scale", "metrics"]
+    },
+    "Microsoft": {
+      "strict_keyword_match": false,
+      "weight_override": {"skills": 0.40, "keywords": 0.25, "format": 0.20, "experience": 0.15},
+      "min_pass_score": 68,
+      "preferred_sections": ["experience", "skills", "education"],
+      "boost_keywords": ["azure", "c#", ".net", "cloud", "typescript", "python", "agile"]
+    },
+    "TCS": {
+      "strict_keyword_match": false,
+      "weight_override": {"skills": 0.35, "keywords": 0.25, "format": 0.25, "experience": 0.15},
+      "min_pass_score": 60,
+      "preferred_sections": ["education", "experience", "skills", "certifications"],
+      "boost_keywords": ["java", "python", "sql", "agile", "communication", "teamwork", "itil"]
+    },
+    "Infosys": {
+      "strict_keyword_match": false,
+      "weight_override": {"skills": 0.35, "keywords": 0.25, "format": 0.25, "experience": 0.15},
+      "min_pass_score": 58,
+      "preferred_sections": ["education", "skills", "experience", "certifications"],
+      "boost_keywords": ["java", "python", "sql", "communication", "problem solving", "agile", "cloud"]
+    },
+    "Wipro": {
+      "strict_keyword_match": false,
+      "weight_override": {"skills": 0.35, "keywords": 0.25, "format": 0.25, "experience": 0.15},
+      "min_pass_score": 58,
+      "preferred_sections": ["education", "skills", "experience"],
+      "boost_keywords": ["java", "python", "sql", "testing", "communication", "agile"]
+    },
+    "Accenture": {
+      "strict_keyword_match": false,
+      "weight_override": {"skills": 0.38, "keywords": 0.27, "format": 0.20, "experience": 0.15},
+      "min_pass_score": 62,
+      "preferred_sections": ["experience", "skills", "education"],
+      "boost_keywords": ["consulting", "cloud", "digital transformation", "python", "data analytics", "communication"]
+    },
+    "Meta": {
+      "strict_keyword_match": true,
+      "weight_override": {"skills": 0.45, "keywords": 0.30, "format": 0.15, "experience": 0.10},
+      "min_pass_score": 73,
+      "preferred_sections": ["experience", "education", "skills", "projects"],
+      "boost_keywords": ["python", "c++", "react", "distributed systems", "machine learning", "scale", "php", "hack"]
+    },
+    "Startup": {
+      "strict_keyword_match": false,
+      "weight_override": {"skills": 0.45, "keywords": 0.20, "format": 0.15, "experience": 0.20},
+      "min_pass_score": 55,
+      "preferred_sections": ["projects", "skills", "experience", "education"],
+      "boost_keywords": ["ownership", "initiative", "full stack", "product", "growth", "startup", "mvp"]
+    }
+  },
+  "score_distribution": [
+    10, 18, 28, 38, 47, 55, 62, 68, 74, 79, 83, 87, 90, 93, 95, 97, 98, 99, 99, 100
+  ]
+}

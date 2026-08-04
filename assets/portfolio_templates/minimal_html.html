@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ candidate_name }} - Portfolio</title>
+<style>
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: #0F172A; color: #F8FAFC; line-height: 1.6; }
+  .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+  header { text-align: center; border-bottom: 1px solid #334155; padding-bottom: 30px; }
+  h1 { font-size: 2.5rem; color: #6366F1; margin-bottom: 10px; }
+  .subtitle { font-size: 1.2rem; color: #94A3B8; }
+  .contact { margin-top: 15px; font-size: 0.95rem; }
+  .contact a { color: #818CF8; text-decoration: none; margin: 0 10px; }
+  section { margin-top: 40px; }
+  h2 { font-size: 1.6rem; color: #818CF8; border-bottom: 2px solid #4F46E5; display: inline-block; padding-bottom: 5px; }
+  .skills-list { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; padding: 0; }
+  .skill-badge { background: #1E293B; border: 1px solid #334155; padding: 6px 14px; border-radius: 20px; font-size: 0.9rem; }
+  .card { background: #1E293B; border-radius: 8px; padding: 20px; margin-bottom: 20px; border: 1px solid #334155; }
+  .card-title { font-weight: bold; font-size: 1.1rem; color: #F8FAFC; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>{{ candidate_name }}</h1>
+      <div class="subtitle">{{ job_title | default('Software Professional') }}</div>
+      <div class="contact">
+        {% if email %}<a href="mailto:{{ email }}">Email</a>{% endif %}
+        {% if phone %}<a href="tel:{{ phone }}">Phone</a>{% endif %}
+        {% if linkedin %}<a href="{{ linkedin }}" target="_blank">LinkedIn</a>{% endif %}
+        {% if github %}<a href="{{ github }}" target="_blank">GitHub</a>{% endif %}
+      </div>
+    </header>
+
+    {% if summary %}
+    <section>
+      <h2>About Me</h2>
+      <p>{{ summary }}</p>
+    </section>
+    {% endif %}
+
+    {% if skills %}
+    <section>
+      <h2>Skills & Expertise</h2>
+      <ul class="skills-list">
+        {% for s in skills %}
+        <li class="skill-badge">{{ s }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    {% if experience %}
+    <section>
+      <h2>Experience</h2>
+      {% for item in experience %}
+      <div class="card">
+        <div class="card-title">{{ item.title }}</div>
+        <div>{{ item.company }} | {{ item.dates }}</div>
+      </div>
+      {% endfor %}
+    </section>
+    {% endif %}
+  </div>
+</body>
+</html>

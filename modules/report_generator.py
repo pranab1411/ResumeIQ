@@ -37,7 +37,9 @@ class PDFReportGenerator:
         matched_skills: list[str],
         missing_skills: list[str],
         suggestions: list[str],
-        evaluation_mode: str = "Experienced Mode"
+        rqi: float = 80.0,
+        confidence_score: float = 75.0,
+        company_name: str = ""
     ) -> str:
         """Generates an executive, highly visual PDF evaluation report for a resume analysis."""
         dir_name = os.path.dirname(output_path)
@@ -171,14 +173,14 @@ class PDFReportGenerator:
             [
                 Paragraph("CANDIDATE NAME", kpi_title_style),
                 Paragraph(score_title, kpi_title_style),
-                Paragraph("STAR RATING", kpi_title_style),
-                Paragraph("TARGET CAREER TRACK", kpi_title_style)
+                Paragraph("QUALITY INDEX (RQI)", kpi_title_style),
+                Paragraph("CONFIDENCE SCORE", kpi_title_style)
             ],
             [
                 Paragraph(f"<b>{display_name}</b><br/><font color='#64748B' size=7.5>{filename[:22]}</font>", body_style),
                 Paragraph(f"<font color='{score_color.hexval()}'><b>{ats_score}%</b></font><br/><font color='#64748B' size=7.5>{score_category}</font>", kpi_value_style),
-                Paragraph(f"<b>{star_rating}</b>", star_style),
-                Paragraph(f"<b>{job_title or 'General Track'}</b>", body_style)
+                Paragraph(f"<b>{rqi:.0f}%</b><br/><font color='#64748B' size=7.5>Structural</font>", kpi_value_style),
+                Paragraph(f"<b>{confidence_score:.0f}%</b><br/><font color='#64748B' size=7.5>Content Strength</font>", kpi_value_style)
             ]
         ]
         kpi_table = Table(kpi_data, colWidths=[135, 135, 135, 135])

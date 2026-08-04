@@ -1,0 +1,72 @@
+{
+  "Full Stack Developer": {
+    "entry_salary": "$70,000 - $90,000",
+    "mid_salary": "$95,000 - $130,000",
+    "senior_salary": "$135,000 - $185,000+",
+    "growth_potential": "High (18% YoY)",
+    "top_locations": ["San Francisco, CA", "Seattle, WA", "Austin, TX", "Remote"]
+  },
+  "Software Engineer": {
+    "entry_salary": "$75,000 - $95,000",
+    "mid_salary": "$100,000 - $140,000",
+    "senior_salary": "$145,000 - $195,000+",
+    "growth_potential": "High (15% YoY)",
+    "top_locations": ["Seattle, WA", "New York, NY", "Silicon Valley, CA", "Remote"]
+  },
+  "Desktop Support Engineer": {
+    "entry_salary": "$45,000 - $60,000",
+    "mid_salary": "$62,000 - $80,000",
+    "senior_salary": "$82,000 - $105,000+",
+    "growth_potential": "Moderate (8% YoY)",
+    "top_locations": ["Dallas, TX", "Atlanta, GA", "Chicago, IL", "On-site / Hybrid"]
+  },
+  "IT Support Engineer": {
+    "entry_salary": "$48,000 - $65,000",
+    "mid_salary": "$68,000 - $88,000",
+    "senior_salary": "$90,000 - $115,000+",
+    "growth_potential": "Moderate (10% YoY)",
+    "top_locations": ["Phoenix, AZ", "Houston, TX", "Denver, CO", "Hybrid"]
+  },
+  "DevOps / Cloud Engineer": {
+    "entry_salary": "$80,000 - $105,000",
+    "mid_salary": "$110,000 - $150,000",
+    "senior_salary": "$155,000 - $210,000+",
+    "growth_potential": "Very High (22% YoY)",
+    "top_locations": ["San Jose, CA", "Washington, DC", "Austin, TX", "Remote"]
+  },
+  "Data Scientist": {
+    "entry_salary": "$85,000 - $108,000",
+    "mid_salary": "$115,000 - $155,000",
+    "senior_salary": "$160,000 - $220,000+",
+    "growth_potential": "Very High (25% YoY)",
+    "top_locations": ["San Francisco, CA", "New York, NY", "Boston, MA", "Remote"]
+  },
+  "Product Manager": {
+    "entry_salary": "$80,000 - $100,000",
+    "mid_salary": "$110,000 - $150,000",
+    "senior_salary": "$155,000 - $205,000+",
+    "growth_potential": "High (14% YoY)",
+    "top_locations": ["San Francisco, CA", "Seattle, WA", "New York, NY"]
+  },
+  "HR Specialist / Recruiter": {
+    "entry_salary": "$50,000 - $68,000",
+    "mid_salary": "$70,000 - $92,000",
+    "senior_salary": "$95,000 - $130,000+",
+    "growth_potential": "Moderate (9% YoY)",
+    "top_locations": ["Chicago, IL", "Los Angeles, CA", "Dallas, TX"]
+  },
+  "Financial Analyst": {
+    "entry_salary": "$60,000 - $78,000",
+    "mid_salary": "$80,000 - $110,000",
+    "senior_salary": "$115,000 - $160,000+",
+    "growth_potential": "Moderate (11% YoY)",
+    "top_locations": ["New York, NY", "Chicago, IL", "Charlotte, NC"]
+  },
+  "Digital Marketing Manager": {
+    "entry_salary": "$52,000 - $70,000",
+    "mid_salary": "$72,000 - $98,000",
+    "senior_salary": "$100,000 - $140,000+",
+    "growth_potential": "High (13% YoY)",
+    "top_locations": ["New York, NY", "Miami, FL", "Austin, TX", "Remote"]
+  }
+}
