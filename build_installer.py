@@ -32,14 +32,24 @@ def main():
     print("      ResumeIQ — Building Standalone Executable & Setup")
     print("============================================================")
 
-    # 1. Clean previous build artifacts
+    # 1. Ensure Production build type in config/version.py
+    version_file = os.path.join(base_dir, "config", "version.py")
+    if os.path.exists(version_file):
+        with open(version_file, "r", encoding="utf-8") as f:
+            v_content = f.read()
+        import re
+        v_content = re.sub(r'BUILD_TYPE\s*=\s*"[^"]*"', 'BUILD_TYPE = "Production"', v_content)
+        with open(version_file, "w", encoding="utf-8") as f:
+            f.write(v_content)
+
+    # 2. Clean previous build artifacts
     dist_dir = os.path.join(base_dir, "dist")
     build_dir = os.path.join(base_dir, "build")
     if os.path.exists(build_dir):
         print("Cleaning previous build folder...")
         shutil.rmtree(build_dir, ignore_errors=True)
 
-    # 2. Run PyInstaller using main.spec with --clean
+    # 3. Run PyInstaller using main.spec with --clean
     pyi_cmd = f'"{sys.executable}" -m PyInstaller --clean --noconfirm main.spec'
     run_step("Compiling Standalone Binary with PyInstaller", pyi_cmd, cwd=base_dir)
 
