@@ -39,7 +39,9 @@ class PDFReportGenerator:
         suggestions: list[str],
         rqi: float = 80.0,
         confidence_score: float = 75.0,
-        company_name: str = ""
+        company_name: str = "",
+        evaluation_mode: str = "Experienced ATS Match",
+        **kwargs
     ) -> str:
         """Generates an executive, highly visual PDF evaluation report for a resume analysis."""
         dir_name = os.path.dirname(output_path)
