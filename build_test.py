@@ -2,7 +2,8 @@
 """
 ResumeIQ Automated Test Build Script
 Compiles the test build executable named according to the standard convention:
-'ResumeIQ v<version> test build.exe' and places it inside the test_builds directory.
+'ResumeIQ v<version> test build <N>.exe' with an auto-incrementing build counter <N>
+and places it inside the test_builds directory.
 """
 
 import os
@@ -31,6 +32,29 @@ def get_current_version(base_dir: str) -> str:
             pass
     return "2.0.0"
 
+def get_next_test_build_number(test_builds_dir: str, version: str) -> int:
+    """Scans test_builds directory and determines the next sequential test build number."""
+    pattern = re.compile(rf"^ResumeIQ v{re.escape(version)} test build(?:\s+(\d+))?\.exe$", re.IGNORECASE)
+    highest_num = 0
+    
+    # Check project test_builds and parent workspace test_builds if available
+    search_dirs = [test_builds_dir]
+    parent_test_builds = os.path.abspath(os.path.join(test_builds_dir, "..", "..", "test_builds"))
+    if os.path.exists(parent_test_builds) and parent_test_builds not in search_dirs:
+        search_dirs.append(parent_test_builds)
+
+    for d in search_dirs:
+        if os.path.exists(d):
+            for f in os.listdir(d):
+                m = pattern.match(f)
+                if m:
+                    if m.group(1):
+                        highest_num = max(highest_num, int(m.group(1)))
+                    else:
+                        highest_num = max(highest_num, 1)
+
+    return highest_num + 1
+
 def run_step(title, command, cwd=None):
     print(f"\n{'='*60}\n -> {title}\n{'='*60}")
     res = subprocess.run(command, cwd=cwd, shell=True)
@@ -44,9 +68,11 @@ def main():
     os.chdir(base_dir)
 
     version = get_current_version(base_dir)
-    build_name = f"ResumeIQ v{version} test build"
     test_builds_dir = os.path.join(base_dir, "test_builds")
     os.makedirs(test_builds_dir, exist_ok=True)
+
+    build_num = get_next_test_build_number(test_builds_dir, version)
+    build_name = f"ResumeIQ v{version} test build {build_num}"
 
     print("============================================================")
     print(f"      Building Test Build: {build_name}")
@@ -66,9 +92,18 @@ def main():
         print("  [ERROR] PyInstaller failed to generate dist/ResumeIQ.exe")
         sys.exit(1)
 
-    # 3. Copy/Rename to test_builds with standardized name
+    # 3. Copy to test_builds with incremented name
     target_exe = os.path.join(test_builds_dir, f"{build_name}.exe")
     shutil.copy2(dist_exe, target_exe)
+
+    # Also copy to root workspace test_builds if present
+    root_test_builds = os.path.abspath(os.path.join(base_dir, "..", "test_builds"))
+    if os.path.exists(root_test_builds):
+        root_target_exe = os.path.join(root_test_builds, f"{build_name}.exe")
+        try:
+            shutil.copy2(dist_exe, root_target_exe)
+        except Exception as e:
+            print(f"  [NOTE] Could not copy to {root_target_exe}: {e}")
 
     size_mb = os.path.getsize(target_exe) / (1024 * 1024)
     print(f"\n[SUCCESS] Test build successfully created:")
