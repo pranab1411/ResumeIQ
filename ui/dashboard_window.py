@@ -39,6 +39,7 @@ from ui.floating_widget import FloatingGlassWidget
 from ui.styles import DARK_THEME_QSS, LIGHT_THEME_QSS
 from utils.logger import logger
 from utils.paths import get_data_path
+from config.version import get_app_version_string
 
 # Directory paths
 RESUMES_DIR = get_data_path("resumes")
@@ -1514,7 +1515,7 @@ class DashboardWindow(QMainWindow):
         f_layout.addSpacing(4)
 
         info_items = [
-            ("Application", "ResumeIQ v2.0.0 (Production Build)"),
+            ("Application", get_app_version_string()),
             ("Logged In User", f"{self.user.get('name', 'User')} ({self.user.get('email', '')})"),
             ("Primary AI Engine", "Autonomous Local AI Agent (Zero API Key)"),
             ("NLP & Semantic Parser", "spaCy (en_core_web_sm)"),
