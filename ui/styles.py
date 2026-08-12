@@ -286,7 +286,16 @@ QHeaderView::section {{
     border-bottom: 1px solid rgba(255, 255, 255, 0.14);
 }}
 
-/* Scroll Bars */
+/* Scroll Bars & Scroll Areas */
+QScrollArea {{
+    background: transparent;
+    border: none;
+}}
+
+QScrollArea > QWidget > QWidget {{
+    background: transparent;
+}}
+
 QScrollBar:vertical {{
     background-color: transparent;
     width: 8px;

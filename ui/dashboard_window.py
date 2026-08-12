@@ -1457,10 +1457,15 @@ class DashboardWindow(QMainWindow):
             self.lbl_ai_badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
     def _build_settings_page(self) -> QWidget:
-        page = QWidget()
-        layout = QVBoxLayout()
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QFrame.Shape.NoFrame)
+        scroll_area.setStyleSheet("background: transparent; border: none;")
+
+        content_widget = QWidget()
+        layout = QVBoxLayout(content_widget)
         layout.setContentsMargins(25, 25, 25, 25)
-        layout.setSpacing(15)
+        layout.setSpacing(16)
 
         title = QLabel("System Settings & Local AI Engine Status")
         title.setObjectName("HeaderTitle")
@@ -1469,42 +1474,60 @@ class DashboardWindow(QMainWindow):
         # Local AI Agent Card
         ai_card = QFrame()
         ai_card.setObjectName("CardFrame")
-        g_layout = QVBoxLayout()
-        g_layout.setContentsMargins(20, 20, 20, 20)
-        g_layout.setSpacing(10)
+        g_layout = QVBoxLayout(ai_card)
+        g_layout.setContentsMargins(22, 22, 22, 22)
+        g_layout.setSpacing(12)
 
         g_title = QLabel("🤖 Autonomous Local AI Agent Engine")
         g_title.setObjectName("SectionHeader")
-        g_sub = QLabel("ResumeIQ runs a 100% Free Autonomous Local AI Agent powered by spaCy NLP, semantic keyword matching, structural layout algorithms, and automated resume synthesis.\n\n• Zero API Keys Required\n• 100% Free Forever & Unlimited Uses\n• Zero Rate Limits or Quota Expiration\n• 100% Offline, Fast & Private")
-        g_sub.setObjectName("SubTitle")
+        g_sub = QLabel(
+            "<p style='color: #CBD5E1; font-size: 13.5px; line-height: 1.5; margin: 0;'>"
+            "ResumeIQ runs a 100% Free Autonomous Local AI Agent powered by spaCy NLP, "
+            "semantic keyword matching, structural layout algorithms, and automated resume synthesis.</p>"
+            "<ul style='color: #E2E8F0; font-size: 13px; line-height: 1.7; margin-top: 8px; margin-bottom: 0; padding-left: 20px;'>"
+            "<li><b>Zero API Keys Required</b></li>"
+            "<li><b>100% Free Forever & Unlimited Uses</b></li>"
+            "<li><b>Zero Rate Limits or Quota Expiration</b></li>"
+            "<li><b>100% Offline, Fast & Private</b></li>"
+            "</ul>"
+        )
+        g_sub.setTextFormat(Qt.TextFormat.RichText)
         g_sub.setWordWrap(True)
         g_layout.addWidget(g_title)
         g_layout.addWidget(g_sub)
 
         status_lbl = QLabel("✅ Autonomous Local AI Agent is ACTIVE and ready for intelligent analysis.")
-        status_lbl.setStyleSheet("color: #34D399; font-weight: 600; font-size: 13px; margin-top: 10px;")
+        status_lbl.setStyleSheet("color: #34D399; font-weight: 600; font-size: 13px; margin-top: 8px;")
         g_layout.addWidget(status_lbl)
-
-        ai_card.setLayout(g_layout)
         layout.addWidget(ai_card)
 
         # System Info Card
         frame = QFrame()
         frame.setObjectName("CardFrame")
-        f_layout = QVBoxLayout()
-        f_layout.setContentsMargins(20, 20, 20, 20)
-        f_layout.setSpacing(10)
+        f_layout = QVBoxLayout(frame)
+        f_layout.setContentsMargins(22, 22, 22, 22)
+        f_layout.setSpacing(8)
 
-        f_layout.addWidget(QLabel("<b>Application:</b> ResumeIQ v1.0.0 (Production Build)"))
-        f_layout.addWidget(QLabel(f"<b>Logged In User:</b> {self.user['name']} ({self.user['email']})"))
-        f_layout.addWidget(QLabel("<b>Primary AI Engine:</b> Autonomous Local AI Agent (Zero API Key)"))
-        f_layout.addWidget(QLabel("<b>NLP & Semantic Parser:</b> spaCy (en_core_web_sm)"))
-        f_layout.addWidget(QLabel("<b>Database:</b> SQLite3 (local resumeiq.db)"))
-        f_layout.addWidget(QLabel("<b>Document Extractors:</b> pdfplumber, python-docx"))
-        f_layout.addWidget(QLabel("<b>Report Engine:</b> ReportLab PDF Compiler"))
-        f_layout.addStretch()
+        sys_title = QLabel("ℹ️ System & Engine Information")
+        sys_title.setObjectName("SectionHeader")
+        f_layout.addWidget(sys_title)
+        f_layout.addSpacing(4)
 
-        frame.setLayout(f_layout)
+        info_items = [
+            ("Application", "ResumeIQ v2.0.0 (Production Build)"),
+            ("Logged In User", f"{self.user.get('name', 'User')} ({self.user.get('email', '')})"),
+            ("Primary AI Engine", "Autonomous Local AI Agent (Zero API Key)"),
+            ("NLP & Semantic Parser", "spaCy (en_core_web_sm)"),
+            ("Database", "SQLite3 (local resumeiq.db)"),
+            ("Document Extractors", "pdfplumber, python-docx"),
+            ("Report Engine", "ReportLab PDF Compiler")
+        ]
+        for k, v in info_items:
+            lbl = QLabel(f"<b>{k}:</b> {v}")
+            lbl.setStyleSheet("font-size: 13.5px; color: #E2E8F0; padding: 2px 0;")
+            lbl.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+            f_layout.addWidget(lbl)
+
         layout.addWidget(frame)
 
         # Feature 9: Dark / Light Theme Toggle Card
@@ -1512,7 +1535,7 @@ class DashboardWindow(QMainWindow):
         theme_card = QFrame()
         theme_card.setObjectName("CardFrame")
         t_layout = QVBoxLayout(theme_card)
-        t_layout.setContentsMargins(20, 16, 20, 16)
+        t_layout.setContentsMargins(22, 20, 22, 20)
         t_layout.setSpacing(10)
         t_title = QLabel("🎨 App Theme & Visual Styling")
         t_title.setObjectName("SectionHeader")
@@ -1534,8 +1557,8 @@ class DashboardWindow(QMainWindow):
         # Reset Database & Settings Card
         reset_card = QFrame()
         reset_card.setObjectName("CardFrame")
-        r_layout = QVBoxLayout()
-        r_layout.setContentsMargins(20, 20, 20, 20)
+        r_layout = QVBoxLayout(reset_card)
+        r_layout.setContentsMargins(22, 20, 22, 20)
         r_layout.setSpacing(10)
 
         r_title = QLabel("🔄 Reset Database & System Settings")
@@ -1552,11 +1575,11 @@ class DashboardWindow(QMainWindow):
         r_layout.addWidget(r_title)
         r_layout.addWidget(r_sub)
         r_layout.addWidget(btn_reset, 0, Qt.AlignmentFlag.AlignLeft)
-        reset_card.setLayout(r_layout)
         layout.addWidget(reset_card)
 
-        page.setLayout(layout)
-        return page
+        layout.addStretch(1)
+        scroll_area.setWidget(content_widget)
+        return scroll_area
 
     def _apply_theme(self, theme: str = "dark"):
         """Enforces 100% Glassmorphism Dark Theme globally."""
