@@ -1131,15 +1131,19 @@ class DashboardWindow(QMainWindow):
         return page
 
     def load_reports_table(self):
-        reports = db.get_reports_for_user(self.user["id"])
-        self.table_reports.setRowCount(len(reports))
-        for row_idx, r in enumerate(reports):
-            stars = ATSCalculator.get_star_rating_gui(r["ats_score"])
-            self.table_reports.setItem(row_idx, 0, QTableWidgetItem(str(r["id"])))
-            self.table_reports.setItem(row_idx, 1, QTableWidgetItem(r["pdf_name"]))
-            self.table_reports.setItem(row_idx, 2, QTableWidgetItem(r["filename"]))
-            self.table_reports.setItem(row_idx, 3, QTableWidgetItem(f"{r['ats_score']}% ({stars})"))
-            self.table_reports.setItem(row_idx, 4, QTableWidgetItem(str(r["created_at"])))
+        try:
+            reports = db.get_reports_for_user(self.user.get("id", 0)) or []
+            self.table_reports.setRowCount(len(reports))
+            for row_idx, r in enumerate(reports):
+                score = float(r.get("ats_score", 0.0) or 0.0)
+                stars = ATSCalculator.get_star_rating_gui(score)
+                self.table_reports.setItem(row_idx, 0, QTableWidgetItem(str(r.get("id", ""))))
+                self.table_reports.setItem(row_idx, 1, QTableWidgetItem(str(r.get("pdf_name", ""))))
+                self.table_reports.setItem(row_idx, 2, QTableWidgetItem(str(r.get("filename", ""))))
+                self.table_reports.setItem(row_idx, 3, QTableWidgetItem(f"{score}% ({stars})"))
+                self.table_reports.setItem(row_idx, 4, QTableWidgetItem(str(r.get("created_at", ""))))
+        except Exception as e:
+            logger.error(f"Error loading reports table: {e}")
 
     # --- PAGE 5: HISTORY ---
     def _build_history_page(self) -> QWidget:
@@ -1163,15 +1167,19 @@ class DashboardWindow(QMainWindow):
         return page
 
     def load_history_table(self):
-        resumes = db.get_user_resumes(self.user["id"])
-        self.table_history.setRowCount(len(resumes))
-        for row_idx, r in enumerate(resumes):
-            stars = ATSCalculator.get_star_rating_gui(r["ats_score"])
-            self.table_history.setItem(row_idx, 0, QTableWidgetItem(str(r["id"])))
-            self.table_history.setItem(row_idx, 1, QTableWidgetItem(r["filename"]))
-            self.table_history.setItem(row_idx, 2, QTableWidgetItem(str(r["upload_date"])))
-            self.table_history.setItem(row_idx, 3, QTableWidgetItem(f"{r['ats_score']}% ({stars})"))
-            self.table_history.setItem(row_idx, 4, QTableWidgetItem(r["job_title"] or "N/A"))
+        try:
+            resumes = db.get_user_resumes(self.user.get("id", 0)) or []
+            self.table_history.setRowCount(len(resumes))
+            for row_idx, r in enumerate(resumes):
+                score = float(r.get("ats_score", 0.0) or 0.0)
+                stars = ATSCalculator.get_star_rating_gui(score)
+                self.table_history.setItem(row_idx, 0, QTableWidgetItem(str(r.get("id", ""))))
+                self.table_history.setItem(row_idx, 1, QTableWidgetItem(str(r.get("filename", ""))))
+                self.table_history.setItem(row_idx, 2, QTableWidgetItem(str(r.get("upload_date", ""))))
+                self.table_history.setItem(row_idx, 3, QTableWidgetItem(f"{score}% ({stars})"))
+                self.table_history.setItem(row_idx, 4, QTableWidgetItem(str(r.get("job_title") or "N/A")))
+        except Exception as e:
+            logger.error(f"Error loading history table: {e}")
 
     # --- PAGE 6: AI CAREER ASSISTANT CHATBOT ---
     def _build_chatbot_page(self) -> QWidget:

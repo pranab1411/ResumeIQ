@@ -424,6 +424,8 @@ class DatabaseManager:
                 WHERE res.user_id = ?
                 ORDER BY r.id ASC
             """, (user_id,))
+            return [dict(row) for row in cursor.fetchall()]
+
     # --- ATS Score History & Resume Versions ---
     def record_score_history(
         self,
