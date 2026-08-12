@@ -319,8 +319,10 @@ class DashboardWindow(QMainWindow):
         self.table_recent.setColumnCount(4)
         self.table_recent.setHorizontalHeaderLabels(["Filename", "Date", "ATS Score", "Rating"])
         self.table_recent.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.table_recent.verticalHeader().setVisible(False)
         self.table_recent.verticalHeader().setDefaultSectionSize(38)
         self.table_recent.setAlternatingRowColors(True)
+        self.table_recent.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         layout.addWidget(self.table_recent)
 
         page.setLayout(layout)
@@ -1123,8 +1125,13 @@ class DashboardWindow(QMainWindow):
 
         self.table_reports = QTableWidget()
         self.table_reports.setColumnCount(5)
-        self.table_reports.setHorizontalHeaderLabels(["ID", "PDF Report Name", "Resume File", "ATS Score", "Generated Date"])
+        self.table_reports.setHorizontalHeaderLabels(["#", "PDF Report Name", "Resume File", "ATS Score", "Generated Date"])
         self.table_reports.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.table_reports.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        self.table_reports.verticalHeader().setVisible(False)
+        self.table_reports.verticalHeader().setDefaultSectionSize(38)
+        self.table_reports.setAlternatingRowColors(True)
+        self.table_reports.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         layout.addWidget(self.table_reports)
 
         page.setLayout(layout)
@@ -1137,7 +1144,7 @@ class DashboardWindow(QMainWindow):
             for row_idx, r in enumerate(reports):
                 score = float(r.get("ats_score", 0.0) or 0.0)
                 stars = ATSCalculator.get_star_rating_gui(score)
-                self.table_reports.setItem(row_idx, 0, QTableWidgetItem(str(r.get("id", ""))))
+                self.table_reports.setItem(row_idx, 0, QTableWidgetItem(str(row_idx + 1)))
                 self.table_reports.setItem(row_idx, 1, QTableWidgetItem(str(r.get("pdf_name", ""))))
                 self.table_reports.setItem(row_idx, 2, QTableWidgetItem(str(r.get("filename", ""))))
                 self.table_reports.setItem(row_idx, 3, QTableWidgetItem(f"{score}% ({stars})"))
@@ -1157,10 +1164,13 @@ class DashboardWindow(QMainWindow):
 
         self.table_history = QTableWidget()
         self.table_history.setColumnCount(5)
-        self.table_history.setHorizontalHeaderLabels(["ID", "Filename", "Upload Date", "ATS Score & Rating", "Target Role"])
+        self.table_history.setHorizontalHeaderLabels(["#", "Filename", "Upload Date", "ATS Score & Rating", "Target Role"])
         self.table_history.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.table_history.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        self.table_history.verticalHeader().setVisible(False)
         self.table_history.verticalHeader().setDefaultSectionSize(38)
         self.table_history.setAlternatingRowColors(True)
+        self.table_history.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         layout.addWidget(self.table_history)
 
         page.setLayout(layout)
@@ -1173,7 +1183,7 @@ class DashboardWindow(QMainWindow):
             for row_idx, r in enumerate(resumes):
                 score = float(r.get("ats_score", 0.0) or 0.0)
                 stars = ATSCalculator.get_star_rating_gui(score)
-                self.table_history.setItem(row_idx, 0, QTableWidgetItem(str(r.get("id", ""))))
+                self.table_history.setItem(row_idx, 0, QTableWidgetItem(str(row_idx + 1)))
                 self.table_history.setItem(row_idx, 1, QTableWidgetItem(str(r.get("filename", ""))))
                 self.table_history.setItem(row_idx, 2, QTableWidgetItem(str(r.get("upload_date", ""))))
                 self.table_history.setItem(row_idx, 3, QTableWidgetItem(f"{score}% ({stars})"))
