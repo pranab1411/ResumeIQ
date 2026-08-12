@@ -38,14 +38,17 @@ def verify_password(password: str, stored_hash: str, salt: str) -> bool:
         except Exception:
             return False
             
-    # SHA-256 or PBKDF2 verification
-    if len(stored_hash) == 64 and not "$" in stored_hash:
-        salted_pwd = (salt + password).encode('utf-8')
-        return hashlib.sha256(salted_pwd).hexdigest() == stored_hash
-        
     salted = (salt + password).encode('utf-8')
-    computed = hashlib.pbkdf2_hmac('sha256', salted, salt.encode('utf-8'), 100000).hex()
-    return computed == stored_hash
+    # 1. PBKDF2 SHA-256 (standard v2.0 hashing)
+    computed_pbkdf2 = hashlib.pbkdf2_hmac('sha256', salted, salt.encode('utf-8'), 100000).hex()
+    if computed_pbkdf2 == stored_hash:
+        return True
+
+    # 2. Simple SHA-256 (legacy compatibility)
+    if hashlib.sha256(salted).hexdigest() == stored_hash:
+        return True
+
+    return False
 
 def generate_remember_token() -> str:
     """Generates an encrypted remember-me token."""
