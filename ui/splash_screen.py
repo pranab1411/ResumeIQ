@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QProgress
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QColor, QFont, QPixmap
 from utils.paths import get_asset_path
+from config.version import get_splash_version_string
 
 class SplashScreen(QWidget):
     """Frameless Translucent Glassmorphism Splash Screen with Animated Progress Bar."""
@@ -108,7 +109,7 @@ class SplashScreen(QWidget):
         card_layout.addWidget(self.progress_bar)
 
         # Version Pill Label
-        self.lbl_version = QLabel("v2.5 Pro • 100% Offline AI")
+        self.lbl_version = QLabel(get_splash_version_string())
         self.lbl_version.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lbl_version.setStyleSheet("font-size: 11px; color: #64748B; margin-top: 4px;")
         card_layout.addWidget(self.lbl_version)

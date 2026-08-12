@@ -5,8 +5,9 @@ Checks GitHub releases API for a newer version on app startup.
 
 from typing import Tuple
 from utils.logger import logger
+from config.version import APP_VERSION
 
-CURRENT_VERSION = "2.5.0"
+CURRENT_VERSION = APP_VERSION
 GITHUB_RELEASES_API = "https://api.github.com/repos/pranab-chourasiya/resumeiq/releases/latest"
 
 class AppUpdater:
