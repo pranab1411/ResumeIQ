@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 ResumeIQ Automated Test Build Script
-Compiles the test build executable named according to the standard convention:
+Compiles the installable Setup wizard executable (Inno Setup Installer)
+named according to the standard convention:
 'ResumeIQ v<version> test build <N>.exe' with an auto-incrementing build counter <N>
 and places it inside the test_builds directory.
 """
@@ -37,7 +38,6 @@ def get_next_test_build_number(test_builds_dir: str, version: str) -> int:
     pattern = re.compile(rf"^ResumeIQ v{re.escape(version)} test build(?:\s+(\d+))?\.exe$", re.IGNORECASE)
     highest_num = 0
     
-    # Check project test_builds and parent workspace test_builds if available
     search_dirs = [test_builds_dir]
     parent_test_builds = os.path.abspath(os.path.join(test_builds_dir, "..", "..", "test_builds"))
     if os.path.exists(parent_test_builds) and parent_test_builds not in search_dirs:
@@ -63,6 +63,18 @@ def run_step(title, command, cwd=None):
         sys.exit(1)
     print(f"[OK] Completed: {title}")
 
+def find_iscc() -> str:
+    iscc_paths = [
+        "iscc",
+        r"C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
+        r"C:\Program Files\Inno Setup 6\ISCC.exe",
+        os.path.expandvars(r"%LocalAppData%\Programs\Inno Setup 6\ISCC.exe")
+    ]
+    for p in iscc_paths:
+        if shutil.which(p) or os.path.exists(p):
+            return p
+    return None
+
 def main():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(base_dir)
@@ -75,7 +87,7 @@ def main():
     build_name = f"ResumeIQ v{version} test build {build_num}"
 
     print("============================================================")
-    print(f"      Building Test Build: {build_name}")
+    print(f"      Building Installable Setup Test Build: {build_name}")
     print("============================================================")
 
     # 1. Clean previous build directory
@@ -85,31 +97,43 @@ def main():
 
     # 2. Run PyInstaller
     pyi_cmd = f'"{sys.executable}" -m PyInstaller --clean --noconfirm main.spec'
-    run_step("Compiling Binary with PyInstaller", pyi_cmd, cwd=base_dir)
+    run_step("Compiling Standalone Binary with PyInstaller", pyi_cmd, cwd=base_dir)
 
     dist_exe = os.path.join(base_dir, "dist", "ResumeIQ.exe")
     if not os.path.exists(dist_exe):
         print("  [ERROR] PyInstaller failed to generate dist/ResumeIQ.exe")
         sys.exit(1)
 
-    # 3. Copy to test_builds with incremented name
-    target_exe = os.path.join(test_builds_dir, f"{build_name}.exe")
-    shutil.copy2(dist_exe, target_exe)
+    # 3. Find Inno Setup Compiler
+    iscc_path = find_iscc()
+    if not iscc_path:
+        print("\n[ERROR] Inno Setup Compiler (ISCC.exe) was not found!")
+        print("  Install Inno Setup 6 from https://jrsoftware.org/isdl.php to build installable test builds.")
+        sys.exit(1)
 
-    # Also copy to root workspace test_builds if present
+    # 4. Compile Inno Setup Installer directly into test_builds with auto-incremented name
+    iscc_cmd = f'"{iscc_path}" /O"{test_builds_dir}" /F"{build_name}" installer_setup.iss'
+    run_step(f"Compiling Installable Setup Package ({build_name}.exe)", iscc_cmd, cwd=base_dir)
+
+    target_exe = os.path.join(test_builds_dir, f"{build_name}.exe")
+    if not os.path.exists(target_exe):
+        print(f"  [ERROR] Inno Setup failed to output {target_exe}")
+        sys.exit(1)
+
+    # Also copy installable setup to root workspace test_builds if present
     root_test_builds = os.path.abspath(os.path.join(base_dir, "..", "test_builds"))
     if os.path.exists(root_test_builds):
         root_target_exe = os.path.join(root_test_builds, f"{build_name}.exe")
         try:
-            shutil.copy2(dist_exe, root_target_exe)
+            shutil.copy2(target_exe, root_target_exe)
         except Exception as e:
             print(f"  [NOTE] Could not copy to {root_target_exe}: {e}")
 
     size_mb = os.path.getsize(target_exe) / (1024 * 1024)
-    print(f"\n[SUCCESS] Test build successfully created:")
-    print(f"  Target File : {target_exe}")
-    print(f"  Build Size  : {size_mb:.1f} MB")
-    print(f"  Build Name  : {build_name}")
+    print(f"\n[SUCCESS] Installable Test Build Package Created Successfully:")
+    print(f"  Setup Installer : {target_exe}")
+    print(f"  Package Size    : {size_mb:.1f} MB")
+    print(f"  Build Name      : {build_name}")
     print("============================================================")
 
 if __name__ == "__main__":
