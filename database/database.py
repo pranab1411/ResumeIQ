@@ -227,6 +227,7 @@ class DatabaseManager:
         """
         Deletes all stored resumes, extracted skills, generated reports, and app settings
         from the database while strictly PRESERVING user login credentials (users table).
+        Resets auto-increment counters so fresh uploads start cleanly at ID 1.
         """
         try:
             with self.get_connection() as conn:
@@ -235,14 +236,27 @@ class DatabaseManager:
                     cursor.execute("DELETE FROM reports WHERE resume_id IN (SELECT id FROM resumes WHERE user_id = ?)", (user_id,))
                     cursor.execute("DELETE FROM skills WHERE resume_id IN (SELECT id FROM resumes WHERE user_id = ?)", (user_id,))
                     cursor.execute("DELETE FROM resumes WHERE user_id = ?", (user_id,))
+                    cursor.execute("DELETE FROM ats_score_history WHERE resume_id IN (SELECT id FROM resumes WHERE user_id = ?)", (user_id,))
+                    cursor.execute("DELETE FROM resume_versions WHERE resume_id IN (SELECT id FROM resumes WHERE user_id = ?)", (user_id,))
                 else:
                     cursor.execute("DELETE FROM reports")
                     cursor.execute("DELETE FROM skills")
                     cursor.execute("DELETE FROM resumes")
+                    cursor.execute("DELETE FROM ats_score_history")
+                    cursor.execute("DELETE FROM resume_versions")
                 
                 cursor.execute("DELETE FROM app_settings")
+                
+                # Reset auto-increment sequence if resumes table is empty
+                cursor.execute("SELECT COUNT(*) FROM resumes")
+                if cursor.fetchone()[0] == 0:
+                    try:
+                        cursor.execute("DELETE FROM sqlite_sequence WHERE name IN ('resumes', 'skills', 'reports', 'ats_score_history', 'resume_versions')")
+                    except Exception:
+                        pass
+                
                 conn.commit()
-                logger.info("Database reset executed: cleared resumes, skills, reports, and settings (login info preserved).")
+                logger.info("Database reset executed: cleared resumes, skills, reports, and sequence counters (login info preserved).")
         except Exception as e:
             logger.error(f"Error executing database reset: {e}")
 
