@@ -28,10 +28,10 @@ class RealOTPService:
         except ImportError:
             default_user, default_pass, default_host, default_port = "", "", "smtp.gmail.com", 587
 
-        smtp_host = db.get_setting("smtp_host", default_host)
-        smtp_port = int(db.get_setting("smtp_port", str(default_port)))
-        smtp_user = db.get_setting("smtp_user", default_user)
-        smtp_password = db.get_setting("smtp_password", default_pass)
+        smtp_host = db.get_setting("smtp_host", "") or default_host
+        smtp_port = int(db.get_setting("smtp_port", "") or str(default_port))
+        smtp_user = db.get_setting("smtp_user", "") or default_user
+        smtp_password = db.get_setting("smtp_password", "") or default_pass
 
         if not smtp_user or not smtp_password or "your_" in smtp_user or "your_" in smtp_password:
             logger.warning("[REAL OTP SERVICE] Embedded Admin SMTP credentials pending update.")
