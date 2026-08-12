@@ -151,35 +151,6 @@ class LoginWindow(QWidget):
         signin_layout.addSpacing(8)
         signin_layout.addWidget(self.btn_signin)
 
-        # Feature 16: Social Login Divider + Google/GitHub Buttons
-        divider_row = QHBoxLayout()
-        div_line_l = QFrame(); div_line_l.setFrameShape(QFrame.Shape.HLine); div_line_l.setStyleSheet("color: #334155;")
-        div_lbl = QLabel("  or continue with  "); div_lbl.setStyleSheet("color: #64748B; font-size: 11px;")
-        div_line_r = QFrame(); div_line_r.setFrameShape(QFrame.Shape.HLine); div_line_r.setStyleSheet("color: #334155;")
-        divider_row.addWidget(div_line_l); divider_row.addWidget(div_lbl); divider_row.addWidget(div_line_r)
-        signin_layout.addSpacing(4)
-        signin_layout.addLayout(divider_row)
-        signin_layout.addSpacing(4)
-
-        social_row = QHBoxLayout()
-        btn_google = QPushButton("🔵 Google")
-        btn_google.setObjectName("SecondaryButton")
-        btn_google.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_google.clicked.connect(lambda: GlassMessageBox.info(
-            self, "Google Sign-In",
-            "Google OAuth requires an internet connection.\n\nPlease use Email/Username login for offline access.\n\nOnline OAuth support coming in a future update!"
-        ))
-        btn_github = QPushButton("⚫ GitHub")
-        btn_github.setObjectName("SecondaryButton")
-        btn_github.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_github.clicked.connect(lambda: GlassMessageBox.info(
-            self, "GitHub Sign-In",
-            "GitHub OAuth requires an internet connection.\n\nPlease use Email/Username login for offline access.\n\nOnline OAuth support coming in a future update!"
-        ))
-        social_row.addWidget(btn_google)
-        social_row.addWidget(btn_github)
-        signin_layout.addLayout(social_row)
-
         signin_layout.addStretch(1)
         self.signin_tab.setLayout(signin_layout)
 
