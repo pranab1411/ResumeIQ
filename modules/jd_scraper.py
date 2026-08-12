@@ -58,48 +58,59 @@ class JDScraper:
 
         try:
             import requests
-            from bs4 import BeautifulSoup
+            try:
+                from bs4 import BeautifulSoup
+                has_bs4 = True
+            except ImportError:
+                has_bs4 = False
 
             response = requests.get(url, headers=cls.HEADERS, timeout=12)
             response.raise_for_status()
 
-            soup = BeautifulSoup(response.text, "html.parser")
+            if has_bs4:
+                soup = BeautifulSoup(response.text, "html.parser")
 
-            # Remove script and style tags
-            for tag in soup(["script", "style", "noscript"]):
-                tag.decompose()
+                # Remove script and style tags
+                for tag in soup(["script", "style", "noscript"]):
+                    tag.decompose()
 
-            # Try portal-specific selectors first
-            portal_key = next((k for k in cls.PORTAL_SELECTORS if k in url), None)
-            if portal_key:
-                for selector in cls.PORTAL_SELECTORS[portal_key]:
-                    el = soup.select_one(selector)
-                    if el:
-                        text = el.get_text(separator="\n", strip=True)
-                        if len(text) > 100:
-                            logger.info(f"[JD Scraper] Extracted {len(text)} chars from {portal_key}")
-                            return True, text
+                # Try portal-specific selectors first
+                portal_key = next((k for k in cls.PORTAL_SELECTORS if k in url), None)
+                if portal_key:
+                    for selector in cls.PORTAL_SELECTORS[portal_key]:
+                        el = soup.select_one(selector)
+                        if el:
+                            text = el.get_text(separator="\n", strip=True)
+                            if len(text) > 100:
+                                logger.info(f"[JD Scraper] Extracted {len(text)} chars from {portal_key}")
+                                return True, text
 
-            # Generic fallback: look for large text blocks
-            candidates = []
-            for tag in ["article", "section", "div", "main"]:
-                for el in soup.find_all(tag):
-                    text = el.get_text(separator=" ", strip=True)
-                    if 200 < len(text) < 15000:
-                        candidates.append(text)
+                # Generic fallback: look for large text blocks
+                candidates = []
+                for tag in ["article", "section", "div", "main"]:
+                    for el in soup.find_all(tag):
+                        text = el.get_text(separator=" ", strip=True)
+                        if 200 < len(text) < 15000:
+                            candidates.append(text)
 
-            if candidates:
-                best = max(candidates, key=len)
-                # Clean up whitespace
-                best = re.sub(r'\n{3,}', '\n\n', best)
-                best = re.sub(r' {2,}', ' ', best)
-                logger.info(f"[JD Scraper] Fallback extraction: {len(best)} chars from {url}")
-                return True, best[:5000]
+                if candidates:
+                    best = max(candidates, key=len)
+                    # Clean up whitespace
+                    best = re.sub(r'\n{3,}', '\n\n', best)
+                    best = re.sub(r' {2,}', ' ', best)
+                    logger.info(f"[JD Scraper] Fallback extraction: {len(best)} chars from {url}")
+                    return True, best[:5000]
+            else:
+                import html
+                clean_html = re.sub(r'<(script|style|noscript)[^>]*>.*?</\1>', '', response.text, flags=re.DOTALL | re.IGNORECASE)
+                text = re.sub(r'<[^>]+>', ' ', clean_html)
+                text = html.unescape(text)
+                text = re.sub(r'\s+', ' ', text).strip()
+                if len(text) > 100:
+                    return True, text[:5000]
 
             return False, "Could not extract job description text from this URL. Try pasting the JD manually."
 
-        except ImportError:
-            return False, "BeautifulSoup4 not installed. Install it with: pip install beautifulsoup4"
         except Exception as e:
             logger.error(f"[JD Scraper] Error scraping {url}: {e}")
             return False, f"Failed to scrape URL: {str(e)}"

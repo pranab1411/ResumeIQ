@@ -62,12 +62,17 @@ hiddenimports = [
     'PyQt6.QtCore',
     'PyQt6.QtGui',
     'PyQt6.QtWidgets',
+    # HTML / Scraper
+    'bs4',
+    'soupsieve',
 ]
 hiddenimports += collect_submodules('encodings')
 hiddenimports += collect_submodules('spacy')
 hiddenimports += collect_submodules('en_core_web_sm')
 hiddenimports += collect_submodules('google.generativeai')
 hiddenimports += collect_submodules('google.ai.generativelanguage')
+hiddenimports += collect_submodules('bs4')
+hiddenimports += collect_submodules('soupsieve')
 
 a = Analysis(
     ['main.py'],
