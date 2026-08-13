@@ -1,5 +1,6 @@
 import sys
 import os
+import ctypes
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
@@ -12,7 +13,38 @@ from database.database import db
 from utils.logger import logger
 from utils.paths import get_asset_path
 
+def is_admin() -> bool:
+    """Checks if the current process is running with administrator privileges."""
+    if sys.platform != "win32":
+        return True
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin() != 0
+    except Exception:
+        return False
+
+def ensure_admin():
+    """Forces the application to prompt and run as Administrator on Windows."""
+    if sys.platform == "win32" and not is_admin():
+        try:
+            params = " ".join([f'"{arg}"' for arg in sys.argv[1:]])
+            if getattr(sys, 'frozen', False):
+                executable = sys.executable
+            else:
+                executable = sys.executable
+                params = f'"{os.path.abspath(sys.argv[0])}" {params}'.strip()
+
+            ret = ctypes.windll.shell32.ShellExecuteW(
+                None, "runas", executable, params, None, 1
+            )
+            if ret > 32:
+                sys.exit(0)
+        except Exception as e:
+            logger.warning(f"Administrator elevation request failed: {e}")
+
 def main():
+    # Enforce administrator privileges on launch
+    ensure_admin()
+
     # Enable High DPI scaling
     os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
     
