@@ -41,7 +41,7 @@ TOUR_STEPS = [
     {
         "icon": "🚀",
         "title": "You're All Set!",
-        "body": "Export comprehensive PDF intelligence reports, generate tailored Cover Letters, and ask our AI Assistant for resume improvement tips!",
+        "body": "Export comprehensive PDF evaluation reports and ask our AI Assistant for tailored resume improvement advice!",
         "step": "5 / 5"
     },
 ]

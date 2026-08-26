@@ -104,15 +104,15 @@ class AICareerChatbot:
                     f"3. **Metrics Focus**: Emphasize career progression, team leadership, revenue impact, and architecture scale numbers."
                 )
 
-        # 7. Resume Generator (.docx) Advice
-        if any(w in query for w in ["docx", "word", "template", "download", "create resume", "generate"]):
+        # 7. Executive PDF Report Advice
+        if any(w in query for w in ["pdf", "report", "download", "export", "evaluation"]):
             return (
-                f"📄 **AI ATS Resume (.docx) Generation:**\n\n"
-                f"You can instantly generate a fully formatted, ATS-compliant Microsoft Word document!\n\n"
+                f"📄 **Executive PDF Evaluation Report:**\n\n"
+                f"You can export a comprehensive single-page ATS evaluation report!\n\n"
                 f"1. Go to the **Analyze Resume** tab.\n"
                 f"2. Upload your resume and click **🚀 Analyze Resume**.\n"
-                f"3. Click **✨ Create AI ATS Recommended Resume (.docx)**.\n\n"
-                f"ResumeIQ will automatically rewrite your bullet points with action verbs and save the `.docx` file in the Output folder!"
+                f"3. Click **📥 Export PDF Report**.\n\n"
+                f"ResumeIQ will generate an executive report with score breakdowns, prioritized improvements, and section analysis!"
             )
 
         # 8. General AI Fallback Answer

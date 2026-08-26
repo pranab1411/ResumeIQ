@@ -895,7 +895,7 @@ class DashboardWindow(QMainWindow):
                 f"Resume evaluated across Top MNC ATS Engines (Workday, Taleo, Greenhouse, Lever, iCIMS)!\n\n"
                 f"📊 Composite Score: {score}%   |   🌐 MNC Global Avg: {mnc_avg}%\n"
                 f"🏆 {pct_label} — {pct_desc}\n\n"
-                f"Click 'Create AI ATS Recommended Resume' to export an optimized Word resume!"
+                f"Click 'Export PDF Report' to save your executive improvement report!"
             )
             
             # Refresh Charts & Analytics
@@ -1261,7 +1261,7 @@ class DashboardWindow(QMainWindow):
             "🎨 Best font sizes for freshers",
             "⚡ List of strong action verbs",
             "🔍 Check missing skills",
-            "📄 How to create .docx resume?"
+            "📄 How to improve resume structure?"
         ]
 
         for chip_text in prompt_chips:
