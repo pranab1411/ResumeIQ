@@ -1,7 +1,8 @@
 """
 modules/report_generator.py
 Executive PDF Report Generator for ResumeIQ v2.1.
-Matches the exact single-page executive improvement report template layout.
+Matches the exact single-page executive improvement report template layout
+with generous column spacing, padded cells, and crisp vector typography.
 """
 
 import os
@@ -42,18 +43,18 @@ def create_radial_gauge(score: float, category: str = "Good") -> Drawing:
     return d
 
 def create_avatar_icon() -> Drawing:
-    d = Drawing(36, 36)
-    d.add(Circle(18, 18, 16, fillColor=colors.HexColor("#2A177E"), strokeColor=None))
-    d.add(Circle(18, 22, 5.5, fillColor=colors.white, strokeColor=None))
-    d.add(Wedge(18, 10, 10, 0, 180, fillColor=colors.white, strokeColor=None))
+    d = Drawing(38, 38)
+    d.add(Circle(19, 19, 17, fillColor=colors.HexColor("#2A177E"), strokeColor=None))
+    d.add(Circle(19, 23.5, 6, fillColor=colors.white, strokeColor=None))
+    d.add(Wedge(19, 10.5, 11, 0, 180, fillColor=colors.white, strokeColor=None))
     return d
 
 def create_briefcase_icon() -> Drawing:
-    d = Drawing(36, 36)
-    d.add(Circle(18, 18, 16, fillColor=colors.HexColor("#2A177E"), strokeColor=None))
-    d.add(Rect(10, 11, 16, 11, rx=2, ry=2, fillColor=colors.white, strokeColor=None))
-    d.add(Rect(14, 22, 8, 3, rx=1, ry=1, fillColor=colors.white, strokeColor=None))
-    d.add(Rect(15.5, 22, 5, 1.5, fillColor=colors.HexColor("#2A177E"), strokeColor=None))
+    d = Drawing(38, 38)
+    d.add(Circle(19, 19, 17, fillColor=colors.HexColor("#2A177E"), strokeColor=None))
+    d.add(Rect(11, 11.5, 16, 12, rx=2, ry=2, fillColor=colors.white, strokeColor=None))
+    d.add(Rect(15, 23.5, 8, 3.5, rx=1, ry=1, fillColor=colors.white, strokeColor=None))
+    d.add(Rect(16.5, 23.5, 5, 1.8, fillColor=colors.HexColor("#2A177E"), strokeColor=None))
     return d
 
 def create_icon_bullet(icon_type: str) -> Drawing:
@@ -173,27 +174,27 @@ def create_mini_footer_icon(icon_type: str) -> Drawing:
         d.add(Line(4.5, 4.5, 7.5, 4.5, strokeColor=colors.HexColor("#4F46E5"), strokeWidth=0.6))
     return d
 
-def create_progress_bar_row(label: str, score: float, width: float = 44, height: float = 4.5) -> Table:
+def create_progress_bar_row(label: str, score: float, width: float = 46, height: float = 5.0) -> Table:
     styles = getSampleStyleSheet()
-    lbl_style = ParagraphStyle('BarLbl', fontName='Helvetica', fontSize=6, leading=7.5, textColor=colors.HexColor("#334155"))
-    val_style = ParagraphStyle('BarVal', fontName='Helvetica-Bold', fontSize=6, leading=7.5, textColor=colors.HexColor("#334155"), alignment=2)
+    lbl_style = ParagraphStyle('BarLbl', fontName='Helvetica', fontSize=6.2, leading=8, textColor=colors.HexColor("#334155"))
+    val_style = ParagraphStyle('BarVal', fontName='Helvetica-Bold', fontSize=6.2, leading=8, textColor=colors.HexColor("#334155"), alignment=2)
     
     d = Drawing(width, height)
-    d.add(Rect(0, 0, width, height, rx=1.5, ry=1.5, fillColor=colors.HexColor("#E2E8F0"), strokeColor=None))
+    d.add(Rect(0, 0, width, height, rx=1.8, ry=1.8, fillColor=colors.HexColor("#E2E8F0"), strokeColor=None))
     fill_w = min(max(score, 0), 100) / 100.0 * width
     fill_color = colors.HexColor("#10B981") if score >= 75 else (colors.HexColor("#F59E0B") if score >= 50 else colors.HexColor("#EF4444"))
     if fill_w > 0:
-        d.add(Rect(0, 0, fill_w, height, rx=1.5, ry=1.5, fillColor=fill_color, strokeColor=None))
+        d.add(Rect(0, 0, fill_w, height, rx=1.8, ry=1.8, fillColor=fill_color, strokeColor=None))
     
     t = Table([
         [Paragraph(label, lbl_style), d, Paragraph(f"<b>{int(score)}/100</b>", val_style)]
-    ], colWidths=[60, width, 40])
+    ], colWidths=[58, width, 38])
     t.setStyle(TableStyle([
         ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
         ('LEFTPADDING', (0,0), (-1,-1), 0),
         ('RIGHTPADDING', (0,0), (-1,-1), 0),
-        ('TOPPADDING', (0,0), (-1,-1), 0.5),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 0.5),
+        ('TOPPADDING', (0,0), (-1,-1), 0.8),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 0.8),
         ('ALIGN', (2,0), (2,0), 'RIGHT')
     ]))
     return t
@@ -242,9 +243,9 @@ class PDFReportGenerator:
         BORDER_LIGHT = colors.HexColor("#E2E8F0")
         DARK_TEXT = colors.HexColor("#0F172A")
         
-        body_style = ParagraphStyle('BodyCustom', fontName='Helvetica', fontSize=6.5, leading=8.5, textColor=DARK_TEXT)
-        body_bold = ParagraphStyle('BodyBold', fontName='Helvetica-Bold', fontSize=6.5, leading=8.5, textColor=DARK_TEXT)
-        card_title_style = ParagraphStyle('CardTitle', fontName='Helvetica-Bold', fontSize=7, leading=8.5, textColor=PRIMARY_PURPLE)
+        body_style = ParagraphStyle('BodyCustom', fontName='Helvetica', fontSize=6.5, leading=8.8, textColor=DARK_TEXT)
+        body_bold = ParagraphStyle('BodyBold', fontName='Helvetica-Bold', fontSize=6.5, leading=8.8, textColor=DARK_TEXT)
+        card_title_style = ParagraphStyle('CardTitle', fontName='Helvetica-Bold', fontSize=7.2, leading=9, textColor=PRIMARY_PURPLE)
         
         # Sanitize candidate name and job title
         display_name = candidate_name.strip() if candidate_name and candidate_name not in ["Candidate", "Not Found", ""] else "Name not confidently detected"
@@ -309,7 +310,7 @@ class PDFReportGenerator:
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
         ]))
         story.append(header_table)
-        story.append(Spacer(1, 3))
+        story.append(Spacer(1, 4))
         
         # ── 2. CANDIDATE PROFILE & SCORE OVERVIEW BANNER ────────────────────────────
         cand_info = Table([
@@ -319,20 +320,20 @@ class PDFReportGenerator:
                     f"<font size=11 color='#0F172A'><b>{display_name}</b></font><br/>"
                     f"<font size=7 color='#334155'><b>{display_role} Resume</b></font><br/>"
                     f"<font size=6 color='#64748B'>File: {filename}</font>",
-                    ParagraphStyle('CandP', fontName='Helvetica', leading=9)
+                    ParagraphStyle('CandP', fontName='Helvetica', leading=9.5)
                 )
             ]
-        ], colWidths=[38, 116])
+        ], colWidths=[42, 114])
         cand_info.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-            ('LEFTPADDING', (0,0), (-1,-1), 1),
-            ('RIGHTPADDING', (0,0), (-1,-1), 1),
-            ('TOPPADDING', (0,0), (-1,-1), 1),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 1),
+            ('LEFTPADDING', (0,0), (-1,-1), 2),
+            ('RIGHTPADDING', (0,0), (-1,-1), 2),
+            ('TOPPADDING', (0,0), (-1,-1), 2),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 2),
         ]))
         
         gauge_col = Table([
-            [Paragraph("<b>RESUME HEALTH SCORE</b>", ParagraphStyle('GH', fontName='Helvetica-Bold', fontSize=6, textColor=colors.HexColor("#334155"), alignment=1))],
+            [Paragraph("<b>RESUME HEALTH SCORE</b>", ParagraphStyle('GH', fontName='Helvetica-Bold', fontSize=6.2, textColor=colors.HexColor("#334155"), alignment=1))],
             [create_radial_gauge(ats_score, score_category)]
         ], colWidths=[105])
         gauge_col.setStyle(TableStyle([
@@ -345,12 +346,12 @@ class PDFReportGenerator:
         ]))
         
         bars_col = Table([
-            [Paragraph("<b>SCORE BREAKDOWN</b>", ParagraphStyle('BH', fontName='Helvetica-Bold', fontSize=6, textColor=colors.HexColor("#334155")))],
+            [Paragraph("<b>SCORE BREAKDOWN</b>", ParagraphStyle('BH', fontName='Helvetica-Bold', fontSize=6.2, textColor=colors.HexColor("#334155")))],
             [create_progress_bar_row("Structure & Format", pillar_scores.get("format", 82))],
             [create_progress_bar_row("Content Quality", pillar_scores.get("keywords", 76))],
             [create_progress_bar_row("Skills Match", pillar_scores.get("skills", 84))],
             [create_progress_bar_row("ATS Readability", pillar_scores.get("readability", 78))],
-        ], colWidths=[156])
+        ], colWidths=[154])
         bars_col.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
             ('LEFTPADDING', (0,0), (-1,-1), 0),
@@ -360,10 +361,10 @@ class PDFReportGenerator:
         ]))
         
         role_col = Table([
-            [Paragraph("<b>TARGET ROLE</b>", ParagraphStyle('RH', fontName='Helvetica-Bold', fontSize=6, textColor=colors.HexColor("#334155"), alignment=1))],
+            [Paragraph("<b>TARGET ROLE</b>", ParagraphStyle('RH', fontName='Helvetica-Bold', fontSize=6.2, textColor=colors.HexColor("#334155"), alignment=1))],
             [create_briefcase_icon()],
             [Paragraph(f"<font color='#1E1B4B' size=7><b>{display_role}</b></font>", ParagraphStyle('RB', fontName='Helvetica-Bold', alignment=1))]
-        ], colWidths=[140])
+        ], colWidths=[138])
         role_col.setStyle(TableStyle([
             ('ALIGN', (0,0), (-1,-1), 'CENTER'),
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
@@ -373,41 +374,41 @@ class PDFReportGenerator:
             ('BOTTOMPADDING', (0,0), (-1,-1), 0.5),
         ]))
         
-        top_summary_table = Table([[cand_info, gauge_col, bars_col, role_col]], colWidths=[156, 105, 160, 159])
+        top_summary_table = Table([[cand_info, gauge_col, bars_col, role_col]], colWidths=[158, 105, 156, 161])
         top_summary_table.setStyle(TableStyle([
             ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#FFFFFF")),
             ('BOX', (0,0), (-1,-1), 0.75, BORDER_LIGHT),
             ('LINEBEFORE', (1,0), (1,-1), 0.5, BORDER_LIGHT),
             ('LINEBEFORE', (2,0), (2,-1), 0.5, BORDER_LIGHT),
             ('LINEBEFORE', (3,0), (3,-1), 0.5, BORDER_LIGHT),
-            ('PADDING', (0,0), (-1,-1), 3),
+            ('PADDING', (0,0), (-1,-1), 3.5),
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
         ]))
         story.append(top_summary_table)
-        story.append(Spacer(1, 3))
+        story.append(Spacer(1, 4))
         
-        # ── 3. TWO-COLUMN MAIN BODY ─────────────────────────────────────────────────
+        # ── 3. TWO-COLUMN MAIN BODY (WITH GENEROUS SPACING & CELL PADDING) ────────────
         def make_glance_item(icon_type: str, text: str) -> Table:
-            t = Table([[create_icon_bullet(icon_type), Paragraph(text, body_style)]], colWidths=[14, 150])
+            t = Table([[create_icon_bullet(icon_type), Paragraph(text, body_style)]], colWidths=[14, 146])
             t.setStyle(TableStyle([
                 ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
                 ('LEFTPADDING', (0,0), (-1,-1), 0),
                 ('RIGHTPADDING', (0,0), (-1,-1), 0),
-                ('TOPPADDING', (0,0), (-1,-1), 0),
-                ('BOTTOMPADDING', (0,0), (-1,-1), 0)
+                ('TOPPADDING', (0,0), (-1,-1), 0.8),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 0.8)
             ]))
             return t
 
         def make_num_badge(num: str, color_hex: str = "#DC2626") -> Drawing:
-            d = Drawing(12, 12)
-            d.add(Circle(6, 6, 5.5, fillColor=colors.HexColor(color_hex), strokeColor=None))
-            d.add(String(6, 3, num, textAnchor="middle", fontName="Helvetica-Bold", fontSize=6, fillColor=colors.white))
+            d = Drawing(13, 13)
+            d.add(Circle(6.5, 6.5, 6, fillColor=colors.HexColor(color_hex), strokeColor=None))
+            d.add(String(6.5, 3.5, num, textAnchor="middle", fontName="Helvetica-Bold", fontSize=6.5, fillColor=colors.white))
             return d
 
         def make_struct_badge(num: str) -> Drawing:
-            d = Drawing(11, 11)
-            d.add(Circle(5.5, 5.5, 5, fillColor=PRIMARY_PURPLE, strokeColor=None))
-            d.add(String(5.5, 2.5, num, textAnchor="middle", fontName="Helvetica-Bold", fontSize=5.5, fillColor=colors.white))
+            d = Drawing(12, 12)
+            d.add(Circle(6, 6, 5.5, fillColor=PRIMARY_PURPLE, strokeColor=None))
+            d.add(String(6, 3, num, textAnchor="middle", fontName="Helvetica-Bold", fontSize=6.5, fillColor=colors.white))
             return d
 
         # Card 1 Left: AT A GLANCE
@@ -419,7 +420,7 @@ class PDFReportGenerator:
             ('LEFTPADDING', (0,0), (-1,-1), 0),
             ('RIGHTPADDING', (0,0), (-1,-1), 0),
             ('TOPPADDING', (0,0), (-1,-1), 0),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 0)
+            ('BOTTOMPADDING', (0,0), (-1,-1), 1)
         ]))
         
         card_glance = Table([
@@ -429,13 +430,13 @@ class PDFReportGenerator:
             [make_glance_item("check_green", "Technical skills are listed"), make_glance_item("warn_amber", "GitHub/Portfolio link not found")],
             [make_glance_item("check_green", "Projects section is included"), make_glance_item("warn_amber", "Some skills are missing for target role")],
             [make_glance_item("check_green_outline", "One-page resume"), make_glance_item("warn_amber", "Action verbs can be stronger")]
-        ], colWidths=[169, 169])
+        ], colWidths=[167, 167])
         card_glance.setStyle(TableStyle([
             ('SPAN', (0,0), (1,0)),
             ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#FFFFFF")),
             ('BOX', (0,0), (-1,-1), 0.75, BORDER_LIGHT),
-            ('PADDING', (0,0), (-1,-1), 2.5),
-            ('BOTTOMPADDING', (0,0), (1,0), 2.5),
+            ('PADDING', (0,0), (-1,-1), 3),
+            ('BOTTOMPADDING', (0,0), (1,0), 3),
         ]))
 
         # Card 1 Right: RECOMMENDED RESUME STRUCTURE
@@ -448,31 +449,31 @@ class PDFReportGenerator:
         for i, s_title in enumerate(struct_items, start=1):
             struct_rows.append([
                 make_struct_badge(str(i)),
-                Paragraph(f"<font color='#1E1B4B' size=6><b>{s_title}</b></font>", ParagraphStyle('ST', fontName='Helvetica', leading=7.5))
+                Paragraph(f"<font color='#1E1B4B' size=6.2><b>{s_title}</b></font>", ParagraphStyle('ST', fontName='Helvetica', leading=8))
             ])
-        card_structure = Table(struct_rows, colWidths=[14, 210])
+        card_structure = Table(struct_rows, colWidths=[15, 209])
         card_structure.setStyle(TableStyle([
             ('SPAN', (0,0), (1,0)),
             ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#FFFFFF")),
             ('BOX', (0,0), (-1,-1), 0.75, BORDER_LIGHT),
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-            ('LEFTPADDING', (0,0), (-1,-1), 2),
-            ('RIGHTPADDING', (0,0), (-1,-1), 2),
-            ('TOPPADDING', (0,0), (-1,-1), 1.2),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 1.2),
-            ('BOTTOMPADDING', (0,0), (1,0), 2),
+            ('LEFTPADDING', (0,0), (-1,-1), 2.5),
+            ('RIGHTPADDING', (0,0), (-1,-1), 2.5),
+            ('TOPPADDING', (0,0), (-1,-1), 1.6),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 1.6),
+            ('BOTTOMPADDING', (0,0), (1,0), 2.5),
         ]))
 
         # Card 2 Left: FIX THESE FIRST (High Priority)
         fix_header = Table([
-            [create_icon_bullet("target_red"), Paragraph("<b>FIX THESE FIRST (High Priority)</b>", ParagraphStyle('FTH', fontName='Helvetica-Bold', fontSize=7, textColor=colors.HexColor("#DC2626")))]
+            [create_icon_bullet("target_red"), Paragraph("<b>FIX THESE FIRST (High Priority)</b>", ParagraphStyle('FTH', fontName='Helvetica-Bold', fontSize=7.2, textColor=colors.HexColor("#DC2626")))]
         ], colWidths=[14, 280])
         fix_header.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
             ('LEFTPADDING', (0,0), (-1,-1), 0),
             ('RIGHTPADDING', (0,0), (-1,-1), 0),
             ('TOPPADDING', (0,0), (-1,-1), 0),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 0)
+            ('BOTTOMPADDING', (0,0), (-1,-1), 1)
         ]))
 
         card_fix = Table([
@@ -489,10 +490,10 @@ class PDFReportGenerator:
             [
                 make_num_badge("2", "#DC2626"),
                 Paragraph("<b>Improve Project Impact</b><br/>"
-                          "<font color='#334155' size=6>2 out of 3 projects lack measurable outcomes or impact.<br/>"
-                          "<b>Why it matters:</b> Recruiters look for results, not just responsibilities.<br/>"
-                          "<b>Action:</b> Add metrics, scale, performance improvements, or user impact.</font>",
-                          ParagraphStyle('Fix2', fontName='Helvetica', leading=8)),
+                      "<font color='#334155' size=6>2 out of 3 projects lack measurable outcomes or impact.<br/>"
+                      "<b>Why it matters:</b> Recruiters look for results, not just responsibilities.<br/>"
+                      "<b>Action:</b> Add metrics, scale, performance improvements, or user impact.</font>",
+                      ParagraphStyle('Fix2', fontName='Helvetica', leading=8)),
                 create_pill_badge("HIGH", "#FEE2E2", "#DC2626")
             ],
             [
@@ -504,40 +505,40 @@ class PDFReportGenerator:
                           ParagraphStyle('Fix3', fontName='Helvetica', leading=8)),
                 create_pill_badge("HIGH", "#FEE2E2", "#DC2626")
             ],
-        ], colWidths=[16, 280, 42])
+        ], colWidths=[16, 276, 42])
         card_fix.setStyle(TableStyle([
             ('SPAN', (0,0), (2,0)),
             ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#FEF2F2")),
             ('BOX', (0,0), (-1,-1), 0.75, colors.HexColor("#FECACA")),
             ('VALIGN', (0,0), (-1,-1), 'TOP'),
-            ('PADDING', (0,0), (-1,-1), 2.5),
-            ('BOTTOMPADDING', (0,0), (2,0), 2.5),
+            ('PADDING', (0,0), (-1,-1), 2.8),
+            ('BOTTOMPADDING', (0,0), (2,0), 2.8),
         ]))
 
         # Card 2 Right: TARGET ROLE ANALYSIS
         def make_role_skill_item(icon_type: str, skill_name: str) -> Table:
-            t = Table([[create_icon_bullet(icon_type), Paragraph(f"<font size=6 color='#0F172A'>{skill_name}</font>", ParagraphStyle('RS', fontName='Helvetica', leading=7.5))]], colWidths=[14, 205])
+            t = Table([[create_icon_bullet(icon_type), Paragraph(f"<font size=6.2 color='#0F172A'>{skill_name}</font>", ParagraphStyle('RS', fontName='Helvetica', leading=8))]], colWidths=[14, 200])
             t.setStyle(TableStyle([
                 ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
                 ('LEFTPADDING', (0,0), (-1,-1), 0),
                 ('RIGHTPADDING', (0,0), (-1,-1), 0),
-                ('TOPPADDING', (0,0), (-1,-1), 0.25),
-                ('BOTTOMPADDING', (0,0), (-1,-1), 0.25)
+                ('TOPPADDING', (0,0), (-1,-1), 0.5),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 0.5)
             ]))
             return t
 
         role_analysis_rows = [
             [Paragraph(f"<b>TARGET ROLE ANALYSIS</b><br/><font color='#1E1B4B' size=6.5>Role: <b>{display_role}</b></font>", ParagraphStyle('TRA', fontName='Helvetica-Bold', leading=8.5))],
-            [Paragraph("<font color='#059669' size=6><b>Strong Match</b></font>", ParagraphStyle('SM', fontName='Helvetica-Bold', leading=7.5))],
+            [Paragraph("<font color='#059669' size=6.2><b>Strong Match</b></font>", ParagraphStyle('SM', fontName='Helvetica-Bold', leading=8))],
         ]
         for s in matched_display[:4]:
             role_analysis_rows.append([make_role_skill_item("check_green_raw", s)])
             
-        role_analysis_rows.append([Paragraph("<font color='#D97706' size=6><b>Needs Improvement</b></font>", ParagraphStyle('NI', fontName='Helvetica-Bold', leading=7.5))])
+        role_analysis_rows.append([Paragraph("<font color='#D97706' size=6.2><b>Needs Improvement</b></font>", ParagraphStyle('NI', fontName='Helvetica-Bold', leading=8))])
         for s in missing_display[:2]:
             role_analysis_rows.append([make_role_skill_item("play_amber", s)])
             
-        role_analysis_rows.append([Paragraph("<font color='#DC2626' size=6><b>Recommended Additions</b></font>", ParagraphStyle('RA', fontName='Helvetica-Bold', leading=7.5))])
+        role_analysis_rows.append([Paragraph("<font color='#DC2626' size=6.2><b>Recommended Additions</b></font>", ParagraphStyle('RA', fontName='Helvetica-Bold', leading=8))])
         role_analysis_rows.append([make_role_skill_item("plus_red", "System Design (Basics)")])
         role_analysis_rows.append([make_role_skill_item("plus_red", "Testing Frameworks")])
         role_analysis_rows.append([make_role_skill_item("plus_red", "Cloud (AWS/GCP Basics)")])
@@ -546,23 +547,23 @@ class PDFReportGenerator:
         card_target_role.setStyle(TableStyle([
             ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#FFFFFF")),
             ('BOX', (0,0), (-1,-1), 0.75, BORDER_LIGHT),
-            ('LEFTPADDING', (0,0), (-1,-1), 2),
-            ('RIGHTPADDING', (0,0), (-1,-1), 2),
-            ('TOPPADDING', (0,0), (-1,-1), 1.5),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 1.5),
-            ('BOTTOMPADDING', (0,0), (0,0), 2),
+            ('LEFTPADDING', (0,0), (-1,-1), 2.5),
+            ('RIGHTPADDING', (0,0), (-1,-1), 2.5),
+            ('TOPPADDING', (0,0), (-1,-1), 1.8),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 1.8),
+            ('BOTTOMPADDING', (0,0), (0,0), 2.5),
         ]))
 
         # Card 3 Left: IMPROVE (Medium Priority)
         med_header = Table([
-            [create_icon_bullet("arrow_amber"), Paragraph("<b>IMPROVE (Medium Priority)</b>", ParagraphStyle('MPH', fontName='Helvetica-Bold', fontSize=7, textColor=colors.HexColor("#D97706")))]
+            [create_icon_bullet("arrow_amber"), Paragraph("<b>IMPROVE (Medium Priority)</b>", ParagraphStyle('MPH', fontName='Helvetica-Bold', fontSize=7.2, textColor=colors.HexColor("#D97706")))]
         ], colWidths=[14, 280])
         med_header.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
             ('LEFTPADDING', (0,0), (-1,-1), 0),
             ('RIGHTPADDING', (0,0), (-1,-1), 0),
             ('TOPPADDING', (0,0), (-1,-1), 0),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 0)
+            ('BOTTOMPADDING', (0,0), (-1,-1), 1)
         ]))
 
         card_improve = Table([
@@ -591,14 +592,14 @@ class PDFReportGenerator:
                           ParagraphStyle('Med3', fontName='Helvetica', leading=8)),
                 create_pill_badge("MEDIUM", "#FEF3C7", "#D97706")
             ],
-        ], colWidths=[16, 280, 42])
+        ], colWidths=[16, 276, 42])
         card_improve.setStyle(TableStyle([
             ('SPAN', (0,0), (2,0)),
             ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#FFFBEB")),
             ('BOX', (0,0), (-1,-1), 0.75, colors.HexColor("#FDE68A")),
             ('VALIGN', (0,0), (-1,-1), 'TOP'),
-            ('PADDING', (0,0), (-1,-1), 2.5),
-            ('BOTTOMPADDING', (0,0), (2,0), 2.5),
+            ('PADDING', (0,0), (-1,-1), 2.8),
+            ('BOTTOMPADDING', (0,0), (2,0), 2.8),
         ]))
 
         # Card 3 Right: SECTION ANALYSIS Table
@@ -630,23 +631,23 @@ class PDFReportGenerator:
             ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#FFFFFF")),
             ('BOX', (0,0), (-1,-1), 0.75, BORDER_LIGHT),
             ('INNERGRID', (0,1), (-1,-1), 0.25, colors.HexColor("#F1F5F9")),
-            ('LEFTPADDING', (0,0), (-1,-1), 2),
-            ('RIGHTPADDING', (0,0), (-1,-1), 2),
-            ('TOPPADDING', (0,0), (-1,-1), 1),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 1),
-            ('BOTTOMPADDING', (0,0), (2,0), 2),
+            ('LEFTPADDING', (0,0), (-1,-1), 2.5),
+            ('RIGHTPADDING', (0,0), (-1,-1), 2.5),
+            ('TOPPADDING', (0,0), (-1,-1), 1.5),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 1.5),
+            ('BOTTOMPADDING', (0,0), (2,0), 2.5),
         ]))
 
         # Card 4 Left: ALREADY GOOD
         good_header = Table([
-            [create_icon_bullet("check_green"), Paragraph("<b>ALREADY GOOD</b>", ParagraphStyle('AGH', fontName='Helvetica-Bold', fontSize=7, textColor=colors.HexColor("#059669")))]
+            [create_icon_bullet("check_green"), Paragraph("<b>ALREADY GOOD</b>", ParagraphStyle('AGH', fontName='Helvetica-Bold', fontSize=7.2, textColor=colors.HexColor("#059669")))]
         ], colWidths=[14, 300])
         good_header.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
             ('LEFTPADDING', (0,0), (-1,-1), 0),
             ('RIGHTPADDING', (0,0), (-1,-1), 0),
             ('TOPPADDING', (0,0), (-1,-1), 0),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 0)
+            ('BOTTOMPADDING', (0,0), (-1,-1), 1)
         ]))
 
         card_good = Table([
@@ -654,25 +655,25 @@ class PDFReportGenerator:
             [make_glance_item("check_green_outline", "Clear contact information"), make_glance_item("check_green_outline", "Projects are relevant to the role")],
             [make_glance_item("check_green_outline", "Technical skills section is good"), make_glance_item("check_green_outline", "One-page resume")],
             [make_glance_item("check_green_outline", "Education is well structured"), make_glance_item("check_green_outline", "Consistent headings & formatting")]
-        ], colWidths=[169, 169])
+        ], colWidths=[167, 167])
         card_good.setStyle(TableStyle([
             ('SPAN', (0,0), (1,0)),
             ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#ECFDF5")),
             ('BOX', (0,0), (-1,-1), 0.75, colors.HexColor("#A7F3D0")),
-            ('PADDING', (0,0), (-1,-1), 2.5),
-            ('BOTTOMPADDING', (0,0), (1,0), 2.5),
+            ('PADDING', (0,0), (-1,-1), 3),
+            ('BOTTOMPADDING', (0,0), (1,0), 3),
         ]))
 
-        # Combine Left & Right stacks
+        # Combine Left & Right stacks with an explicit 8pt spacing column between them
         left_stack = Table([
             [card_glance],
-            [Spacer(1, 3)],
+            [Spacer(1, 3.5)],
             [card_fix],
-            [Spacer(1, 3)],
+            [Spacer(1, 3.5)],
             [card_improve],
-            [Spacer(1, 3)],
+            [Spacer(1, 3.5)],
             [card_good]
-        ], colWidths=[344])
+        ], colWidths=[340])
         left_stack.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'TOP'),
             ('LEFTPADDING', (0,0), (-1,-1), 0),
@@ -683,9 +684,9 @@ class PDFReportGenerator:
 
         right_stack = Table([
             [card_structure],
-            [Spacer(1, 3)],
+            [Spacer(1, 3.5)],
             [card_target_role],
-            [Spacer(1, 3)],
+            [Spacer(1, 3.5)],
             [card_section_analysis]
         ], colWidths=[232])
         right_stack.setStyle(TableStyle([
@@ -696,7 +697,7 @@ class PDFReportGenerator:
             ('BOTTOMPADDING', (0,0), (-1,-1), 0)
         ]))
 
-        master_grid = Table([[left_stack, right_stack]], colWidths=[346, 234])
+        master_grid = Table([[left_stack, "", right_stack]], colWidths=[340, 8, 232])
         master_grid.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'TOP'),
             ('LEFTPADDING', (0,0), (-1,-1), 0),
@@ -705,7 +706,7 @@ class PDFReportGenerator:
             ('BOTTOMPADDING', (0,0), (-1,-1), 0)
         ]))
         story.append(master_grid)
-        story.append(Spacer(1, 3))
+        story.append(Spacer(1, 4))
         
         # ── 4. METHODOLOGY & LIMITATIONS FOOTER ─────────────────────────────────────
         def make_method_item(icon_name: str, title: str, sub: str) -> Table:
@@ -755,7 +756,7 @@ class PDFReportGenerator:
             ('BOX', (0,0), (-1,-1), 0.75, BORDER_LIGHT),
             ('LINEBEFORE', (1,0), (1,-1), 0.5, BORDER_LIGHT),
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-            ('PADDING', (0,0), (-1,-1), 2),
+            ('PADDING', (0,0), (-1,-1), 2.5),
         ]))
         story.append(footer_card)
         story.append(Spacer(1, 2))
