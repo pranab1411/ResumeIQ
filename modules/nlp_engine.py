@@ -256,7 +256,7 @@ class NLPEngine:
         """Extracts quantified metrics (%, $, numbers, time saved)."""
         if not text:
             return []
-        metric_pattern = r'\b\d+%\b|\$\d+(?:\,\d+)*(?:\.\d+)?\b|\b\d+\+\s+(?:years?|projects?|users?|clients?|teams?)\b|\b\d+x\b'
+        metric_pattern = r'\b\d+(?:,\d{3})*(?:\.\d+)?%|\$\d+(?:,\d{3})*(?:\.\d+)?\b|\b\d+(?:,\d{3})*\+\s*(?:years?|projects?|users?|clients?|teams?|daily\s+requests?|clusters?|devs?|engineers?|reqs?|rps)?|\b\d+x\b'
         return list(set(re.findall(metric_pattern, text, re.IGNORECASE)))
 
     def extract_certifications(self, text: str) -> List[str]:
@@ -296,4 +296,65 @@ class NLPEngine:
         """Extracts key skills/technologies mentioned in Job Description."""
         return self.extract_skills(jd_text)
 
+    def generate_highlighted_html(
+        self,
+        text: str,
+        matched_skills: List[str] = None,
+        missing_skills: List[str] = None,
+        is_jd: bool = False
+    ) -> str:
+        """
+        Transforms plain text into visually rich HTML with colored entity badges:
+        - Matched Skills: Emerald Green badge
+        - Action Verbs: Indigo badge
+        - Quantified Metrics: Cyan badge
+        - Missing Skills (for JD): Red badge
+        """
+        import html
+        if not text:
+            return "<p style='color:#94A3B8;font-style:italic;'>No text available to highlight.</p>"
+
+        escaped_lines = []
+        star_verbs = [
+            "achieved", "increased", "decreased", "reduced", "improved", "developed",
+            "spearheaded", "generated", "saved", "launched", "boosted", "optimized",
+            "architected", "engineered", "designed", "deployed", "implemented", "led", "managed"
+        ]
+        
+        matched_lower = {s.lower(): s for s in (matched_skills or []) if s}
+        missing_lower = {s.lower(): s for s in (missing_skills or []) if s}
+
+        for line in text.split("\n"):
+            line_str = line.strip()
+            if not line_str:
+                escaped_lines.append("<br/>")
+                continue
+
+            escaped = html.escape(line_str)
+
+            # Highlight Matched Skills
+            for s_lower in sorted(matched_lower.keys(), key=len, reverse=True):
+                pat = re.compile(rf'\b({re.escape(s_lower)})\b', re.IGNORECASE)
+                escaped = pat.sub(r'<span style="background:rgba(16,185,129,0.25);color:#34D399;padding:1px 5px;border-radius:4px;font-weight:600;border:1px solid rgba(16,185,129,0.4);">\1</span>', escaped)
+
+            # Highlight Missing Skills (if JD view)
+            if is_jd:
+                for s_lower in sorted(missing_lower.keys(), key=len, reverse=True):
+                    pat = re.compile(rf'\b({re.escape(s_lower)})\b', re.IGNORECASE)
+                    escaped = pat.sub(r'<span style="background:rgba(239,68,68,0.25);color:#FCA5A5;padding:1px 5px;border-radius:4px;font-weight:600;border:1px solid rgba(239,68,68,0.4);">\1</span>', escaped)
+            else:
+                # Highlight Action Verbs (if Resume view)
+                for v in star_verbs:
+                    pat = re.compile(rf'\b({re.escape(v)})\b', re.IGNORECASE)
+                    escaped = pat.sub(r'<span style="background:rgba(99,102,241,0.25);color:#A5B4FC;padding:1px 5px;border-radius:4px;font-weight:600;border:1px solid rgba(99,102,241,0.4);">\1</span>', escaped)
+
+                # Highlight Quantified Metrics (%, $, numbers)
+                metric_pat = re.compile(r'(\b\d+(?:,\d{3})*(?:\.\d+)?%|\$\d+(?:,\d{3})*(?:\.\d+)?\b|\b\d+(?:,\d{3})*\+\s*(?:years?|projects?|users?|clients?|teams?|daily\s+requests?|clusters?|devs?|engineers?|reqs?|rps)?|\b\d+x\b)', re.IGNORECASE)
+                escaped = metric_pat.sub(r'<span style="background:rgba(6,182,212,0.25);color:#67E8F9;padding:1px 5px;border-radius:4px;font-weight:600;border:1px solid rgba(6,182,212,0.4);">\1</span>', escaped)
+
+            escaped_lines.append(f"<p style='margin: 4px 0; line-height: 1.6; color: #E2E8F0; font-family: Segoe UI, sans-serif; font-size: 12.5px;'>{escaped}</p>")
+
+        return "".join(escaped_lines)
+
 nlp_engine = NLPEngine()
+

@@ -75,5 +75,40 @@ class TestATSCalculator(unittest.TestCase):
         )
         self.assertTrue(any("Docker" in s or "skills" in s.lower() for s in suggestions))
 
+    def test_format_health_audit(self):
+        text = """
+        Johnathan Developer | john@dev.com | 123-456-7890 | github.com/johndev
+        Summary: Experienced Software Engineer with strong background in backend systems.
+        Experience:
+        - Architected scalable Python microservices handling 50,000+ daily requests.
+        - Optimized database indexing, reducing API latency by 35%.
+        - Spearheaded CI/CD automated deployment pipelines across 12+ production clusters.
+        Skills: Python, SQL, Docker, AWS, Kubernetes, Git
+        Education: B.S. in Computer Science
+        """
+        contact = {"name": "Johnathan Developer", "email": "john@dev.com", "phone": "123-456-7890"}
+        audit = ATSCalculator.generate_format_health_audit(text, contact)
+        self.assertGreater(audit["word_count"], 40)
+        self.assertGreater(audit["action_verbs_count"], 0)
+        self.assertGreater(audit["metrics_count"], 0)
+        self.assertEqual(audit["contact_completeness_pct"], 100)
+        self.assertIn("Grade", f"Grade {audit['health_grade']}")
+
+    def test_calculate_version_delta(self):
+        from modules.ats_benchmark import ATSBenchmarkEngine
+        prev_records = [
+            {"id": 1, "filename": "resume_v1.pdf", "ats_score": 65.0, "skills": ["Python", "SQL"]},
+            {"id": 2, "filename": "resume_v2.pdf", "ats_score": 72.0, "skills": ["Python", "SQL", "Git"]}
+        ]
+        delta = ATSBenchmarkEngine.calculate_version_delta(84.0, ["Python", "SQL", "Git", "Docker", "AWS"], prev_records)
+        self.assertIsNotNone(delta)
+        self.assertTrue(delta["has_delta"])
+        self.assertEqual(delta["prev_score"], 72.0)
+        self.assertEqual(delta["current_score"], 84.0)
+        self.assertEqual(delta["delta_score"], 12.0)
+        self.assertTrue(delta["is_improved"])
+        self.assertIn("Docker", delta["new_skills"])
+
 if __name__ == "__main__":
     unittest.main()
+

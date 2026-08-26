@@ -394,6 +394,90 @@ class ATSCalculator:
         return ATSCalculator.get_star_rating(score, is_gui=True)
 
     @staticmethod
+    def generate_format_health_audit(resume_text: str, contact_info: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+        """
+        Generates a 4-card structural hygiene diagnostic audit matrix:
+        1. Word Count Budget (Optimal / Under / Over)
+        2. Action Verb Density
+        3. Quantified Metrics Density
+        4. Contact Completeness Index
+        """
+        if not resume_text:
+            return {
+                "word_count": 0,
+                "word_count_status": "Empty",
+                "word_count_color": "#94A3B8",
+                "action_verbs_count": 0,
+                "metrics_count": 0,
+                "contact_completeness_pct": 0,
+                "health_grade": "C (Needs Formatting Fixes)",
+                "health_score": 0.0
+            }
+
+        words = [w for w in resume_text.split() if len(w) > 1]
+        word_count = len(words)
+
+        if 350 <= word_count <= 850:
+            wc_status = "Optimal (1–2 Pages)"
+            wc_color = "#34D399"
+        elif word_count < 350:
+            wc_status = "Under Budget (<350 words)"
+            wc_color = "#FBBF24"
+        else:
+            wc_status = "Dense / Long (>850 words)"
+            wc_color = "#F87171"
+
+        # Action Verbs
+        star_verbs = ["achieved", "increased", "decreased", "reduced", "improved", "developed", 
+                      "spearheaded", "generated", "saved", "launched", "boosted", "optimized", 
+                      "architected", "engineered", "designed", "deployed", "implemented", "led", "managed"]
+        text_lower = resume_text.lower()
+        verb_count = sum(len(re.findall(rf'\b{re.escape(v)}\b', text_lower)) for v in star_verbs)
+
+        # Quantified Metrics
+        metric_pattern = r'\b\d+(?:,\d{3})*(?:\.\d+)?%|\$\d+(?:,\d{3})*(?:\.\d+)?\b|\b\d+(?:,\d{3})*\+\s*(?:years?|projects?|users?|clients?|teams?|daily\s+requests?|clusters?|devs?|engineers?|reqs?|rps)?|\b\d+x\b'
+        metrics_found = list(set(re.findall(metric_pattern, resume_text, re.IGNORECASE)))
+        metrics_count = len(metrics_found)
+
+        # Contact Completeness
+        contact = contact_info or {}
+        contact_pts = 0
+        if contact.get("name", "Candidate") not in ["Candidate", "Not Found", ""]:
+            contact_pts += 30
+        if contact.get("email", "Not Found") not in ["Not Found", ""]:
+            contact_pts += 30
+        if contact.get("phone", "Not Found") not in ["Not Found", ""]:
+            contact_pts += 25
+        if "github.com" in text_lower or "linkedin.com" in text_lower:
+            contact_pts += 15
+        contact_completeness = min(contact_pts, 100)
+
+        # Overall Structural Health Score & Grade
+        avg_score = (
+            (100 if 350 <= word_count <= 850 else 60) * 0.25 +
+            min(verb_count * 15, 100) * 0.25 +
+            min(metrics_count * 25, 100) * 0.25 +
+            contact_completeness * 0.25
+        )
+        if avg_score >= 80:
+            grade = "A (Clean & ATS-Ready)"
+        elif avg_score >= 60:
+            grade = "B (Acceptable)"
+        else:
+            grade = "C (Needs Formatting Fixes)"
+
+        return {
+            "word_count": word_count,
+            "word_count_status": wc_status,
+            "word_count_color": wc_color,
+            "action_verbs_count": verb_count,
+            "metrics_count": metrics_count,
+            "contact_completeness_pct": contact_completeness,
+            "health_grade": grade,
+            "health_score": round(avg_score, 1)
+        }
+
+    @staticmethod
     def generate_suggestions(
         score: float,
         matched_skills: List[str],

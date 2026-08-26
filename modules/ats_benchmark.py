@@ -396,3 +396,56 @@ class ATSBenchmarkEngine:
             "checklist_pass_count": sum(1 for c in checklist if c["passed"]),
             "checklist_total": len(checklist),
         }
+
+    @staticmethod
+    def calculate_version_delta(
+        current_score: float,
+        current_skills: list,
+        previous_resumes: list
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Calculates iterative version improvement over previous resume uploads.
+        Returns score gain, new skills added, and progress message.
+        """
+        if not previous_resumes:
+            return None
+
+        valid_prev = [r for r in previous_resumes if r.get("ats_score") is not None]
+        if not valid_prev:
+            return None
+
+        last_record = valid_prev[-1]
+        prev_score = float(last_record.get("ats_score", 0.0))
+        delta_score = round(current_score - prev_score, 1)
+
+        prev_skills = set(s.lower() for s in (last_record.get("skills", []) or []))
+        new_skills = [s for s in (current_skills or []) if s.lower() not in prev_skills]
+
+        is_improved = delta_score > 0
+        if delta_score > 0:
+            summary = f"Score Improved by +{delta_score}% over last upload!"
+            status_color = "#34D399"
+            icon = "📈"
+        elif delta_score < 0:
+            summary = f"Score Decreased by {delta_score}% compared to previous version."
+            status_color = "#F87171"
+            icon = "📉"
+        else:
+            summary = "Score unchanged from previous upload."
+            status_color = "#94A3B8"
+            icon = "⚖️"
+
+        return {
+            "has_delta": True,
+            "prev_score": prev_score,
+            "current_score": current_score,
+            "delta_score": delta_score,
+            "is_improved": is_improved,
+            "new_skills": new_skills[:5],
+            "new_skills_count": len(new_skills),
+            "summary": summary,
+            "status_color": status_color,
+            "icon": icon,
+            "prev_filename": last_record.get("filename", "Previous Version")
+        }
+

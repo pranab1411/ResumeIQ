@@ -473,6 +473,21 @@ class DashboardWindow(QMainWindow):
         right_layout.setContentsMargins(20, 20, 20, 20)
         right_layout.setSpacing(14)
 
+        # Delta Progression Banner
+        self.lbl_delta_banner = QLabel("")
+        self.lbl_delta_banner.setVisible(False)
+        self.lbl_delta_banner.setWordWrap(True)
+        self.lbl_delta_banner.setStyleSheet("""
+            background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 rgba(16, 185, 129, 0.18), stop:1 rgba(99, 102, 241, 0.18));
+            border: 1px solid rgba(16, 185, 129, 0.45);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #E2E8F0;
+            font-size: 12.5px;
+            font-weight: 600;
+        """)
+        right_layout.addWidget(self.lbl_delta_banner)
+
         # ATS Score Gauge / Progress Bar
         score_header_layout = QHBoxLayout()
         self.score_title = QLabel("ATS Compatibility Score")
@@ -503,6 +518,40 @@ class DashboardWindow(QMainWindow):
         self.lbl_contact_info = QLabel("Candidate Contact: N/A")
         self.lbl_contact_info.setStyleSheet("color: #CBD5E1; font-size: 12px;")
         right_layout.addWidget(self.lbl_contact_info)
+
+        # Format Health & Structural Audit Matrix
+        self.lbl_health_title = QLabel("🛡️ ATS Parseability & Structural Hygiene Audit")
+        self.lbl_health_title.setObjectName("SectionHeader")
+        right_layout.addWidget(self.lbl_health_title)
+
+        health_frame = QFrame()
+        health_frame.setObjectName("CardFrame")
+        health_grid = QGridLayout(health_frame)
+        health_grid.setContentsMargins(12, 12, 12, 12)
+        health_grid.setSpacing(10)
+
+        self.lbl_hw_words = QLabel("Word Budget:\n—")
+        self.lbl_hw_words.setStyleSheet("background: rgba(255,255,255,0.04); border-radius: 6px; padding: 8px; font-size: 11.5px; color: #CBD5E1;")
+        
+        self.lbl_hw_verbs = QLabel("Action Verbs:\n—")
+        self.lbl_hw_verbs.setStyleSheet("background: rgba(255,255,255,0.04); border-radius: 6px; padding: 8px; font-size: 11.5px; color: #CBD5E1;")
+
+        self.lbl_hw_metrics = QLabel("Metrics Density:\n—")
+        self.lbl_hw_metrics.setStyleSheet("background: rgba(255,255,255,0.04); border-radius: 6px; padding: 8px; font-size: 11.5px; color: #CBD5E1;")
+
+        self.lbl_hw_contact = QLabel("Contact Index:\n—")
+        self.lbl_hw_contact.setStyleSheet("background: rgba(255,255,255,0.04); border-radius: 6px; padding: 8px; font-size: 11.5px; color: #CBD5E1;")
+
+        health_grid.addWidget(self.lbl_hw_words, 0, 0)
+        health_grid.addWidget(self.lbl_hw_verbs, 0, 1)
+        health_grid.addWidget(self.lbl_hw_metrics, 1, 0)
+        health_grid.addWidget(self.lbl_hw_contact, 1, 1)
+
+        self.lbl_health_grade = QLabel("Audit Status: Waiting for analysis...")
+        self.lbl_health_grade.setStyleSheet("font-size: 12px; font-weight: bold; color: #34D399; margin-top: 4px;")
+        health_grid.addWidget(self.lbl_health_grade, 2, 0, 1, 2)
+
+        right_layout.addWidget(health_frame)
 
         # Matched Skills Box
         self.lbl_matched_title = QLabel("✅ Matched Skills Detected")
@@ -564,6 +613,36 @@ class DashboardWindow(QMainWindow):
             pillar_layout.addLayout(row)
             self._pillar_bars[pillar_key] = bar
         right_layout.addWidget(pillar_frame)
+
+        # Visual Entity & Skill Highlighter Tabs
+        self.lbl_highlighter_title = QLabel("🔍 Interactive Visual Entity & Skill Highlighter")
+        self.lbl_highlighter_title.setObjectName("SectionHeader")
+        right_layout.addWidget(self.lbl_highlighter_title)
+
+        legend_lbl = QLabel(
+            "<b>Legend:</b> &nbsp;"
+            "<span style='color:#34D399;font-weight:600;'>🟩 Matched Skill</span> &nbsp;|&nbsp; "
+            "<span style='color:#A5B4FC;font-weight:600;'>🟪 Action Verb</span> &nbsp;|&nbsp; "
+            "<span style='color:#67E8F9;font-weight:600;'>🟦 Metric</span> &nbsp;|&nbsp; "
+            "<span style='color:#FCA5A5;font-weight:600;'>🟥 Missing Requirement</span>"
+        )
+        legend_lbl.setStyleSheet("font-size: 11px; color: #94A3B8; padding: 2px 0;")
+        right_layout.addWidget(legend_lbl)
+
+        self.tab_highlighter = QTabWidget()
+        self.tab_highlighter.setFixedHeight(230)
+
+        self.txt_highlight_resume = QTextEdit()
+        self.txt_highlight_resume.setReadOnly(True)
+        self.txt_highlight_resume.setPlaceholderText("Highlighted resume text with detected entities will appear here...")
+        self.tab_highlighter.addTab(self.txt_highlight_resume, "📄 Highlighted Resume")
+
+        self.txt_highlight_jd = QTextEdit()
+        self.txt_highlight_jd.setReadOnly(True)
+        self.txt_highlight_jd.setPlaceholderText("Highlighted Job Description showing matched and missing skills will appear here...")
+        self.tab_highlighter.addTab(self.txt_highlight_jd, "🎯 Highlighted Job Description")
+
+        right_layout.addWidget(self.tab_highlighter)
 
         # Feature 2: Top MNC ATS Score Table
         self.lbl_mnc_title = QLabel("🏢 Top MNC ATS System Scores")
@@ -730,6 +809,36 @@ class DashboardWindow(QMainWindow):
             from modules.ats_benchmark import ATSBenchmarkEngine
             calc_rqi = ATSBenchmarkEngine.calculate_rqi(extracted_text, contact_info)
             calc_strength = ATSBenchmarkEngine.calculate_confidence_score(extracted_text, matched, score)
+
+            # Update Format Health Audit Matrix
+            health_audit = ATSCalculator.generate_format_health_audit(extracted_text, contact_info)
+            self.lbl_hw_words.setText(f"Word Budget:\n<b>{health_audit['word_count']} words</b> ({health_audit['word_count_status']})")
+            self.lbl_hw_verbs.setText(f"Action Verbs:\n<b>{health_audit['action_verbs_count']} Detected</b> (Active Voice)")
+            self.lbl_hw_metrics.setText(f"Metrics Density:\n<b>{health_audit['metrics_count']} Quantified Points</b>")
+            self.lbl_hw_contact.setText(f"Contact Index:\n<b>{health_audit['contact_completeness_pct']}% Complete</b>")
+            self.lbl_health_grade.setText(f"Audit Status: Grade {health_audit['health_grade']} ({health_audit['health_score']}/100)")
+
+            # Update Visual Entity Highlighter
+            hl_resume = nlp_engine.generate_highlighted_html(extracted_text, matched, missing, is_jd=False)
+            hl_jd = nlp_engine.generate_highlighted_html(jd_text, matched, missing, is_jd=True)
+            self.txt_highlight_resume.setHtml(hl_resume)
+            self.txt_highlight_jd.setHtml(hl_jd)
+
+            # Calculate Version Progression Delta
+            try:
+                user_resumes = db.get_user_resumes(self.user.get("id", 0)) or []
+                delta = ATSBenchmarkEngine.calculate_version_delta(score, resume_skills, user_resumes)
+                if delta and delta.get("has_delta"):
+                    self.lbl_delta_banner.setText(
+                        f"{delta['icon']} <b>{delta['summary']}</b> &nbsp;|&nbsp; "
+                        f"Previous: {delta['prev_score']}% → Current: {delta['current_score']}%"
+                    )
+                    self.lbl_delta_banner.setVisible(True)
+                else:
+                    self.lbl_delta_banner.setVisible(False)
+            except Exception as e:
+                logger.warning(f"Version delta calculation: {e}")
+                self.lbl_delta_banner.setVisible(False)
 
             self.current_analysis_data = {
                 "resume_id": resume_id,
@@ -1054,6 +1163,11 @@ class DashboardWindow(QMainWindow):
         title.setObjectName("HeaderTitle")
         layout.addWidget(title)
 
+        self.lbl_history_progression = QLabel("")
+        self.lbl_history_progression.setVisible(False)
+        self.lbl_history_progression.setWordWrap(True)
+        layout.addWidget(self.lbl_history_progression)
+
         self.table_history = QTableWidget()
         self.table_history.setColumnCount(5)
         self.table_history.setHorizontalHeaderLabels(["#", "Filename", "Upload Date", "ATS Score & Rating", "Target Role"])
@@ -1080,6 +1194,25 @@ class DashboardWindow(QMainWindow):
                 self.table_history.setItem(row_idx, 2, QTableWidgetItem(str(r.get("upload_date", ""))))
                 self.table_history.setItem(row_idx, 3, QTableWidgetItem(f"{score}% ({stars})"))
                 self.table_history.setItem(row_idx, 4, QTableWidgetItem(str(r.get("job_title") or "N/A")))
+
+            if len(resumes) >= 2:
+                latest = resumes[0]
+                prev = resumes[1]
+                latest_score = float(latest.get("ats_score", 0.0) or 0.0)
+                prev_score = float(prev.get("ats_score", 0.0) or 0.0)
+                delta = round(latest_score - prev_score, 1)
+                if delta > 0:
+                    self.lbl_history_progression.setText(f"📈 <b>Version Progression:</b> Your latest score improved by <b>+{delta}%</b> ({prev_score}% → {latest_score}%)!")
+                    self.lbl_history_progression.setStyleSheet("background: rgba(16, 185, 129, 0.15); border: 1px solid #10B981; border-radius: 8px; padding: 10px 14px; color: #34D399; font-size: 13px; font-weight: 600;")
+                    self.lbl_history_progression.setVisible(True)
+                elif delta < 0:
+                    self.lbl_history_progression.setText(f"📉 <b>Version Progression:</b> Latest score changed by <b>{delta}%</b> ({prev_score}% → {latest_score}%).")
+                    self.lbl_history_progression.setStyleSheet("background: rgba(239, 68, 68, 0.15); border: 1px solid #EF4444; border-radius: 8px; padding: 10px 14px; color: #FCA5A5; font-size: 13px; font-weight: 600;")
+                    self.lbl_history_progression.setVisible(True)
+                else:
+                    self.lbl_history_progression.setVisible(False)
+            else:
+                self.lbl_history_progression.setVisible(False)
         except Exception as e:
             logger.error(f"Error loading history table: {e}")
 

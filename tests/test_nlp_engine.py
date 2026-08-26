@@ -49,5 +49,19 @@ class TestNLPEngine(unittest.TestCase):
         self.assertIn("PostgreSQL", keywords)
         self.assertIn("AWS", keywords)
 
+    def test_generate_highlighted_html(self):
+        resume_text = "Architected a scalable Python backend, optimizing latency by 35%."
+        html_out = nlp_engine.generate_highlighted_html(
+            resume_text,
+            matched_skills=["Python"],
+            missing_skills=["Docker"],
+            is_jd=False
+        )
+        self.assertIn("Python", html_out)
+        self.assertIn("#34D399", html_out) # Emerald green for matched skill
+        self.assertIn("#A5B4FC", html_out) # Indigo for action verb 'Architected'
+        self.assertIn("#67E8F9", html_out) # Cyan for metric '35%'
+
 if __name__ == "__main__":
     unittest.main()
+
