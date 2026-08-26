@@ -735,23 +735,6 @@ class DashboardWindow(QMainWindow):
             self.txt_missing_skills.setPlainText(", ".join(missing) if missing else "None")
             self.txt_suggestions.setPlainText("\n".join([f"• {s}" for s in suggestions]))
 
-            self.current_analysis_data = {
-                "resume_id": resume_id,
-                "candidate_name": contact_info["name"],
-                "filename": filename,
-                "job_title": job_title,
-                "ats_score": score,
-                "score_category": category,
-                "matched_skills": matched,
-                "missing_skills": missing,
-                "suggestions": suggestions,
-                "mode": mode
-            }
-
-            self.btn_export_pdf.setEnabled(True)
-            self.btn_create_ai_resume.setEnabled(True)
-            self.btn_cover_letter.setEnabled(True)
-
             # Feature 1: Update 4-pillar breakdown bars
             mnc_res = ai_res.get("mnc_ats", {})
             mnc_avg = mnc_res.get("mnc_average", score)
@@ -768,6 +751,38 @@ class DashboardWindow(QMainWindow):
             self._pillar_bars["semantic"].setValue(int(semantic_pct))
             self._pillar_bars["hygiene"].setValue(int(hygiene_pct))
             self._pillar_bars["exp"].setValue(int(exp_pct))
+
+            from modules.ats_benchmark import ATSBenchmarkEngine
+            calc_rqi = ATSBenchmarkEngine.calculate_rqi(extracted_text, contact_info)
+            calc_strength = ATSBenchmarkEngine.calculate_confidence_score(extracted_text, matched, score)
+
+            self.current_analysis_data = {
+                "resume_id": resume_id,
+                "candidate_name": contact_info["name"],
+                "filename": filename,
+                "job_title": job_title,
+                "ats_score": score,
+                "score_category": category,
+                "matched_skills": matched,
+                "missing_skills": missing,
+                "suggestions": suggestions,
+                "mode": mode,
+                "resume_text": extracted_text,
+                "jd_text": jd_text,
+                "contact_info": contact_info,
+                "pillar_scores": {
+                    "skills": skill_pct,
+                    "keywords": semantic_pct,
+                    "format": hygiene_pct,
+                    "experience": exp_pct,
+                },
+                "rqi": calc_rqi,
+                "confidence_score": calc_strength,
+            }
+
+            self.btn_export_pdf.setEnabled(True)
+            self.btn_create_ai_resume.setEnabled(True)
+            self.btn_cover_letter.setEnabled(True)
 
             # Feature 2: Populate MNC table
             sys_scores = mnc_res.get("system_scores", {})
@@ -868,7 +883,13 @@ class DashboardWindow(QMainWindow):
                 matched_skills=self.current_analysis_data["matched_skills"],
                 missing_skills=self.current_analysis_data["missing_skills"],
                 suggestions=self.current_analysis_data["suggestions"],
-                evaluation_mode=eval_mode_title
+                evaluation_mode=eval_mode_title,
+                pillar_scores=self.current_analysis_data.get("pillar_scores"),
+                resume_text=self.current_analysis_data.get("resume_text", ""),
+                jd_text=self.current_analysis_data.get("jd_text", ""),
+                contact_info=self.current_analysis_data.get("contact_info"),
+                rqi=self.current_analysis_data.get("rqi", 80.0),
+                confidence_score=self.current_analysis_data.get("confidence_score", 75.0)
             )
             
             db.save_report(self.current_analysis_data["resume_id"], pdf_name, output_path)
