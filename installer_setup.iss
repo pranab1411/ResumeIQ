@@ -2,7 +2,7 @@
 #define MyAppName "ResumeIQ"
 #define MyAppVersion "2.0.0"
 #define MyAppPublisher "ResumeIQ AI Systems"
-#define MyAppURL "https://github.com/ResumeIQ"
+#define MyAppURL "https://github.com/pranab1411/ResumeIQ"
 #define MyAppExeName "ResumeIQ.exe"
 
 [Setup]

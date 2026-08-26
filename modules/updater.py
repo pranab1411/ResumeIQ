@@ -8,7 +8,7 @@ from utils.logger import logger
 from config.version import APP_VERSION
 
 CURRENT_VERSION = APP_VERSION
-GITHUB_RELEASES_API = "https://api.github.com/repos/pranab-chourasiya/resumeiq/releases/latest"
+GITHUB_RELEASES_API = "https://api.github.com/repos/pranab1411/ResumeIQ/releases/latest"
 
 class AppUpdater:
     """Checks for new ResumeIQ releases on GitHub."""
@@ -21,7 +21,8 @@ class AppUpdater:
         """
         try:
             import requests
-            resp = requests.get(GITHUB_RELEASES_API, timeout=5)
+            headers = {"User-Agent": "ResumeIQ-Desktop-App"}
+            resp = requests.get(GITHUB_RELEASES_API, headers=headers, timeout=5)
             if resp.status_code != 200:
                 return False, CURRENT_VERSION, "", ""
 
