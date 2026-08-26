@@ -56,11 +56,13 @@ class DocumentParser:
         try:
             from modules.nlp_engine import nlp_engine
             extracted_name = nlp_engine.extract_candidate_name(raw_text)
+            extracted_role = nlp_engine.extract_target_role(raw_text)
             extracted_skills = nlp_engine.extract_skills(raw_text)
             extracted_contact = nlp_engine.extract_contact_info(raw_text)
         except Exception as e:
             logger.warning(f"[DocumentParser] NLP engine extraction fallback: {e}")
-            extracted_name = "Candidate"
+            extracted_name = "Name not confidently detected"
+            extracted_role = "General Position"
             extracted_skills = []
             extracted_contact = {}
             
@@ -76,6 +78,7 @@ class DocumentParser:
         
         return ResumeData(
             candidate_name=extracted_name,
+            target_role=extracted_role,
             email=email,
             phone=phone,
             linkedin=linkedin,

@@ -8,7 +8,8 @@ from typing import List, Dict, Any, Optional
 
 @dataclass
 class ResumeData:
-    candidate_name: str = "Candidate"
+    candidate_name: str = "Name not confidently detected"
+    target_role: str = ""
     email: str = "Not Found"
     phone: str = "Not Found"
     address: str = "Not Found"

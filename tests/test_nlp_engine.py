@@ -62,6 +62,59 @@ class TestNLPEngine(unittest.TestCase):
         self.assertIn("#A5B4FC", html_out) # Indigo for action verb 'Architected'
         self.assertIn("#67E8F9", html_out) # Cyan for metric '35%'
 
+    def test_name_recognition_test_1(self):
+        text = "Pranab Chourasiya\nBackend Developer\n+91 9876543210\npranab@example.com"
+        name = nlp_engine.extract_candidate_name(text)
+        role = nlp_engine.extract_target_role(text)
+        self.assertEqual(name, "Pranab Chourasiya")
+        self.assertEqual(role, "Backend Developer")
+
+    def test_name_recognition_test_2(self):
+        text = "PRANAB CHOURASIYA\nBackend Developer | Python | SQL\ngithub.com/example\npranab@example.com"
+        name = nlp_engine.extract_candidate_name(text)
+        self.assertEqual(name, "Pranab Chourasiya")
+        self.assertNotIn("Backend Developer", name)
+
+    def test_name_recognition_test_3(self):
+        text = "RESUME\nPranab Chourasiya\nBackend Developer"
+        name = nlp_engine.extract_candidate_name(text)
+        self.assertEqual(name, "Pranab Chourasiya")
+
+    def test_name_recognition_test_4(self):
+        text = "Backend Developer\nPranab Chourasiya\nPython | SQL | Docker"
+        name = nlp_engine.extract_candidate_name(text)
+        self.assertEqual(name, "Pranab Chourasiya")
+
+    def test_name_recognition_test_5(self):
+        text = "Pranab Chourasiya\nB.Tech Computer Science\nXYZ University"
+        name = nlp_engine.extract_candidate_name(text)
+        self.assertEqual(name, "Pranab Chourasiya")
+
+    def test_name_recognition_test_6_one_word_name(self):
+        text = "Pranab\nBackend Developer\nEmail: pranab@example.com"
+        name = nlp_engine.extract_candidate_name(text)
+        self.assertEqual(name, "Pranab")
+
+    def test_name_recognition_test_7_supervisor_not_selected(self):
+        text = "Pranab Chourasiya\nBackend Developer\n\nPROJECTS\nProject Supervisor: Dr. Rajesh Kumar"
+        name = nlp_engine.extract_candidate_name(text)
+        self.assertEqual(name, "Pranab Chourasiya")
+
+    def test_name_recognition_test_8_no_identifiable_name(self):
+        text = "Backend Developer\nPython SQL Docker\nBhopal, India\nPhone: 9876543210\nEmail: test@example.com"
+        name = nlp_engine.extract_candidate_name(text)
+        self.assertEqual(name, "Name not confidently detected")
+
+    def test_name_recognition_test_9_document_over_filename(self):
+        text = "Pranab Chourasiya\nBackend Developer"
+        name = nlp_engine.extract_candidate_name(text)
+        self.assertEqual(name, "Pranab Chourasiya")
+
+    def test_name_recognition_test_10_prefixed_header(self):
+        text = "Name: Pranab Chourasiya\nEmail: pranab@example.com\nPhone: +91 9876543210"
+        name = nlp_engine.extract_candidate_name(text)
+        self.assertEqual(name, "Pranab Chourasiya")
+
 if __name__ == "__main__":
     unittest.main()
 

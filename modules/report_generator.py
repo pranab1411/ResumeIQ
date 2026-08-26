@@ -238,21 +238,22 @@ class PDFReportGenerator:
         story.append(Spacer(1, 6))
 
         # ── 2. CANDIDATE & OVERALL EVALUATION KPI CARDS ─────────────────────────
-        display_name = candidate_name if candidate_name and candidate_name != "Candidate" else "Candidate Profile"
+        display_name = candidate_name.strip() if candidate_name and candidate_name not in ["Candidate", "Not Found", ""] else "Name not confidently detected"
+        display_role = job_title.strip() if job_title and job_title not in ["General Position", ""] else "General / Unspecified Role"
         score_title = "PRESENTATION SCORE" if is_fresher else "ATS MATCH SCORE"
 
         kpi_data = [
             [
-                Paragraph("CANDIDATE PROFILE", kpi_title_style),
+                Paragraph("CANDIDATE", kpi_title_style),
+                Paragraph("TARGET ROLE", kpi_title_style),
                 Paragraph(score_title, kpi_title_style),
-                Paragraph("RESUME QUALITY INDEX", kpi_title_style),
-                Paragraph("CONTENT STRENGTH", kpi_title_style)
+                Paragraph("RESUME QUALITY INDEX", kpi_title_style)
             ],
             [
-                Paragraph(f"<b>{display_name}</b><br/><font color='#64748B' size=7>{filename[:24]}</font>", body_style),
+                Paragraph(f"<b>{display_name}</b>", body_bold),
+                Paragraph(f"<b>{display_role}</b>", body_style),
                 Paragraph(f"<font color='{score_color.hexval()}'><b>{ats_score:.1f}/100</b></font><br/><font color='#64748B' size=7>{score_category}</font>", kpi_value_style),
-                Paragraph(f"<b>{calc_rqi:.0f}/100</b><br/><font color='#64748B' size=7>Structural Quality</font>", kpi_value_style),
-                Paragraph(f"<b>{calc_content_strength:.0f}/100</b><br/><font color='#64748B' size=7>Analytical Depth</font>", kpi_value_style)
+                Paragraph(f"<b>{calc_rqi:.0f}/100</b><br/><font color='#64748B' size=7>Structural Quality</font>", kpi_value_style)
             ]
         ]
         kpi_table = Table(kpi_data, colWidths=[135, 135, 135, 135])
@@ -260,7 +261,7 @@ class PDFReportGenerator:
             ('BACKGROUND', (0, 0), (-1, -1), LIGHT_BG),
             ('BOX', (0, 0), (-1, -1), 0.75, BORDER_COLOR),
             ('INNERGRID', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
-            ('PADDING', (0, 0), (-1, -1), 5),
+            ('PADDING', (0, 0), (-1, -1), 6),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ]))

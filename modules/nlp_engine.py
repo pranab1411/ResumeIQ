@@ -9,26 +9,61 @@ from utils.paths import get_asset_path
 SKILLS_FILE = get_asset_path("assets", "skills.json")
 NAMES_FILE = get_asset_path("assets", "names_db.json")
 
-# Strict non-name header, section label & job title blacklist filter
+# Comprehensive exclusion vocabularies
 NON_NAME_KEYWORDS: Set[str] = {
-    "about", "me", "about me", "profile", "personal", "summary", "executive", "contact", 
-    "experience", "education", "skills", "curriculum", "vitae", "resume", "cv", "projects", 
-    "certifications", "work", "history", "career", "objective", "info", "information", 
-    "details", "phone", "email", "address", "linkedin", "github", "portfolio", "references", 
-    "declaration", "page", "hobbies", "languages", "technical", "professional", "qualification",
-    "qualifications", "achievements", "overview", "bio", "biography", "background", "contact info",
-    "personal profile", "work experience", "career summary", "executive summary", "key skills",
-    "soft skills", "technical skills", "academic background", "personal details",
-    # Job Titles, Roles & Industry Blacklist
-    "support", "engineer", "developer", "designer", "manager", "analyst", "consultant",
-    "specialist", "administrator", "lead", "architect", "associate", "intern", "assistant",
-    "coordinator", "director", "officer", "helpdesk", "service", "services", "customer",
-    "agent", "representative", "trainee", "fresher", "senior", "junior", "principal", "staff",
-    "head", "vp", "ceo", "cto", "cfo", "team", "group", "department", "division", "tech",
-    "technology", "solutions", "systems", "operations", "management", "business", "sales",
-    "marketing", "finance", "accounting", "recruiter", "hr", "human", "resources",
-    "creator", "founder", "author", "freelancer", "contributor", "owner", "partner"
+    # Section Labels & Headers
+    "about", "me", "about me", "profile", "personal", "personal profile", "summary", 
+    "executive", "executive summary", "professional summary", "career summary", "contact", 
+    "contact info", "contact information", "experience", "work experience", "education", 
+    "academic background", "skills", "key skills", "technical skills", "soft skills", 
+    "curriculum", "vitae", "resume", "cv", "professional resume", "projects", "academic projects",
+    "certifications", "work", "history", "career", "objective", "career objective", "info", 
+    "information", "details", "personal details", "phone", "telephone", "mobile", "email", 
+    "address", "linkedin", "github", "portfolio", "references", "declaration", "page", 
+    "hobbies", "languages", "technical", "professional", "qualification", "qualifications", 
+    "achievements", "overview", "bio", "biography", "background", "candidate profile",
+    "resumeiq", "confidential", "supervisor", "guide", "mentor", "references available",
+    # Locations, Months & Common Words
+    "january", "february", "march", "april", "may", "june", "july", "august", "september",
+    "october", "november", "december", "present", "current", "india", "usa", "uk", "bhopal",
+    "delhi", "mumbai", "bangalore", "hyderabad", "pune", "chennai", "kolkata", "new york",
+    "california", "texas", "london", "street", "road", "avenue", "city", "state", "country",
+    "pincode", "zipcode", "gpa", "cgpa", "percentage", "score", "grade"
 }
+
+JOB_TITLES_VOCABULARY: Set[str] = {
+    "software developer", "backend developer", "frontend developer", "full stack developer", 
+    "web developer", "mobile developer", "android developer", "ios developer", "python developer",
+    "java developer", "react developer", "node developer", "cloud developer",
+    "software engineer", "backend engineer", "frontend engineer", "full stack engineer",
+    "data engineer", "data scientist", "data analyst", "machine learning engineer", "ai engineer",
+    "cloud engineer", "cloud architect", "devops engineer", "site reliability engineer", "sre",
+    "qa engineer", "qa analyst", "test engineer", "automation engineer",
+    "product manager", "project manager", "scrum master", "technical lead", "tech lead",
+    "engineering manager", "ui/ux designer", "ui designer", "ux designer", "graphic designer",
+    "system administrator", "network engineer", "database administrator", "dba",
+    "cybersecurity analyst", "security engineer", "penetration tester",
+    "fresher", "intern", "graduate", "student", "associate software engineer", "junior developer", 
+    "senior developer", "senior software engineer", "principal engineer", "lead developer",
+    "experienced professional", "consultant", "specialist", "coordinator", "director", "officer",
+    "architect", "analyst", "developer", "engineer", "designer", "manager", "lead"
+}
+
+DEGREE_VOCABULARY: Set[str] = {
+    "b.tech", "btech", "b.e.", "be", "bca", "mca", "b.s.", "m.s.", "bs", "ms",
+    "b.sc", "m.sc", "bsc", "msc", "bba", "mba", "ph.d.", "phd", "diploma",
+    "bachelor", "bachelors", "master", "masters", "doctorate", "degree",
+    "computer science", "information technology", "electrical engineering",
+    "mechanical engineering", "civil engineering", "electronics"
+}
+
+ORGANIZATION_KEYWORDS: Set[str] = {
+    "university", "college", "institute", "institution", "school", "academy",
+    "technologies", "solutions", "services", "corporation", "corp", "inc",
+    "ltd", "limited", "pvt", "private", "systems", "labs", "consulting",
+    "department", "faculty", "campus"
+}
+
 
 class NLPEngine:
     def __init__(self):
@@ -81,34 +116,76 @@ class NLPEngine:
                 flat[skill.lower()] = skill
         return flat
 
-    def is_valid_candidate_name(self, candidate_name: str) -> bool:
-        """Validates if a string is a valid human name, excluding section headers & titles."""
+    @staticmethod
+    def normalize_candidate_name(raw_name: str) -> str:
+        """Normalizes and sanitizes candidate personal names."""
+        if not raw_name:
+            return ""
+        # Strip common prefix labels (e.g., "Name: John Doe", "Candidate Name - John Doe")
+        name = re.sub(r'^(?:candidate\s+name|full\s+name|candidate|name)\s*[:\-–]\s*', '', raw_name.strip(), flags=re.IGNORECASE)
+        # Remove surrounding quotes, bullets, punctuation
+        name = name.strip("\"'`:,-_#|•–\t ")
+        # Collapse multiple spaces
+        name = re.sub(r'\s+', ' ', name).strip()
+        # If all uppercase (e.g. "PRANAB CHOURASIYA"), title case it while preserving initials
+        if name.isupper():
+            name = name.title()
+        return name
+
+    def is_valid_candidate_name(self, candidate_name: str, context: Optional[str] = None) -> bool:
+        """
+        Strictly validates if a string is a valid personal human name.
+        Rejects job titles, contact info, headings, degrees, organizations, and noisy phrases.
+        """
         if not candidate_name or not candidate_name.strip():
             return False
             
-        clean = candidate_name.strip().strip(":,-_#|•")
-        clean_lower = clean.lower()
-
-        if clean_lower in NON_NAME_KEYWORDS:
+        name = self.normalize_candidate_name(candidate_name)
+        if not name or len(name) < 2 or len(name) > 40:
             return False
             
-        words = [w.strip() for w in clean_lower.split() if w.strip()]
+        name_lower = name.lower()
+
+        # Reject if exact match in blacklists or known technical skills
+        if (name_lower in NON_NAME_KEYWORDS or 
+            name_lower in JOB_TITLES_VOCABULARY or 
+            name_lower in DEGREE_VOCABULARY or
+            name_lower in self.known_skills_flat):
+            return False
+
+        # Reject if contains email, URL, domain, or phone characters
+        if "@" in name or "http" in name_lower or "www." in name_lower or ".com" in name_lower or "github" in name_lower or "linkedin" in name_lower:
+            return False
+        if any(c.isdigit() for c in name):
+            return False
+        if any(c in name for c in ["+", "(", ")", "[", "]", "{", "}", "=", "<", ">", "/", "\\", "%", "$", "*", "_", "~", ":", ";"]):
+            return False
+
+        # Tokens validation (supports 1-word up to 4-word names)
+        words = [w.strip(".,") for w in name_lower.split() if w.strip(".,")]
         if not (1 <= len(words) <= 4):
             return False
 
         for w in words:
-            if w in NON_NAME_KEYWORDS:
+            if (w in NON_NAME_KEYWORDS or 
+                w in JOB_TITLES_VOCABULARY or 
+                w in DEGREE_VOCABULARY or 
+                w in ORGANIZATION_KEYWORDS or
+                w in self.known_skills_flat):
                 return False
-            if any(char.isdigit() for char in w):
-                return False
-            if "@" in w or "http" in w or "www." in w or ".com" in w:
+            if not re.match(r"^[a-zA-Z\.\'-]+$", w):
                 return False
 
-        # Check matching against global names database or capitalized proper noun format
+        # Character composition: must be alphabetic / punctuation like periods, hyphens, apostrophes
+        is_all_alphabetic = all(re.match(r"^[a-zA-Z\.\'-]+$", w) for w in name.split())
+        if not is_all_alphabetic:
+            return False
+
+        # Verify proper capitalization or dictionary presence
         has_dict_match = any(w in self.global_first_names or w in self.global_last_names for w in words)
-        is_all_alphabetic = all(re.match(r'^[a-zA-Z\.\'-]+$', w) for w in words)
+        is_proper_cased = all(w[0].isupper() for w in name.split() if len(w) > 0 and w[0].isalpha())
 
-        return is_all_alphabetic and (has_dict_match or all(w[0].isupper() for w in clean.split() if w))
+        return has_dict_match or is_proper_cased
 
     def extract_name_with_gemini(self, text: str) -> Optional[str]:
         """Uses Gemini AI to extract candidate name from resume text if API key is configured."""
@@ -117,70 +194,109 @@ class NLPEngine:
             if not gemini_available():
                 return None
 
-            lines = [line.strip() for line in text.split("\n") if line.strip()][:10]
+            lines = [line.strip() for line in text.split("\n") if line.strip()][:12]
             header_text = "\n".join(lines)
             prompt = (
-                "Extract ONLY the candidate's real full name from this resume header. "
-                "Do NOT include job titles, emails, phone numbers, or section headers like 'About Me'. "
-                "Return ONLY the plain candidate name and nothing else.\n\nResume Header:\n" + header_text
+                "You are an expert ATS resume parser. Extract ONLY the candidate's real personal full name from this resume header. "
+                "Do NOT include job titles (like 'Backend Developer'), emails, phone numbers, degrees, or section headers. "
+                "Output ONLY the plain candidate name and absolutely nothing else. If no personal name is found, output 'NONE'.\n\n"
+                "Resume Header:\n" + header_text
             )
-            raw_name = gemini_generate(prompt, timeout=5)
+            raw_name = gemini_generate(prompt, timeout=6)
             clean_name = raw_name.split("\n")[0].strip().strip("\"':,-_#|•")
-            if clean_name and self.is_valid_candidate_name(clean_name):
+            if clean_name and clean_name.upper() != "NONE" and self.is_valid_candidate_name(clean_name):
                 logger.info(f"[GEMINI AI] Extracted candidate name: {clean_name}")
-                return clean_name.title()
+                return self.normalize_candidate_name(clean_name)
         except Exception as e:
             logger.warning(f"Gemini AI name extraction fallback: {e}")
         return None
 
     def extract_candidate_name(self, text: str) -> str:
-        """Accurately extracts candidate name using Gemini AI + spaCy NLP + Global Names DB."""
+        """
+        Accurately extracts candidate name using multi-signal context scoring:
+        1. Gemini AI (Tier 1 preference)
+        2. spaCy PERSON NER in header
+        3. Header line segmentation with strict exclusion validation
+        4. Global Names DB matching
+        5. Controlled fallback: 'Name not confidently detected'
+        """
         if not text:
-            return "Candidate"
+            return "Name not confidently detected"
 
         lines = [line.strip() for line in text.split("\n") if line.strip()][:15]
 
-        # 0. Try Gemini AI Name Extraction if API Key is configured
+        # 0. Primary Preference: Gemini AI extraction if key configured
         gemini_name = self.extract_name_with_gemini(text)
-        if gemini_name:
-            return gemini_name
+        if gemini_name and self.is_valid_candidate_name(gemini_name):
+            return self.normalize_candidate_name(gemini_name)
 
-        # Helper to clean token parts
-        def clean_token(tok: str) -> str:
-            # Strip job title words from token
-            words = [w for w in tok.split() if w.lower() not in NON_NAME_KEYWORDS]
-            return " ".join(words)
+        scored_candidates: List[Tuple[float, str]] = []
 
-        # 1. Try spaCy PERSON entities with strict exclude validation
+        # 1. spaCy PERSON entities in the top 10 lines
         if self.nlp:
             header_text = "\n".join(lines[:10])
             doc = self.nlp(header_text)
-            for ent in doc.ents:
+            for i, ent in enumerate(doc.ents):
                 if ent.label_ == "PERSON":
-                    clean_ent = ent.text.split("\n")[0].strip().strip(":,-_#|•")
-                    clean_candidate = clean_token(clean_ent)
-                    if clean_candidate and self.is_valid_candidate_name(clean_candidate):
-                        return clean_candidate.title()
+                    for part in re.split(r'[|•,\t/–-]', ent.text):
+                        clean_part = self.normalize_candidate_name(part)
+                        if clean_part and self.is_valid_candidate_name(clean_part):
+                            score = 100 - (i * 10)
+                            words = [w.lower() for w in clean_part.split()]
+                            if any(w in self.global_first_names or w in self.global_last_names for w in words):
+                                score += 25
+                            scored_candidates.append((score, clean_part))
 
-        # 2. Check top lines against global names database and exclude filters
-        for line in lines:
-            if "@" in line or "http" in line or "phone" in line.lower() or "resume" in line.lower():
+        # 2. Segmented Header Lines Inspection
+        for line_idx, line in enumerate(lines[:10]):
+            line_lower = line.lower()
+            if "@" in line or "http" in line_lower or "www." in line_lower or "github" in line_lower or "linkedin" in line_lower:
                 continue
-            
-            parts = [p.strip() for p in re.split(r'[|•,\t:-]', line) if p.strip()]
-            for part in parts:
-                clean_part = clean_token(part)
-                if clean_part and self.is_valid_candidate_name(clean_part):
-                    return clean_part.title()
+            if any(kw in line_lower for kw in ["phone", "tel", "mobile", "address", "date of birth"]):
+                continue
 
-        # 3. Check first non-keyword line
+            # Strip prefixes like "Name: John Doe"
+            line_cleaned = re.sub(r'^(?:candidate\s+name|full\s+name|candidate|name)\s*[:\-–]\s*', '', line, flags=re.IGNORECASE)
+
+            # Split on separators (| • , \t - /)
+            segments = [p.strip() for p in re.split(r'[|•\t/–]', line_cleaned) if p.strip()]
+            for seg_idx, segment in enumerate(segments):
+                clean_seg = self.normalize_candidate_name(segment)
+                if clean_seg and self.is_valid_candidate_name(clean_seg):
+                    base_score = 90 - (line_idx * 8) - (seg_idx * 5)
+                    words = [w.lower() for w in clean_seg.split()]
+                    if any(w in self.global_first_names or w in self.global_last_names for w in words):
+                        base_score += 30
+                    if 2 <= len(words) <= 3:
+                        base_score += 15
+                    scored_candidates.append((base_score, clean_seg))
+
+        if scored_candidates:
+            scored_candidates.sort(key=lambda x: x[0], reverse=True)
+            best_name = scored_candidates[0][1]
+            return self.normalize_candidate_name(best_name)
+
+        return "Name not confidently detected"
+
+    def extract_target_role(self, text: str, fallback_role: str = "") -> str:
+        """
+        Extracts candidate's target job role from header lines or returns fallback role.
+        """
+        if not text:
+            return fallback_role or "General Position"
+
+        lines = [line.strip() for line in text.split("\n") if line.strip()][:12]
+        
         for line in lines:
-            line_clean = line.strip().strip(":,-_#|•")
-            clean_part = clean_token(line_clean)
-            if clean_part and self.is_valid_candidate_name(clean_part):
-                return clean_part.title()
+            segments = [s.strip() for s in re.split(r'[|•\t,–]', line) if s.strip()]
+            for seg in segments:
+                seg_lower = seg.lower()
+                for title in JOB_TITLES_VOCABULARY:
+                    if title in seg_lower and len(seg) <= 45:
+                        clean_title = re.sub(r'[^\w\s\-/&]', '', seg).strip()
+                        return clean_title.title()
 
-        return "Candidate"
+        return fallback_role or "General Position"
 
     def extract_contact_info(self, text: str) -> Dict[str, str]:
         """Extracts candidate email, phone, and accurately parsed candidate name."""
@@ -200,6 +316,7 @@ class NLPEngine:
             "email": email,
             "phone": phone
         }
+
 
     def extract_skills(self, text: str) -> List[str]:
         """Extracts recognized skills from text using boundary matching."""

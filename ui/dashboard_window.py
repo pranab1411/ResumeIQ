@@ -764,10 +764,11 @@ class DashboardWindow(QMainWindow):
             ai_res = local_ai_agent.analyze_resume(extracted_text, job_title, jd_text, mode=mode)
 
             contact_info = {
-                "name": ai_res.get("candidate_name", "Candidate"),
+                "name": ai_res.get("candidate_name", "Name not confidently detected"),
                 "email": ai_res.get("email", "Not Found"),
                 "phone": ai_res.get("phone", "Not Found")
             }
+            detected_role = ai_res.get("target_role") or job_title
             score = float(ai_res.get("ats_score", 0.0))
             category = ai_res.get("score_category", ATSCalculator.get_score_category(score))
             matched = ai_res.get("matched_skills", [])
@@ -775,7 +776,7 @@ class DashboardWindow(QMainWindow):
             suggestions = ai_res.get("suggestions", [])
 
             # Save Analysis Results to DB
-            db.update_resume_analysis(resume_id, score, job_title, jd_text)
+            db.update_resume_analysis(resume_id, score, detected_role, jd_text)
             db.save_resume_skills(resume_id, matched, missing)
 
             # 6. Update GUI Result Display
@@ -783,7 +784,7 @@ class DashboardWindow(QMainWindow):
             self.lbl_ats_score_val.setText(f"{score}%")
             self.progress_ats.setValue(int(score))
             self.lbl_score_category.setText(f"Rating: {category}  |  {star_rating}  ({mode.capitalize()} Mode)")
-            self.lbl_contact_info.setText(f"Candidate: {contact_info['name']} | Email: {contact_info['email']} | Phone: {contact_info['phone']}")
+            self.lbl_contact_info.setText(f"Candidate: <b>{contact_info['name']}</b> &nbsp;|&nbsp; Target Role: <b>{detected_role}</b> &nbsp;|&nbsp; Email: {contact_info['email']}")
 
             self.txt_matched_skills.setPlainText(", ".join(matched) if matched else "None detected")
             self.txt_missing_skills.setPlainText(", ".join(missing) if missing else "None")

@@ -50,8 +50,11 @@ class LocalAIAgent:
             ]
             suggestions.extend(mnc_eval.get("insights", []))
 
+            extracted_role = job_title or nlp_engine.extract_target_role(extracted_text, "Fresher / Entry-Level Role")
+
             return {
                 "candidate_name": contact_info["name"],
+                "target_role": extracted_role,
                 "email": contact_info["email"],
                 "phone": contact_info["phone"],
                 "ats_score": score,
@@ -81,8 +84,11 @@ class LocalAIAgent:
                 if insight not in suggestions:
                     suggestions.append(insight)
 
+            extracted_role = job_title or nlp_engine.extract_target_role(extracted_text, "Experienced Professional")
+
             return {
                 "candidate_name": contact_info["name"],
+                "target_role": extracted_role,
                 "email": contact_info["email"],
                 "phone": contact_info["phone"],
                 "ats_score": score,
