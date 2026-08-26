@@ -30,7 +30,6 @@ from modules.chatbot_engine import chatbot_engine
 from modules.benchmarks import IndustryBenchmark
 from modules.jd_scraper import JDScraper
 from modules.cover_letter_generator import CoverLetterGenerator
-from modules.linkedin_optimizer import LinkedInOptimizer
 from modules.scheduler import ATSRescanScheduler
 from modules.updater import AppUpdater
 from ui.floating_widget import FloatingGlassWidget
@@ -151,9 +150,8 @@ class DashboardWindow(QMainWindow):
             ("📑 Reports", 3),
             ("📜 History", 4),
             ("💬 AI Assistant", 5),
-            ("🔗 LinkedIn Optimizer", 6),
-            ("👤 My Profile", 7),
-            ("⚙️ Settings", 8)
+            ("👤 My Profile", 6),
+            ("⚙️ Settings", 7)
         ]
 
         for text, index in nav_items:
@@ -207,7 +205,6 @@ class DashboardWindow(QMainWindow):
         self.page_reports = self._build_reports_page()
         self.page_history = self._build_history_page()
         self.page_chatbot = self._build_chatbot_page()
-        self.page_linkedin = self._build_linkedin_page()       # Feature 13
         self.page_profile = self._build_profile_page()         # Feature 17
         self.page_settings = self._build_settings_page()
 
@@ -217,9 +214,8 @@ class DashboardWindow(QMainWindow):
         self.stacked_widget.addWidget(self.page_reports)     # 3
         self.stacked_widget.addWidget(self.page_history)     # 4
         self.stacked_widget.addWidget(self.page_chatbot)     # 5
-        self.stacked_widget.addWidget(self.page_linkedin)    # 6
-        self.stacked_widget.addWidget(self.page_profile)     # 7
-        self.stacked_widget.addWidget(self.page_settings)    # 8
+        self.stacked_widget.addWidget(self.page_profile)     # 6
+        self.stacked_widget.addWidget(self.page_settings)    # 7
 
         main_layout.addWidget(self.stacked_widget)
         self.switch_page(0)
@@ -1446,103 +1442,7 @@ class DashboardWindow(QMainWindow):
         event.accept()
         ClosingScreen.show_closing_and_exit()
 
-    # --- Feature 13: LINKEDIN OPTIMIZER PAGE ---
-    def _build_linkedin_page(self) -> QWidget:
-        page = QWidget()
-        layout = QVBoxLayout(page)
-        layout.setContentsMargins(28, 28, 28, 28)
-        layout.setSpacing(16)
 
-        header = QLabel("🔗 LinkedIn Profile Optimizer")
-        header.setObjectName("HeaderTitle")
-        sub = QLabel("Analyze your LinkedIn sections for ATS keyword coverage and recruiter impact.")
-        sub.setObjectName("SubTitle")
-        layout.addWidget(header)
-        layout.addWidget(sub)
-
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-
-        # Left: Input fields
-        left = QFrame()
-        left.setObjectName("CardFrame")
-        ll = QVBoxLayout(left)
-        ll.setContentsMargins(18, 18, 18, 18)
-        ll.setSpacing(10)
-
-        ll.addWidget(QLabel("📌 LinkedIn Headline"))
-        self.li_headline = QLineEdit()
-        self.li_headline.setPlaceholderText("e.g. Senior Python Engineer | AWS | 5 YOE | Open to Work")
-        ll.addWidget(self.li_headline)
-
-        ll.addWidget(QLabel("📝 About Section"))
-        self.li_about = QTextEdit()
-        self.li_about.setPlaceholderText("Paste your LinkedIn About section text here...")
-        self.li_about.setMaximumHeight(150)
-        ll.addWidget(self.li_about)
-
-        ll.addWidget(QLabel("🛠️ Skills (comma-separated)"))
-        self.li_skills = QLineEdit()
-        self.li_skills.setPlaceholderText("Python, AWS, React, Machine Learning, SQL...")
-        ll.addWidget(self.li_skills)
-
-        ll.addWidget(QLabel("🎯 Target Job Title (Optional)"))
-        self.li_job_title = QLineEdit()
-        self.li_job_title.setPlaceholderText("e.g. Data Scientist")
-        ll.addWidget(self.li_job_title)
-
-        btn_analyze_li = QPushButton("🔍 Analyze LinkedIn Profile")
-        btn_analyze_li.setObjectName("PrimaryButton")
-        btn_analyze_li.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_analyze_li.clicked.connect(self.handle_analyze_linkedin)
-        ll.addWidget(btn_analyze_li)
-        ll.addStretch()
-        splitter.addWidget(left)
-
-        # Right: Results
-        right = QFrame()
-        right.setObjectName("CardFrame")
-        rl = QVBoxLayout(right)
-        rl.setContentsMargins(18, 18, 18, 18)
-        rl.setSpacing(10)
-
-        self.lbl_li_score = QLabel("Overall LinkedIn Score: —")
-        self.lbl_li_score.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
-        self.lbl_li_score.setStyleSheet("color: #10B981;")
-        rl.addWidget(self.lbl_li_score)
-
-        self.li_bar = QProgressBar()
-        self.li_bar.setRange(0, 100)
-        self.li_bar.setValue(0)
-        self.li_bar.setFixedHeight(12)
-        self.li_bar.setTextVisible(False)
-        self.li_bar.setStyleSheet("QProgressBar{background:rgba(255,255,255,0.06);border-radius:6px;} QProgressBar::chunk{background:qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #6366F1,stop:1 #10B981);border-radius:6px;}")
-        rl.addWidget(self.li_bar)
-
-        self.txt_li_tips = QTextEdit()
-        self.txt_li_tips.setReadOnly(True)
-        self.txt_li_tips.setPlaceholderText("Analysis tips will appear here after analysis...")
-        rl.addWidget(self.txt_li_tips)
-        splitter.addWidget(right)
-
-        layout.addWidget(splitter)
-        return page
-
-    def handle_analyze_linkedin(self):
-        result = LinkedInOptimizer.analyze_full_profile(
-            headline=self.li_headline.text(),
-            about=self.li_about.toPlainText(),
-            skills=self.li_skills.text(),
-            job_title=self.li_job_title.text()
-        )
-        score = result["composite_score"]
-        self.lbl_li_score.setText(f"Overall LinkedIn Score: {score}%  {result['stars']}")
-        self.li_bar.setValue(int(score))
-
-        tips = []
-        for section_key, label in [("headline", "📌 Headline"), ("about", "📝 About"), ("skills", "🛠️ Skills")]:
-            for tip in result[section_key].get("tips", []):
-                tips.append(f"{label}: {tip}")
-        self.txt_li_tips.setPlainText("\n\n".join([f"• {t}" for t in tips]) if tips else "✅ Your LinkedIn profile looks strong!")
 
     # --- Feature 17: USER PROFILE PAGE ---
     def _build_profile_page(self) -> QWidget:
