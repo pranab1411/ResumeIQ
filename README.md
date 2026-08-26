@@ -116,7 +116,7 @@ python -m unittest discover -s tests -p "test_*.py"
 
 ## 📦 Windows Installers & Automated Setup
 
-Build a standard Windows installer wizard (`test_builds/ResumeIQ v2.0.0 test build <N>.exe`):
+Build a standard Windows installer wizard (`test_builds/ResumeIQ v2.1 test build <N>.exe`):
 
 ```bash
 python build_test.py

@@ -32,7 +32,7 @@ def get_current_version(base_dir: str) -> str:
                     return m.group(1)
         except Exception:
             pass
-    return "2.0.0"
+    return "2.1"
 
 def get_next_test_build_number(test_builds_dir: str, version: str) -> int:
     """Scans test_builds directory and determines the next sequential test build number."""
