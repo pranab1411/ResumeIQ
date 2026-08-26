@@ -26,9 +26,7 @@ from modules.ats_calculator import ATSCalculator
 from modules.mnc_ats_engine import TopMNCATSEngine
 from modules.report_generator import PDFReportGenerator
 from modules.local_ai_agent import local_ai_agent
-from modules.resume_builder import DocxResumeGenerator
 from modules.chatbot_engine import chatbot_engine
-from modules.template_engine import template_registry
 from modules.benchmarks import IndustryBenchmark
 from modules.jd_scraper import JDScraper
 from modules.cover_letter_generator import CoverLetterGenerator
@@ -153,10 +151,9 @@ class DashboardWindow(QMainWindow):
             ("📑 Reports", 3),
             ("📜 History", 4),
             ("💬 AI Assistant", 5),
-            ("🎨 1,000 Templates", 6),
-            ("🔗 LinkedIn Optimizer", 7),
-            ("👤 My Profile", 8),
-            ("⚙️ Settings", 9)
+            ("🔗 LinkedIn Optimizer", 6),
+            ("👤 My Profile", 7),
+            ("⚙️ Settings", 8)
         ]
 
         for text, index in nav_items:
@@ -210,7 +207,6 @@ class DashboardWindow(QMainWindow):
         self.page_reports = self._build_reports_page()
         self.page_history = self._build_history_page()
         self.page_chatbot = self._build_chatbot_page()
-        self.page_templates = self._build_templates_page()
         self.page_linkedin = self._build_linkedin_page()       # Feature 13
         self.page_profile = self._build_profile_page()         # Feature 17
         self.page_settings = self._build_settings_page()
@@ -221,10 +217,9 @@ class DashboardWindow(QMainWindow):
         self.stacked_widget.addWidget(self.page_reports)     # 3
         self.stacked_widget.addWidget(self.page_history)     # 4
         self.stacked_widget.addWidget(self.page_chatbot)     # 5
-        self.stacked_widget.addWidget(self.page_templates)   # 6
-        self.stacked_widget.addWidget(self.page_linkedin)    # 7
-        self.stacked_widget.addWidget(self.page_profile)     # 8
-        self.stacked_widget.addWidget(self.page_settings)    # 9
+        self.stacked_widget.addWidget(self.page_linkedin)    # 6
+        self.stacked_widget.addWidget(self.page_profile)     # 7
+        self.stacked_widget.addWidget(self.page_settings)    # 8
 
         main_layout.addWidget(self.stacked_widget)
         self.switch_page(0)
@@ -593,20 +588,14 @@ class DashboardWindow(QMainWindow):
         self.lbl_benchmark.setStyleSheet("color: #A5B4FC; font-size: 12.5px; font-weight: 600;")
         right_layout.addWidget(self.lbl_benchmark)
 
-        # Action Buttons Layout (PDF Report & AI Resume Generator)
+        # Action Buttons Layout (PDF Report & Cover Letter)
         action_btn_layout = QHBoxLayout()
 
         self.btn_export_pdf = QPushButton("📥 Export PDF Report")
-        self.btn_export_pdf.setObjectName("SecondaryButton")
+        self.btn_export_pdf.setObjectName("PrimaryButton")
         self.btn_export_pdf.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_export_pdf.setEnabled(False)
         self.btn_export_pdf.clicked.connect(self.handle_export_report)
-
-        self.btn_create_ai_resume = QPushButton("✨ Create AI ATS Recommended Resume (.docx)")
-        self.btn_create_ai_resume.setObjectName("PrimaryButton")
-        self.btn_create_ai_resume.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_create_ai_resume.setEnabled(False)
-        self.btn_create_ai_resume.clicked.connect(self.handle_create_ai_resume)
 
         # Feature 14: Cover Letter button
         self.btn_cover_letter = QPushButton("📝 Generate Cover Letter")
@@ -616,7 +605,6 @@ class DashboardWindow(QMainWindow):
         self.btn_cover_letter.clicked.connect(self.handle_generate_cover_letter)
 
         action_btn_layout.addWidget(self.btn_export_pdf)
-        action_btn_layout.addWidget(self.btn_create_ai_resume)
         action_btn_layout.addWidget(self.btn_cover_letter)
         right_layout.addLayout(action_btn_layout)
 
@@ -781,7 +769,6 @@ class DashboardWindow(QMainWindow):
             }
 
             self.btn_export_pdf.setEnabled(True)
-            self.btn_create_ai_resume.setEnabled(True)
             self.btn_cover_letter.setEnabled(True)
 
             # Feature 2: Populate MNC table
@@ -902,84 +889,7 @@ class DashboardWindow(QMainWindow):
             logger.error(f"Failed to generate report: {e}")
             QMessageBox.critical(self, "Export Error", f"Could not generate PDF report: {str(e)}")
 
-    def handle_create_ai_resume(self):
-        if not self.selected_file_path:
-            QMessageBox.warning(self, "Missing File", "Please select a resume file first.")
-            return
 
-        is_fresher = self.radio_fresher.isChecked()
-        mode = "fresher" if is_fresher else "experienced"
-        jd_text = "" if is_fresher else self.input_jd.toPlainText().strip()
-        job_title = self.input_job_title.text().strip() or ("Fresher Candidate" if is_fresher else "General Position")
-
-        try:
-            extracted_text = DocumentParser.extract_text(self.selected_file_path)
-            logger.info(f"Generating AI optimized resume with Free Local AI Agent ({mode} mode)...")
-            
-            resume_data = local_ai_agent.generate_optimized_resume_data(extracted_text, job_title, jd_text, mode=mode)
-
-            if not resume_data:
-                logger.warning("Local AI Agent returned None. Using intelligent offline NLP resume builder fallback...")
-                contact = nlp_engine.extract_contact_info(extracted_text)
-                skills = nlp_engine.extract_skills(extracted_text)
-                resume_data = {
-                    "mode": mode,
-                    "candidate_name": contact.get("name", "Candidate"),
-                    "email": contact.get("email", "candidate@email.com"),
-                    "phone": contact.get("phone", "+1 234 567 890"),
-                    "summary": f"Results-driven technical professional targeting {job_title} role with expertise in software engineering and problem solving.",
-                    "skills": {
-                        "Core Technical Skills": skills if skills else ["Python", "SQL", "Software Architecture"],
-                        "Tools & Platforms": ["Git", "VS Code", "Linux"]
-                    },
-                    "experience": [
-                        {
-                            "title": job_title,
-                            "company": "Technology Projects",
-                            "dates": "2024 - Present",
-                            "bullets": [
-                                "Architected and delivered scalable technical solutions adhering to industry best practices.",
-                                "Optimized application performance and streamlined database queries for efficient processing."
-                            ]
-                        }
-                    ] if mode != "fresher" else [],
-                    "projects": [
-                        {
-                            "name": "ResumeIQ — AI ATS Optimizer",
-                            "tech_stack": "Python, PyQt6, SQLite, AI Engine",
-                            "link": "github.com/candidate/resumeiq",
-                            "bullets": [
-                                "Built an AI-powered desktop application to parse, analyze, and optimize resumes for ATS compatibility.",
-                                "Implemented modular architecture with SQLite caching and automated PDF/DOCX report compilation."
-                            ]
-                        }
-                    ],
-                    "education": [{"degree": "Bachelor of Technology / Computer Science", "institution": "University"}],
-                    "certifications": ["Technical Certification in Software Engineering"]
-                }
-
-            output_dir = get_data_path("Output")
-            os.makedirs(output_dir, exist_ok=True)
-            candidate_safe = "".join([c for c in resume_data.get("candidate_name", "Candidate") if c.isalnum() or c in " _-"]).strip()
-            filename = f"AI_Optimized_Resume_{candidate_safe}_{mode.capitalize()}.docx"
-            output_path = os.path.join(output_dir, filename)
-
-            DocxResumeGenerator.generate_docx(resume_data, output_path)
-
-            reply = QMessageBox.information(
-                self,
-                "Resume Created Successfully! 🎉",
-                f"Your AI ATS Recommended Resume has been generated and saved to:\n{output_path}\n\nWould you like to open the generated Word document now?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                QMessageBox.StandardButton.Yes
-            )
-
-            if reply == QMessageBox.StandardButton.Yes and os.name == 'nt':
-                os.startfile(output_path)
-
-        except Exception as e:
-            logger.error(f"Failed to generate AI resume: {e}")
-            QMessageBox.critical(self, "Error", f"Could not create AI resume: {str(e)}")
 
     # --- PAGE 3: ANALYTICS & CHARTS ---
     def _build_analytics_page(self) -> QWidget:
@@ -1335,158 +1245,7 @@ class DashboardWindow(QMainWindow):
         bot_reply = chatbot_engine.get_response(msg, context_data=context)
         self.add_chat_bubble("bot", bot_reply)
 
-    # --- PAGE 6: 1,000 RESUME TEMPLATES & BUILDER ---
-    def _build_templates_page(self) -> QWidget:
-        page = QWidget()
-        layout = QVBoxLayout()
-        layout.setContentsMargins(25, 25, 25, 25)
-        layout.setSpacing(15)
 
-        title = QLabel("🎨 1,000 Top Industry Resume Templates Gallery")
-        title.setObjectName("HeaderTitle")
-        sub = QLabel("Select from 1,000 top industry-proven templates from FAANG, Fortune 500, Harvard, McKinsey, and Silicon Valley. ResumeIQ automatically formats 100% of your uploaded details into your chosen layout.")
-        sub.setObjectName("SubTitle")
-        sub.setWordWrap(True)
-
-        layout.addWidget(title)
-        layout.addWidget(sub)
-
-        # Search & Filter Layout
-        filter_layout = QHBoxLayout()
-        filter_layout.setSpacing(10)
-
-        self.input_template_search = QLineEdit()
-        self.input_template_search.setPlaceholderText("🔍 Search 1,000 templates by title, style (FAANG, Harvard, Executive, Tech)...")
-        self.input_template_search.textChanged.connect(self.filter_template_grid)
-
-        self.cmb_template_cat = QComboBox()
-        self.cmb_template_cat.addItems([
-            "All",
-            "FAANG & Tech Lead",
-            "Executive & Corporate",
-            "Software & Engineering",
-            "Creative & Design",
-            "Finance & Consulting",
-            "Fresher & Entry-Level"
-        ])
-        self.cmb_template_cat.currentTextChanged.connect(self.filter_template_grid)
-
-        filter_layout.addWidget(self.input_template_search, 1)
-        filter_layout.addWidget(QLabel("Category:"))
-        filter_layout.addWidget(self.cmb_template_cat, 0)
-        layout.addLayout(filter_layout)
-
-        # Scroll Area for Templates Grid
-        self.templates_scroll = QScrollArea()
-        self.templates_scroll.setWidgetResizable(True)
-        self.templates_scroll.setFrameShape(QFrame.Shape.NoFrame)
-
-        self.templates_container = QWidget()
-        self.templates_grid = QGridLayout()
-        self.templates_grid.setSpacing(15)
-        self.templates_container.setLayout(self.templates_grid)
-        self.templates_scroll.setWidget(self.templates_container)
-
-        layout.addWidget(self.templates_scroll, 1)
-        page.setLayout(layout)
-
-        self.filter_template_grid()
-        return page
-
-    def filter_template_grid(self):
-        # Clear existing grid
-        while self.templates_grid.count():
-            item = self.templates_grid.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-
-        cat = self.cmb_template_cat.currentText()
-        query = self.input_template_search.text().strip()
-
-        matched_templates = template_registry.filter_templates(category=cat, search_text=query)[:60]
-
-        columns = 3
-        for idx, t in enumerate(matched_templates):
-            card = QFrame()
-            card.setObjectName("CardFrame")
-            c_layout = QVBoxLayout()
-            c_layout.setContentsMargins(14, 14, 14, 14)
-            c_layout.setSpacing(6)
-
-            t_title = QLabel(t["name"])
-            t_title.setStyleSheet("font-weight: 700; font-size: 13px; color: #F8FAFC;")
-            
-            t_cat = QLabel(f"🏷️ {t['category']}  |  🎨 {t['style']}")
-            t_cat.setStyleSheet("font-size: 11px; color: #94A3B8;")
-
-            t_badge = QLabel(f"⭐ {t['ats_score_badge']}% ATS Score  |  Font: {t['font_family']}")
-            t_badge.setStyleSheet("font-size: 11px; color: #34D399; font-weight: 600;")
-
-            btn_export = QPushButton("📄 Apply & Export Resume")
-            btn_export.setObjectName("PrimaryButton")
-            btn_export.setCursor(Qt.CursorShape.PointingHandCursor)
-            btn_export.clicked.connect(lambda checked, tid=t["id"], tname=t["name"]: self.export_resume_with_template(tid, tname))
-
-            c_layout.addWidget(t_title)
-            c_layout.addWidget(t_cat)
-            c_layout.addWidget(t_badge)
-            c_layout.addSpacing(6)
-            c_layout.addWidget(btn_export)
-            card.setLayout(c_layout)
-
-            row = idx // columns
-            col = idx % columns
-            self.templates_grid.addWidget(card, row, col)
-
-    def export_resume_with_template(self, template_id: int, template_name: str):
-        resumes = db.get_user_resumes(self.user["id"])
-        if not resumes:
-            QMessageBox.warning(self, "No Resume Found", "Please upload or analyze a resume first in the 'Analyze Resume' tab so ResumeIQ can extract your details!")
-            return
-
-        latest_resume = resumes[-1]
-        extracted_skills = db.get_resume_skills(latest_resume["id"])
-        
-        data = {
-            "candidate_name": self.user["name"],
-            "email": self.user["email"],
-            "summary": f"Professional portfolio extracted from {latest_resume['filename']}. Focused on software engineering and technical deliverables.",
-            "skills": extracted_skills if extracted_skills else ["Python", "SQL", "Git", "Problem Solving", "Team Leadership"],
-            "job_title": latest_resume["job_title"] or "Software Engineer",
-            "experience": [
-                {
-                    "title": latest_resume["job_title"] or "Software Engineer / Analyst",
-                    "company": "Tech Solutions Corp",
-                    "dates": "2022 — Present",
-                    "bullets": [
-                        "Designed and developed scalable application workflows matching key ATS qualification metrics.",
-                        "Collaborated with cross-functional teams to deliver technical features and optimize pipeline architecture."
-                    ]
-                }
-            ],
-            "education": [
-                {
-                    "degree": "Bachelor of Technology / Science",
-                    "institution": "University Institute of Technology",
-                    "year": "2022",
-                    "gpa": "First Class with Distinction"
-                }
-            ]
-        }
-
-        save_path, _ = QFileDialog.getSaveFileName(
-            self,
-            f"Export Resume ({template_name})",
-            f"Resume_{self.user['name'].replace(' ', '_')}_Template_{template_id}.docx",
-            "Word Document (*.docx);;All Files (*)"
-        )
-        if save_path:
-            DocxResumeGenerator.generate_docx(data, save_path, template_id=template_id)
-            QMessageBox.information(
-                self,
-                "Resume Exported Successfully! 🎉",
-                f"Your resume has been generated using template '{template_name}'!\n\nSaved to:\n👉 {save_path}"
-            )
 
     # --- PAGE 7: SETTINGS ---
     def update_ai_badge(self):
