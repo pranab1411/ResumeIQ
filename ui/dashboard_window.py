@@ -29,7 +29,6 @@ from modules.local_ai_agent import local_ai_agent
 from modules.chatbot_engine import chatbot_engine
 from modules.benchmarks import IndustryBenchmark
 from modules.jd_scraper import JDScraper
-from modules.cover_letter_generator import CoverLetterGenerator
 from modules.scheduler import ATSRescanScheduler
 from modules.updater import AppUpdater
 from ui.floating_widget import FloatingGlassWidget
@@ -584,7 +583,7 @@ class DashboardWindow(QMainWindow):
         self.lbl_benchmark.setStyleSheet("color: #A5B4FC; font-size: 12.5px; font-weight: 600;")
         right_layout.addWidget(self.lbl_benchmark)
 
-        # Action Buttons Layout (PDF Report & Cover Letter)
+        # Action Buttons Layout (PDF Report)
         action_btn_layout = QHBoxLayout()
 
         self.btn_export_pdf = QPushButton("📥 Export PDF Report")
@@ -593,15 +592,7 @@ class DashboardWindow(QMainWindow):
         self.btn_export_pdf.setEnabled(False)
         self.btn_export_pdf.clicked.connect(self.handle_export_report)
 
-        # Feature 14: Cover Letter button
-        self.btn_cover_letter = QPushButton("📝 Generate Cover Letter")
-        self.btn_cover_letter.setObjectName("SecondaryButton")
-        self.btn_cover_letter.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_cover_letter.setEnabled(False)
-        self.btn_cover_letter.clicked.connect(self.handle_generate_cover_letter)
-
         action_btn_layout.addWidget(self.btn_export_pdf)
-        action_btn_layout.addWidget(self.btn_cover_letter)
         right_layout.addLayout(action_btn_layout)
 
         right_panel.setLayout(right_layout)
@@ -765,7 +756,6 @@ class DashboardWindow(QMainWindow):
             }
 
             self.btn_export_pdf.setEnabled(True)
-            self.btn_cover_letter.setEnabled(True)
 
             # Feature 2: Populate MNC table
             sys_scores = mnc_res.get("system_scores", {})
@@ -818,32 +808,7 @@ class DashboardWindow(QMainWindow):
         else:
             GlassMessageBox.warning(self, "Scrape Failed", text)
 
-    def handle_generate_cover_letter(self):
-        """Feature 14: Generate a tailored cover letter .docx."""
-        if not self.current_analysis_data:
-            GlassMessageBox.warning(self, "No Analysis", "Please run an analysis first before generating a cover letter.")
-            return
-        company = self.current_analysis_data.get("job_title", "Target Company")
-        result = CoverLetterGenerator.generate(
-            candidate_name=self.current_analysis_data.get("candidate_name", "Candidate"),
-            email=self.user.get("email", ""),
-            phone="",
-            job_title=self.current_analysis_data.get("job_title", ""),
-            company_name=company,
-            matched_skills=self.current_analysis_data.get("matched_skills", []),
-            suggestions=self.current_analysis_data.get("suggestions", []),
-            resume_text="",
-            output_dir=REPORTS_DIR
-        )
-        if result["success"]:
-            GlassMessageBox.success(self, "Cover Letter Generated! 📝",
-                f"Cover letter saved to:\n{result['path']}\n\nOpening file...")
-            try:
-                os.startfile(result["path"])
-            except Exception:
-                pass
-        else:
-            GlassMessageBox.warning(self, "Generation Failed", "Could not generate cover letter.")
+
 
     def handle_export_report(self):
         if not self.current_analysis_data:
