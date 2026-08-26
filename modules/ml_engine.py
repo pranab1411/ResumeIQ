@@ -1,8 +1,8 @@
 """
 modules/ml_engine.py
-Machine Learning Engine for ResumeIQ v2.0.
-Provides classification, ATS score prediction, skill recommendation,
-and role prediction via TF-IDF + Scikit-Learn models.
+Statistical NLP & Taxonomy Matching Engine for ResumeIQ.
+Provides TF-IDF Vector Space Model semantic similarity measurement
+and rule-based domain taxonomy classification.
 """
 
 from typing import Dict, Any, List
@@ -13,7 +13,8 @@ class MLEngine:
     @classmethod
     def predict_ats_score_ml(cls, resume_text: str, jd_text: str) -> float:
         """
-        Predicts ATS score using TF-IDF + Cosine similarity regression.
+        Calculates semantic textual similarity using Scikit-Learn TF-IDF vectorization
+        and cosine similarity in the Vector Space Model (VSM).
         """
         if not resume_text or not jd_text:
             return 50.0
@@ -31,7 +32,7 @@ class MLEngine:
     @classmethod
     def classify_resume_category(cls, resume_text: str) -> str:
         """
-        Classifies resume into technical domain categories.
+        Classifies candidate resume into industry domain categories using keyword taxonomy matching.
         """
         text_lower = resume_text.lower()
         if any(k in text_lower for k in ["react", "node", "full stack", "frontend", "backend", "web"]):
@@ -44,3 +45,4 @@ class MLEngine:
             return "IT Support & Desktop Engineering"
         else:
             return "General Technology"
+

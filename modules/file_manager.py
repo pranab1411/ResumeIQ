@@ -55,7 +55,7 @@ class FileManager:
             dest_path = os.path.join(user_dir, os.path.basename(path))
             shutil.copy2(path, dest_path)
             
-            res_id = db.save_resume(user_id, os.path.basename(path), dest_path)
+            res_id = db.add_resume(user_id, os.path.basename(path), dest_path)
             results.append({"path": path, "success": True, "resume_id": res_id, "dest": dest_path})
             
         return results

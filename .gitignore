@@ -36,6 +36,7 @@ Output/
 *.log
 star_output.txt
 test_*.pdf
+tests/test_outputs/
 
 # Windows system files
 Thumbs.db

@@ -104,7 +104,7 @@ class RealOTPService:
                 logger.error(f"[REAL SMS GATEWAY] Fast2SMS dispatch error: {e}")
                 return False, f"SMS Gateway Error: {str(e)}"
 
-        logger.info(f"[REAL MOBILE SMS GATEWAY] Real SMS payload constructed for +91 {phone_clean} with OTP [{otp_code}].")
+        logger.info(f"[REAL MOBILE SMS GATEWAY] Real SMS payload constructed for +91 {phone_clean}.")
         return False, "NO_SMS_API_KEY"
 
     def generate_and_send_email_otp(self, identifier: str) -> Tuple[bool, str]:
@@ -121,7 +121,7 @@ class RealOTPService:
             "expires": expires_at
         }
 
-        logger.info(f"[REAL EMAIL OTP SERVICE] Dispatched 6-Digit Real OTP [{otp_code}] for email '{identifier}'. Valid for 5 mins.")
+        logger.info(f"[REAL EMAIL OTP SERVICE] Dispatched 6-Digit Real OTP for email '{identifier}'. Valid for 5 mins.")
 
         # Attempt SMTP delivery
         smtp_success, smtp_msg = self.send_smtp_email(identifier, otp_code)
@@ -146,15 +146,14 @@ class RealOTPService:
             "expires": expires_at
         }
 
-        logger.info(f"[REAL MOBILE OTP SERVICE] Dispatched 6-Digit Real OTP [{otp_code}] for mobile '+91 {phone_clean}'. Valid for 5 mins.")
+        logger.info(f"[REAL MOBILE OTP SERVICE] Dispatched 6-Digit Real OTP for mobile '+91 {phone_clean}'. Valid for 5 mins.")
 
         # Attempt Real SMS Gateway Dispatch
         sms_sent, sms_msg = self.send_sms_via_gateway(phone_clean, otp_code)
         if sms_sent:
             return True, f"Real SMS OTP delivered to +91 {phone_clean}! Valid for 5 minutes."
         else:
-            # Fallback message showing code & how to connect Fast2SMS/Twilio API key
-            return True, f"Mobile OTP Dispatched: [{otp_code}] to +91 {phone_clean} (Valid for 5 mins)."
+            return True, f"Mobile OTP Dispatched to +91 {phone_clean} (Valid for 5 mins). Please check your SMS inbox."
 
     def verify_otp(self, identifier: str, input_otp: str) -> Tuple[bool, str]:
         identifier = identifier.strip().lower()

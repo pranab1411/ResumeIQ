@@ -11,7 +11,7 @@ import urllib.error
 from utils.logger import logger
 
 # Current working model — update here if Google deprecates it
-GEMINI_MODEL = "gemini-2.0-flash"
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
 GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 
 

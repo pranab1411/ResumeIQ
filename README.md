@@ -5,34 +5,30 @@
 ![NLP](https://img.shields.io/badge/NLP-spaCy-green)
 ![SQLite](https://img.shields.io/badge/Database-SQLite3-lightgrey)
 
-**ResumeIQ** is an AI-powered desktop application built with PyQt6, spaCy, pdfplumber, python-docx, ReportLab, and Matplotlib. It parses resumes (PDF & DOCX), performs NLP entity and skill extraction, calculates 4-Pillar ATS compatibility scores against custom Job Descriptions, predicts matching job roles aligning to candidate skills, visualizes analytics, and generates PDF evaluation reports.
+**ResumeIQ** is an offline-capable, NLP-powered desktop application built with Python 3.12, PyQt6, spaCy, pdfplumber, python-docx, and ReportLab. It parses resumes across multiple formats (PDF, DOCX, TXT, RTF, ODT, HTML), performs entity and domain skill extraction, computes a transparent 4-Pillar Multi-Criteria Decision Analysis (MCDA) ATS compatibility score against custom Job Descriptions, predicts aligned job roles, provides career optimization suggestions, and generates executive PDF evaluation reports.
 
 ---
 
 ## 🌟 Key Features
 
-1. **User Authentication & Security**:
-   - Salted SHA-256 password hashing.
-   - User account registration and authentication.
-2. **Resume Parsing & Extraction**:
-   - Multi-format text extraction (PDF & DOCX).
-   - spaCy entity recognition for Candidate Name, Email, and Phone Number.
-   - Taxonomy-driven skill extraction across **22 tech and non-tech role categories** (350+ skills) including **IT Support & Desktop Engineering**, **Software Engineering**, **Data Science & AI**, **Cloud & DevOps**, **Digital Marketing**, **Product Management**, **Finance**, **HR**, **Sales**, and **Operations**.
-3. **4-Pillar ATS Compatibility Engine**:
-   - Industry-grade 4-Pillar scoring formula: `(40% Skill Match) + (25% TF-IDF Similarity) + (20% Hygiene & Structure) + (15% Experience Alignment)`.
-   - Granular 5-star rating system (0.0 to 5.0 Stars) supporting full, fractional (¾, ½, ¼), and empty star representations.
-   - Score categorization: *Needs Improvement* (<50%), *Average* (50-75%), *Excellent* (>75%).
-   - Actionable AI improvement suggestions tailored for fresher and experienced candidates.
+1. **User Authentication & Cryptographic Security**:
+   - Per-user salted Argon2 / PBKDF2-SHA256 password hashing.
+   - Secure account registration, authentication, and SQLite persistence.
+2. **Multi-Format Resume Parsing**:
+   - Multi-format text extraction (PDF, DOCX, TXT, RTF, ODT, HTML) with OCR image fallback.
+   - spaCy Named Entity Recognition (NER) for Candidate Name, Email, and Phone Number.
+   - Curated domain taxonomy skill extraction across **22 tech and non-tech role categories** (350+ skills).
+3. **4-Pillar MCDA Scoring Engine**:
+   - Multi-Criteria Decision Analysis scoring model:
+     $$\text{ATS Score} = (0.40 \times \text{Skills}) + (0.25 \times \text{TF-IDF Cosine}) + (0.20 \times \text{Hygiene/Format}) + (0.15 \times \text{Experience})$$
+   - Granular 5-star rating system (0.0 to 5.0 Stars) supporting fractional representations.
+   - Score categorization: *Needs Improvement* (<50%), *Average* (50–75%), *Excellent* (>75%).
 4. **Target Job Role Prediction**:
-   - Predicts top matching job roles based on skills extracted from the candidate's resume (e.g. *Desktop Support Engineer*, *Full Stack Developer*, *Data Scientist*, *IT Support Engineer*, *Product Manager*).
-   - Shows percentage alignment and key matching skills for each recommended role.
-5. **Interactive Dashboard & Analytics**:
-   - Real-time Matplotlib charts embedded in PyQt6 canvas (Pie charts, Bar graphs).
-   - Overview KPI summary metrics and score category breakdown.
-6. **PDF Evaluation Report Export**:
-   - ReportLab PDF generator compiling candidate score, star rating, matched/missing skills, predicted matching job roles table, and actionable recommendations.
-7. **SQLite Storage & History**:
-   - Persistent storage for resumes, extracted text, ATS scores, skills breakdown, and generated reports.
+   - Predicts top matching job roles based on skills extracted from the candidate's resume (e.g. *Full Stack Developer*, *Data Scientist*, *Desktop Support Engineer*, *DevOps Engineer*).
+5. **Simulated Enterprise ATS Profiles**:
+   - Heuristic multi-criteria profiling simulating ATS evaluation priorities (Workday, Oracle Taleo, Greenhouse, Lever, iCIMS).
+6. **Executive PDF Evaluation Report Export**:
+   - Generates an executive ReportLab PDF report containing candidate metrics, traceable MCDA contribution table, extracted evidence (verbs, % metrics), skill gap matrix, and actionable recommendations.
 
 ---
 
@@ -40,44 +36,38 @@
 
 ```text
 ResumeIQ/
-├── assets/
-│   ├── skills.json          # Pre-populated 22-category tech & non-tech skills taxonomy
-│   └── check.svg            # UI checkbox vector asset
+├── assets/                  # Domain skills taxonomy & UI vector assets
+│   ├── skills.json          # 22-category tech & non-tech skills taxonomy
+│   └── names_db.json        # Global first & last names database
+├── config/
+│   ├── ats_config.json      # Configurable ATS weights, thresholds & benchmarks
+│   └── smtp_config.py       # Environment-based SMTP configuration
 ├── database/
-│   ├── database.py          # SQLite connection manager & CRUD operations
-│   └── resumeiq.db          # Auto-generated SQLite database
-├── models/
-│   ├── user.py              # User data DTO
-│   └── resume.py            # Resume analysis result DTO
+│   ├── database.py          # SQLite connection manager with WAL mode & CRUD
+│   └── resumeiq.db          # Local SQLite database
 ├── modules/
-│   ├── auth.py              # Authentication business logic
-│   ├── parser.py            # PDF & DOCX text extraction
-│   ├── nlp_engine.py        # spaCy extraction engine & skill matching
-│   ├── ats_calculator.py    # 4-Pillar ATS scoring, skill normalization & role predictor
-│   ├── benchmarks.py        # Tech & non-tech industry ATS benchmarks
-│   ├── cover_letter_generator.py # Automated cover letter generator
-│   ├── linkedin_optimizer.py    # LinkedIn profile review & scoring
-│   ├── local_ai_agent.py        # Local AI resume rewrite & bullet optimizer
-│   ├── mnc_ats_engine.py        # Multi-MNC ATS system simulator
-│   ├── report_generator.py      # ReportLab PDF report generator with matching job roles
-│   └── scheduler.py             # Periodic background rescan scheduler
-├── reports/                 # Output folder for generated PDF reports
-├── resumes/                 # Storage folder for uploaded resume files
-├── ui/
-│   ├── styles.py            # Design tokens & QSS dark theme stylesheet
-│   ├── login_window.py      # PyQt6 Login & Register UI
-│   ├── dashboard_window.py  # Main Dashboard window & navigation views
-│   ├── closing_screen.py    # Shutdown splash screen
-│   ├── floating_widget.py   # Desktop quick-access widget
-│   └── splash_screen.py     # Startup glassmorphism splash screen
-├── utils/
-│   ├── security.py          # Password hashing & email validation
-│   ├── logger.py            # Logging utility
-│   └── paths.py             # Cross-platform data path helper
+│   ├── ats_calculator.py    # 4-Pillar MCDA scoring, skill normalization & role predictor
+│   ├── ats_benchmark.py     # RQI, Content Strength & industry benchmark engine
+│   ├── mnc_ats_engine.py    # Simulated enterprise ATS compatibility engine
+│   ├── nlp_engine.py        # spaCy extraction engine & skill matcher
+│   ├── parser.py            # Unified multi-format document parser
+│   ├── report_generator.py  # ReportLab executive PDF report generator
+│   └── scheduler.py         # Periodic background rescan scheduler
+├── tests/                   # Automated unit test suite
+│   ├── test_ats_calculator.py
+│   ├── test_database.py
+│   ├── test_nlp_engine.py
+│   ├── test_parsers.py
+│   └── test_report_generator.py
+├── ui/                      # PyQt6 GUI components & dark theme stylesheets
+│   ├── dashboard_window.py  # Main Dashboard window
+│   ├── login_window.py      # Login & Registration UI
+│   └── styles.py            # Dark theme QSS design tokens
+├── utils/                   # Security, logging & path helpers
+│   ├── gemini_client.py     # Gemini REST client
+│   └── security.py          # Password hashing & email validation
 ├── main.py                  # Application entry point
 ├── build_installer.py       # Inno Setup & PyInstaller compiler script
-├── setup_installer.py       # Dependency setup & health check assistant
-├── Install-ResumeIQ.ps1     # Automated PowerShell installer script
 ├── requirements.txt         # Dependencies manifest
 └── README.md                # Documentation
 ```
@@ -114,42 +104,25 @@ ResumeIQ/
 
 ---
 
+## 🧪 Running Automated Tests
+
+Run the full automated test suite:
+
+```bash
+python -m unittest discover -s tests -p "test_*.py"
+```
+
+---
+
 ## 📦 Windows Installers & Automated Setup
 
-ResumeIQ includes automated setup and installer creation tools:
-
-### Option 1: Standalone Windows GUI Installer (`ResumeIQ_Setup.exe`)
-Build a standard Windows installer wizard with desktop shortcuts and automatic Visual C++ Redistributable check & download:
+Build a standard Windows installer wizard (`test_builds/ResumeIQ v2.0.0 test build <N>.exe`):
 
 ```bash
-python build_installer.py
+python build_test.py
 ```
-
-- Compiles standalone `dist/ResumeIQ.exe` bundling PyQt6, spaCy NLP model (`en_core_web_sm`), pdfplumber, and ReportLab.
-- Uses `installer_setup.iss` to package into a single setup wizard (`Output/ResumeIQ_Setup_v1.0.0.exe`).
-- Automatically detects missing system prerequisites on the client PC and downloads `vc_redist.x64.exe` from Microsoft's official servers.
-
-### Option 2: Automated PowerShell Bootstrapper (`Install-ResumeIQ.ps1`)
-Automated setup script for machines where Python runtime is managed on host:
-
-```powershell
-# Run in PowerShell as Administrator or User:
-.\Install-ResumeIQ.ps1
-```
-
-- **Python Check**: Automatically checks if Python 3.10+ is installed; downloads and installs Python 3.12 64-bit silently if missing.
-- **Dependency Download**: Creates virtual environment `.venv`, downloads required packages from `requirements.txt`, and downloads spaCy's `en_core_web_sm` model.
-- **Shortcuts**: Automatically generates Windows Desktop and Start Menu shortcuts.
-
-### Option 3: Python Setup & Health Check Assistant (`setup_installer.py`)
-
-```bash
-python setup_installer.py
-```
-
-- Scans installed packages, downloads missing dependencies, loads spaCy model, and creates working directories (`assets/`, `database/`, `reports/`, `resumes/`).
 
 ---
 
 ## 📝 License
-Built as an MCA Minor Project / Portfolio Confidential Application.
+Built as an MCA Minor Project / Academic Portfolio Application.

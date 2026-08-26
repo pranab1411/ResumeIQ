@@ -48,8 +48,9 @@ class ATSRescanScheduler(QObject):
                 try:
                     old_score = float(resume.get("ats_score", 0.0))
                     result = local_ai_agent.analyze_resume(
-                        resume["extracted_text"],
-                        resume.get("job_description", ""),
+                        extracted_text=resume["extracted_text"],
+                        job_title=resume.get("job_title", ""),
+                        job_description=resume.get("job_description", ""),
                         mode="experienced"
                     )
                     new_score = float(result.get("ats_score", old_score))

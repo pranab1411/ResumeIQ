@@ -111,5 +111,5 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon=os.path.join('assets', 'app_icon.ico'),
-    uac_admin=True,
+    uac_admin=False,
 )

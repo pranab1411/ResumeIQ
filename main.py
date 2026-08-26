@@ -42,9 +42,6 @@ def ensure_admin():
             logger.warning(f"Administrator elevation request failed: {e}")
 
 def main():
-    # Enforce administrator privileges on launch
-    ensure_admin()
-
     # Enable High DPI scaling
     os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
     

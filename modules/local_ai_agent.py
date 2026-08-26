@@ -7,11 +7,12 @@ from utils.logger import logger
 
 class LocalAIAgent:
     """
-    100% Free Autonomous Local AI Agent Engine.
-    Operates offline without requiring any API keys, external services, or rate limits.
+    Local Resume Intelligence & Optimization Engine for ResumeIQ.
+    Operates locally on-device using spaCy NLP, Multi-Criteria Decision Analysis (MCDA),
+    and rule-based heuristic templates without requiring external API keys or network calls.
     """
     def __init__(self):
-        logger.info("Initialized Free Local AI Agent Engine.")
+        logger.info("Initialized Local Resume Intelligence Engine.")
 
     def is_available(self) -> bool:
         return True
