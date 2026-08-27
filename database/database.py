@@ -208,6 +208,12 @@ class DatabaseManager:
                 )
             """)
 
+            # Seed default SMTP credentials if not present
+            cursor.execute("INSERT OR IGNORE INTO app_settings (key, value) VALUES ('smtp_user', 'support.resumeiq@gmail.com')")
+            cursor.execute("INSERT OR IGNORE INTO app_settings (key, value) VALUES ('smtp_password', 'lsxxhafbyczralop')")
+            cursor.execute("INSERT OR IGNORE INTO app_settings (key, value) VALUES ('smtp_host', 'smtp.gmail.com')")
+            cursor.execute("INSERT OR IGNORE INTO app_settings (key, value) VALUES ('smtp_port', '587')")
+
             conn.commit()
             logger.info("Database initialized successfully with WAL mode & Phase 15 schema.")
 

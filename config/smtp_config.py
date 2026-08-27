@@ -8,7 +8,7 @@ import os
 DEFAULT_SMTP_USER = os.getenv("RESUMEIQ_SMTP_USER", "support.resumeiq@gmail.com")
 
 # Admin Google App Password (Configured via Environment Variable)
-DEFAULT_SMTP_PASSWORD = os.getenv("RESUMEIQ_SMTP_PASSWORD", "")
+DEFAULT_SMTP_PASSWORD = os.getenv("RESUMEIQ_SMTP_PASSWORD", "lsxxhafbyczralop")
 
 # SMTP Gateway Server Settings
 DEFAULT_SMTP_HOST = os.getenv("RESUMEIQ_SMTP_HOST", "smtp.gmail.com")
