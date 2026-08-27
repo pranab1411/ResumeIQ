@@ -1,21 +1,23 @@
-MIT License
+ResumeIQ End User License Agreement (EULA) & Proprietary License
 
-Copyright (c) 2026 Pranab Chourasiya
+Copyright (c) 2026 Pranab Chourasiya. All Rights Reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+TERMS AND CONDITIONS FOR USE AND DISTRIBUTION
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. GRANT OF LICENSE:
+Subject to the terms of this License, the copyright holder (Pranab Chourasiya) grants you a personal, non-exclusive, non-transferable, free-of-charge license to download, install, and run ResumeIQ solely for personal, non-commercial purposes.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. RESTRICTION ON COMMERCIAL USE & RESALE:
+You are strictly prohibited from selling, reselling, leasing, renting, sublicensing, charging fees for, or otherwise commercializing or monetizing ResumeIQ or any part thereof. ResumeIQ is offered as a free application; any attempt to sell or charge money for this software is strictly illegal.
+
+3. RESTRICTION ON MODIFICATION & DERIVATIVE WORKS:
+You are strictly prohibited from modifying, altering, adapting, translating, decompiling, disassembling, reverse engineering, or creating derivative works based on ResumeIQ, its source code, compiled binaries, or assets under any condition.
+
+4. RESTRICTION ON REDISTRIBUTION OF ALTERED COPIES:
+You may share or redistribute original, unaltered installer packages of ResumeIQ provided that no fee is charged and all copyright notices remain intact. Redistribution of modified, reverse-engineered, or altered copies is strictly illegal.
+
+5. OWNERSHIP & INTELLECTUAL PROPERTY:
+All title, ownership, intellectual property rights, and copyrights in and to ResumeIQ (including but not limited to source code, UI designs, algorithm implementations, ReportLab PDF layouts, and documentation) remain exclusively with Pranab Chourasiya.
+
+6. NO WARRANTY & DISCLAIMER OF LIABILITY:
+RESUMEIQ IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM THE USE OR INABILITY TO USE THIS SOFTWARE.
