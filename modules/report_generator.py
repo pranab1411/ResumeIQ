@@ -585,117 +585,29 @@ class PDFReportGenerator:
             ('BOTTOMPADDING', (0,0), (-1,-1), 0.5)
         ]))
         
-        # Detect candidate field/category dynamically
+        # 100% DYNAMIC DECISION MAKING FROM GEMINI AI & KWARGS (NO HARDCODED INDUSTRY IF/ELIF BRANCHES)
         text_lower = (resume_text or "").lower()
-        role_lower = (display_role or "").lower()
 
-        # Check IT Support, Cybersecurity, Networking, Hardware, and Tech FIRST before Civil to prevent false positive on "PC building"
-        if any(k in role_lower or k in text_lower for k in [
-            "it support", "itsupport", "active directory", "cybersecurity", "networking", "pc hardware",
-            "troubleshooting", "system administration", "computer applications", "bca", "mca", "help desk",
-            "software engineer", "python", "developer", "java", "react", "node", "sql", "devops", "cloud security"
-        ]):
-            field_cat = "tech"
-        elif any(k in role_lower or k in text_lower for k in [
-            "civil engineering", "civil engineer", "construction management", "site engineer civil",
-            "structural engineering", "quantity survey", "concrete technology", "primavera p6", "staad.pro", "peb packages"
-        ]):
-            field_cat = "civil"
-        elif any(k in role_lower or k in text_lower for k in ["nurse", "medical", "patient", "clinical", "doctor", "triage", "hospital", "bls", "acls"]):
-            field_cat = "healthcare"
-        elif any(k in role_lower or k in text_lower for k in ["finance", "account", "cpa", "audit", "tax", "budgeting"]):
-            field_cat = "finance"
-        elif any(k in role_lower or k in text_lower for k in ["legal", "law", "attorney", "paralegal", "litigation"]):
-            field_cat = "legal"
-        elif any(k in role_lower or k in text_lower for k in ["teacher", "education", "curriculum", "school"]):
-            field_cat = "education"
-        elif any(k in role_lower or k in text_lower for k in ["figma", "ui/ux", "designer", "graphic", "behance"]):
-            field_cat = "design"
+        req_fix = kwargs.get("required_asset_fix", {}) if isinstance(kwargs.get("required_asset_fix"), dict) else {}
+        item3_title = req_fix.get("title") or "Add Industry Credentials & Portfolio Links"
+        item3_desc = req_fix.get("description") or "Include relevant industry certifications, professional license status, or portfolio/project links."
+        item3_why = req_fix.get("why_it_matters") or "Provides proof of expertise and increases recruiter credibility."
+        item3_action = req_fix.get("action") or "Add your professional certifications or portfolio URL near your header."
+
+        rec_additions_input = kwargs.get("recommended_additions", [])
+        if rec_additions_input and isinstance(rec_additions_input, list) and len(rec_additions_input) > 0:
+            rec_additions = rec_additions_input
+        elif missing_skills:
+            rec_additions = missing_skills
         else:
-            field_cat = "general"
+            rec_additions = ["Advanced Industry Skills", "Specialized Tools / Software", "Professional Certifications"]
 
-        # Field-Specific Action Items & Recommendations
-        if field_cat == "civil":
-            item3_title = "Add Professional Credentials & Certifications"
-            item3_desc = "State active FE/PE License status, Primavera P6, or CAD/BIM certifications."
-            item3_why = "Increases credibility for major infrastructure and commercial projects."
-            item3_action = "Add license numbers and project software credentials to your header."
-            rec_additions = ["Structural BIM (Revit)", "STAAD.Pro / ETABS", "Green Building / LEED"]
-            fallback_missing = ["Structural BIM", "STAAD.Pro Analysis"]
-            link_glance_text = "LinkedIn profile verified" if "linkedin.com" in text_lower else "Professional profile link missing"
-            link_glance_icon = "check_green" if "linkedin.com" in text_lower else "warn_amber"
-        elif field_cat == "healthcare":
-            item3_title = "Add Medical Licensure & EMR Systems"
-            item3_desc = "State active Nursing/Medical License (RN, BLS, ACLS, CPR) and hospital EMRs."
-            item3_why = "Crucial for healthcare compliance and clinical safety."
-            item3_action = "List license numbers and hospital EMR systems (Epic/Cerner) prominently."
-            rec_additions = ["Clinical EMR (Epic/Cerner)", "Advanced Triage", "HIPAA Compliance"]
-            fallback_missing = ["Clinical EMR Systems", "Pediatric Care"]
-            link_glance_text = "Clinical license info checked"
-            link_glance_icon = "check_green"
-        elif field_cat == "finance":
-            item3_title = "Add Financial Certifications & ERP"
-            item3_desc = "Highlight CPA/CFA credentials and SAP S/4HANA or QuickBooks expertise."
-            item3_why = "Proves financial modeling accuracy and regulatory compliance."
-            item3_action = "Mention CPA/CFA status and ERP financial modeling tools."
-            rec_additions = ["Advanced Financial Modeling", "SAP S/4HANA", "IFRS Compliance"]
-            fallback_missing = ["SAP S/4HANA", "IFRS Compliance"]
-            link_glance_text = "LinkedIn profile verified" if "linkedin.com" in text_lower else "Executive profile link missing"
-            link_glance_icon = "check_green" if "linkedin.com" in text_lower else "warn_amber"
-        elif field_cat == "legal":
-            item3_title = "Add Bar Admission & Legal Tools"
-            item3_desc = "State your State Bar Admission, JD degree, and Westlaw/LexisNexis proficiency."
-            item3_why = "Required for court admission and legal litigation trust."
-            item3_action = "Place Bar Admission and JD credentials at your contact header."
-            rec_additions = ["Westlaw / LexisNexis", "Contract Drafting", "Litigation Support"]
-            fallback_missing = ["Westlaw Research", "Litigation Support"]
-            link_glance_text = "Bar admission & credentials checked"
-            link_glance_icon = "check_green"
-        elif field_cat == "design":
-            item3_title = "Add Behance / Figma Portfolio Link"
-            item3_desc = "No Behance, Dribbble, or Figma portfolio link found."
-            item3_why = "Provides proof of visual case studies and user experience design."
-            item3_action = "Add your Behance or Figma portfolio URL."
-            rec_additions = ["User Research & Testing", "Interactive Prototyping", "Design System Specs"]
-            fallback_missing = ["Interactive Prototyping", "Design Systems"]
-            has_design_link = any(k in text_lower for k in ["behance.net", "dribbble.com", "figma.com", "portfolio"])
-            link_glance_text = "Design portfolio URL present" if has_design_link else "Design portfolio URL not found"
-            link_glance_icon = "check_green" if has_design_link else "warn_amber"
-        elif field_cat == "tech":
-            is_it_support = any(k in text_lower or k in role_lower for k in ["it support", "itsupport", "pc hardware", "active directory", "cybersecurity", "troubleshooting", "system administration"])
-            if is_it_support:
-                item3_title = "Add IT Certifications & Hands-On Labs"
-                item3_desc = "Highlight CompTIA Security+, CCNA, or Microsoft Active Directory credentials."
-                item3_why = "Increases recruiter trust for enterprise IT support and system administration roles."
-                item3_action = "List CompTIA, CCNA, or Microsoft certifications near header."
-                rec_additions = ["Advanced Network Administration", "Cloud Security (AWS/Azure)", "PowerShell / Bash Scripting"]
-                fallback_missing = ["Cloud Security Basics", "PowerShell Scripting"]
-                has_link = any(k in text_lower for k in ["github.com", "linkedin.com"])
-                link_glance_text = "Professional profile / LinkedIn verified" if has_link else "Professional profile link missing"
-                link_glance_icon = "check_green" if has_link else "warn_amber"
-            else:
-                item3_title = "Add GitHub / Code Repository Link"
-                item3_desc = "No GitHub, GitLab, or personal project link found."
-                item3_why = "Provides proof of your code repositories and open-source contributions."
-                item3_action = "Add your GitHub profile or live project URL."
-                rec_additions = ["System Architecture", "CI/CD & Pipeline Basics", "Cloud Services (AWS/GCP)"]
-                fallback_missing = ["REST APIs", "Docker"]
-                has_tech_link = any(k in text_lower for k in ["github.com", "gitlab.com"])
-                link_glance_text = "GitHub / GitLab repository link present" if has_tech_link else "GitHub / Portfolio link not found"
-                link_glance_icon = "check_green" if has_tech_link else "warn_amber"
-        else:
-            item3_title = "Add Professional Branding / LinkedIn Link"
-            item3_desc = "Ensure your LinkedIn profile or professional site is clearly linked."
-            item3_why = "Establishes recruiter trust and executive branding."
-            item3_action = "Add your LinkedIn profile link to your header."
-            rec_additions = ["Project Management", "Quantified Metrics", "Stakeholder Relations"]
-            fallback_missing = ["Quantified Metrics", "Stakeholder Relations"]
-            has_link = "linkedin.com" in text_lower
-            link_glance_text = "LinkedIn profile verified" if has_link else "Professional profile link missing"
-            link_glance_icon = "check_green" if has_link else "warn_amber"
+        has_link = any(k in text_lower for k in ["linkedin.com", "github.com", "behance.net", "dribbble.com", "portfolio"])
+        link_glance_text = "Professional profile / link verified" if has_link else "Professional profile link missing"
+        link_glance_icon = "check_green" if has_link else "warn_amber"
 
-        matched_display = matched_skills if matched_skills else ["Project Planning", "Quality Control", "Execution", "Safety"]
-        missing_display = missing_skills if missing_skills else fallback_missing
+        matched_display = matched_skills if matched_skills else ["Core Skill Alignment", "Relevant Domain Knowledge", "Professional Execution"]
+        missing_display = missing_skills if missing_skills else ["Domain Certifications", "Specialized Tools"]
 
         card_glance_inner = Table([
             [glance_header, ""],

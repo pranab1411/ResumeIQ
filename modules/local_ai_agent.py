@@ -34,9 +34,9 @@ class LocalAIAgent:
         # 1. FORCE Gemini AI evaluation if Gemini API is available
         if gemini_available():
             try:
-                logger.info("[GEMINI AI] Executing full Gemini AI Candidate Evaluation & Multi-Industry Matching...")
+                logger.info("[GEMINI AI] Executing 100% Dynamic Gemini AI Candidate Evaluation & Multi-Industry Matching...")
                 prompt = f"""You are an elite ATS Candidate Evaluator and Industry Specialist.
-Analyze the following candidate resume text carefully.
+Analyze the following candidate resume text carefully and make 100% dynamic decisions tailored specifically to THIS candidate's field.
 
 RESUME TEXT:
 \"\"\"
@@ -48,32 +48,45 @@ TARGET JOB DESCRIPTION (Optional): "{job_description[:2000]}"
 
 Instructions:
 1. Extract candidate name, email, and phone.
-2. Determine total work experience in years (e.g. 11.0) and seniority status:
-   - "Fresher / Entry-Level Candidate" (if < 1 year experience)
-   - "Experienced Professional (X.Y Yrs Exp)" (if >= 1 year experience)
-3. Predict target job role and industry category (e.g. Civil Engineering, Healthcare, Tech, Finance, Law, Education).
-4. Identify candidate's core skills and missing skills required for their target role.
-5. Compute ATS score (0 to 100).
-6. Provide 4 tailored, industry-relevant improvement suggestions (DO NOT suggest IT/GitHub links if the candidate is in Civil Engineering, Healthcare, Finance, or Law!).
+2. Determine total work experience in years (e.g. 0.5 or 11.0) and seniority status:
+   - "Fresher / Entry-Level Candidate" (if < 1 year experience AND entry-level)
+   - "Experienced Professional (X.Y Yrs Exp)" (if >= 1 year experience or experienced)
+3. Predict exact candidate target job role (e.g. "IT Support Engineer", "Civil Engineering Specialist", "Registered Nurse", "Financial Analyst", "Full Stack Developer").
+4. Predict exact candidate industry category (e.g. "Information Technology", "Civil Engineering", "Healthcare", "Finance").
+5. Extract matched core skills and identify 2-3 role-specific missing skills required for their target role.
+6. Compute ATS match score (0 to 100).
+7. Recommend 3 role-specific additions/skills for the candidate to learn or add.
+8. Provide a dynamic "required_asset_fix" object tailored strictly to candidate's field (e.g. for IT Support: IT Certifications/CompTIA/Labs; for Tech: GitHub; for Design: Behance/Figma; for Healthcare: Medical License/EMR; for Legal: Bar Admission; for Civil: PE License/BIM).
+9. Provide 4 tailored, industry-relevant improvement suggestions.
 
 Return a valid raw JSON object strictly matching this schema:
 {{
   "candidate_name": "Full Name",
   "email": "Email Address",
   "phone": "Phone Number",
-  "seniority_label": "Experienced Professional (11.0 Yrs Exp)",
-  "target_role": "Predicted or Target Job Title",
+  "is_fresher": false,
+  "experience_years": 5.0,
+  "seniority_label": "Experienced Professional (5.0 Yrs Exp)",
+  "target_role": "Predicted Target Job Title",
+  "industry_category": "Industry Category",
   "ats_score": 85.0,
-  "matched_skills": ["Skill1", "Skill2", "Skill3"],
-  "missing_skills": ["SkillA", "SkillB"],
-  "suggestions": ["Suggestion 1", "Suggestion 2"]
+  "matched_skills": ["Skill 1", "Skill 2"],
+  "missing_skills": ["Missing Skill A", "Missing Skill B"],
+  "recommended_additions": ["Addition 1", "Addition 2", "Addition 3"],
+  "required_asset_fix": {{
+    "title": "Tailored Title",
+    "description": "Tailored Description",
+    "why_it_matters": "Tailored Rationale",
+    "action": "Tailored Action"
+  }},
+  "suggestions": ["Suggestion 1", "Suggestion 2", "Suggestion 3", "Suggestion 4"]
 }}
 """
                 raw_res = gemini_generate(prompt, temperature=0.2)
                 clean_json = re.sub(r'```json\s*|\s*```', '', raw_res).strip()
                 data = json.loads(clean_json)
 
-                if not data.get("candidate_name") or data["candidate_name"] == "Full Name":
+                if not data.get("candidate_name") or data["candidate_name"] in ["Full Name", "Exact Candidate Name"]:
                     data["candidate_name"] = contact_info.get("name", "Candidate")
                 if not data.get("email") or data["email"] == "Email Address":
                     data["email"] = contact_info.get("email", "Not Found")
@@ -101,6 +114,8 @@ Return a valid raw JSON object strictly matching this schema:
                     "score_category": category,
                     "matched_skills": data.get("matched_skills", []),
                     "missing_skills": data.get("missing_skills", []),
+                    "recommended_additions": data.get("recommended_additions", []),
+                    "required_asset_fix": data.get("required_asset_fix", {}),
                     "suggestions": data.get("suggestions", []),
                     "mnc_ats": mnc_eval,
                     "engine_used": "Google Gemini AI"

@@ -807,11 +807,13 @@ class DashboardWindow(QMainWindow):
                 "resume_id": resume_id,
                 "candidate_name": contact_info["name"],
                 "filename": filename,
-                "job_title": job_title,
+                "job_title": detected_role,
                 "ats_score": score,
                 "score_category": category,
                 "matched_skills": matched,
                 "missing_skills": missing,
+                "recommended_additions": ai_res.get("recommended_additions", []),
+                "required_asset_fix": ai_res.get("required_asset_fix", {}),
                 "suggestions": suggestions,
                 "mode": mode,
                 "resume_text": extracted_text,
@@ -908,6 +910,8 @@ class DashboardWindow(QMainWindow):
                 resume_text=self.current_analysis_data.get("resume_text", ""),
                 jd_text=self.current_analysis_data.get("jd_text", ""),
                 contact_info=self.current_analysis_data.get("contact_info"),
+                recommended_additions=self.current_analysis_data.get("recommended_additions", []),
+                required_asset_fix=self.current_analysis_data.get("required_asset_fix", {}),
                 rqi=self.current_analysis_data.get("rqi", 80.0),
                 confidence_score=self.current_analysis_data.get("confidence_score", 75.0)
             )
