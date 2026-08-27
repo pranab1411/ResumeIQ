@@ -1306,8 +1306,29 @@ class DashboardWindow(QMainWindow):
     # --- PAGE 7: SETTINGS ---
     def update_ai_badge(self):
         if hasattr(self, 'lbl_ai_badge'):
-            self.lbl_ai_badge.setText("🤖 Free Local AI Agent Active")
-            self.lbl_ai_badge.setObjectName("AIBadge")
+            from utils.gemini_client import gemini_available
+            if gemini_available():
+                self.lbl_ai_badge.setText("✨ Google Gemini AI Active")
+                self.lbl_ai_badge.setStyleSheet("""
+                    background: rgba(16, 185, 129, 0.15); 
+                    color: #34D399; 
+                    border: 1px solid rgba(52, 211, 153, 0.3); 
+                    font-weight: bold; 
+                    font-size: 12px;
+                    border-radius: 15px; 
+                    padding: 4px 14px;
+                """)
+            else:
+                self.lbl_ai_badge.setText("🤖 Free Local spaCy AI Active")
+                self.lbl_ai_badge.setStyleSheet("""
+                    background: rgba(129, 140, 248, 0.15); 
+                    color: #A78BFA; 
+                    border: 1px solid rgba(167, 139, 250, 0.3); 
+                    font-weight: bold; 
+                    font-size: 12px;
+                    border-radius: 15px; 
+                    padding: 4px 14px;
+                """)
             self.lbl_ai_badge.setFixedHeight(30)
             self.lbl_ai_badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -1351,7 +1372,52 @@ class DashboardWindow(QMainWindow):
 
         layout.addWidget(acc_card)
 
-        # Feature 9: Dark / Light Theme Toggle Card
+        # Google Gemini AI Key Configuration Card
+        gemini_card = QFrame()
+        gemini_card.setObjectName("CardFrame")
+        g_layout = QVBoxLayout(gemini_card)
+        g_layout.setContentsMargins(22, 20, 22, 20)
+        g_layout.setSpacing(12)
+
+        g_title = QLabel("🤖 Google Gemini AI Engine Configuration")
+        g_title.setObjectName("SectionHeader")
+        g_sub = QLabel("Configure your Google Gemini API Key to enable cloud AI profile evaluation, 50+ universal job role predictions, and instant AI career chat.")
+        g_sub.setObjectName("SubTitle")
+        g_sub.setWordWrap(True)
+
+        key_layout = QHBoxLayout()
+        key_layout.setSpacing(10)
+
+        self.input_gemini_key = QLineEdit()
+        self.input_gemini_key.setPlaceholderText("Enter Google Gemini API Key (e.g. AIzaSy...)")
+        existing_key = db.get_setting("gemini_api_key") or os.environ.get("GEMINI_API_KEY", "")
+        self.input_gemini_key.setText(existing_key)
+        self.input_gemini_key.setStyleSheet("""
+            QLineEdit {
+                background: #0F172A; color: #F8FAFC; border: 1px solid #334155; border-radius: 6px; padding: 8px 12px; font-size: 13px;
+            }
+            QLineEdit:focus { border: 1px solid #818CF8; }
+        """)
+
+        btn_save_gemini = QPushButton("💾 Save API Key")
+        btn_save_gemini.setObjectName("PrimaryButton")
+        btn_save_gemini.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_save_gemini.clicked.connect(self._handle_save_gemini_key)
+
+        btn_test_gemini = QPushButton("⚡ Test Connection")
+        btn_test_gemini.setObjectName("SecondaryButton")
+        btn_test_gemini.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_test_gemini.clicked.connect(self._handle_test_gemini_connection)
+
+        key_layout.addWidget(self.input_gemini_key, 1)
+        key_layout.addWidget(btn_save_gemini)
+        key_layout.addWidget(btn_test_gemini)
+
+        g_layout.addWidget(g_title)
+        g_layout.addWidget(g_sub)
+        g_layout.addLayout(key_layout)
+        layout.addWidget(gemini_card)
+
         # App Theme Card (Permanent 100% Glassmorphism Dark Theme)
         theme_card = QFrame()
         theme_card.setObjectName("CardFrame")
@@ -1410,6 +1476,32 @@ class DashboardWindow(QMainWindow):
         if app:
             app.setStyleSheet(DARK_THEME_QSS)
         GlassMessageBox.success(self, "Theme Status", "🌙 Modern Glassmorphism Dark Mode is active!")
+
+    def _handle_save_gemini_key(self):
+        key = self.input_gemini_key.text().strip()
+        db.set_setting("gemini_api_key", key)
+        os.environ["GEMINI_API_KEY"] = key
+        self.update_ai_badge()
+        if key:
+            GlassMessageBox.success(self, "API Key Saved", "✨ Google Gemini API Key saved successfully!\n\nCloud Gemini AI engine is now ACTIVE for resume evaluation and role prediction.")
+        else:
+            GlassMessageBox.warning(self, "API Key Removed", "🤖 API Key cleared. ResumeIQ will use the free local spaCy NLP engine.")
+
+    def _handle_test_gemini_connection(self):
+        key = self.input_gemini_key.text().strip() or db.get_setting("gemini_api_key") or os.environ.get("GEMINI_API_KEY", "")
+        if not key:
+            GlassMessageBox.warning(self, "No API Key", "Please enter a valid Google Gemini API Key before testing.")
+            return
+        
+        os.environ["GEMINI_API_KEY"] = key
+        db.set_setting("gemini_api_key", key)
+        try:
+            from utils.gemini_client import gemini_generate
+            res = gemini_generate("Hello, confirm active API connection in 5 words.", timeout=10)
+            self.update_ai_badge()
+            GlassMessageBox.success(self, "Gemini Connection Successful", f"✨ Connection Verified!\n\nGemini Response: \"{res}\"")
+        except Exception as e:
+            GlassMessageBox.warning(self, "Connection Failed", f"⚠️ Failed to connect to Google Gemini API:\n\n{e}")
 
 
     def handle_reset_settings(self):
