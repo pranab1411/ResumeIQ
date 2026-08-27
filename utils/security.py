@@ -58,3 +58,30 @@ def is_valid_email(email: str) -> bool:
     """Basic email regex validation."""
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return bool(re.match(pattern, email.strip()))
+
+def hash_otp(otp_code: str, salt: str = "RIQ_OTP_SALT_v2") -> str:
+    """Hashes a 6-digit OTP code using SHA-256 with salt."""
+    clean_otp = str(otp_code).strip()
+    return hashlib.sha256((salt + clean_otp).encode('utf-8')).hexdigest()
+
+def verify_otp_hash(input_otp: str, stored_hash: str, salt: str = "RIQ_OTP_SALT_v2") -> bool:
+    """Verifies input OTP code against stored hash in constant time."""
+    import hmac
+    computed_hash = hash_otp(input_otp, salt)
+    return hmac.compare_digest(computed_hash, stored_hash)
+
+def mask_email(email: str) -> str:
+    """Masks an email address for non-sensitive UI display, e.g. p***876@gmail.com."""
+    email = email.strip()
+    if "@" not in email:
+        return email
+    parts = email.split("@", 1)
+    local, domain = parts[0], parts[1]
+    if len(local) <= 2:
+        masked_local = local[0] + "***"
+    elif len(local) <= 4:
+        masked_local = local[0] + "***" + local[-1]
+    else:
+        masked_local = local[:2] + "***" + local[-2:]
+    return f"{masked_local}@{domain}"
+

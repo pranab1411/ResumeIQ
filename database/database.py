@@ -189,14 +189,22 @@ class DatabaseManager:
                 )
             """)
 
-            # Audit Log table (Phase 15)
+            # Password Reset Sessions table (Phase 16 - OTP Security Engine)
             cursor.execute("""
-                CREATE TABLE IF NOT EXISTS audit_log (
+                CREATE TABLE IF NOT EXISTS password_reset_sessions (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER,
-                    action TEXT NOT NULL,
-                    details TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    email TEXT NOT NULL,
+                    otp_hash TEXT NOT NULL,
+                    otp_created_at REAL NOT NULL,
+                    otp_expires_at REAL NOT NULL,
+                    otp_attempts INTEGER DEFAULT 0,
+                    max_otp_attempts INTEGER DEFAULT 5,
+                    otp_status TEXT DEFAULT 'PENDING',
+                    resend_available_at REAL NOT NULL,
+                    reset_token TEXT,
+                    reset_authorized_until REAL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
 
@@ -501,5 +509,129 @@ class DatabaseManager:
                 ORDER BY version_number ASC
             """, (resume_id,))
             return [dict(row) for row in cursor.fetchall()]
+
+    def get_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
+        email = email.strip().lower()
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM users WHERE LOWER(email) = ?", (email,))
+            row = cursor.fetchone()
+            return dict(row) if row else None
+
+    # --- PASSWORD RESET SESSIONS CRUD ---
+    def create_password_reset_session(
+        self,
+        email: str,
+        otp_hash: str,
+        ttl_seconds: int = 300,
+        cooldown_seconds: int = 60,
+        max_attempts: int = 5
+    ) -> Dict[str, Any]:
+        import time
+        email = email.strip().lower()
+        now = time.time()
+        expires_at = now + ttl_seconds
+        resend_at = now + cooldown_seconds
+
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            # Invalidate any previously active non-completed sessions for this email
+            cursor.execute("""
+                UPDATE password_reset_sessions
+                SET otp_status = 'EXPIRED', updated_at = CURRENT_TIMESTAMP
+                WHERE email = ? AND otp_status IN ('PENDING', 'VERIFIED')
+            """, (email,))
+
+            cursor.execute("""
+                INSERT INTO password_reset_sessions (
+                    email, otp_hash, otp_created_at, otp_expires_at,
+                    otp_attempts, max_otp_attempts, otp_status, resend_available_at
+                ) VALUES (?, ?, ?, ?, 0, ?, 'PENDING', ?)
+            """, (email, otp_hash, now, expires_at, max_attempts, resend_at))
+            conn.commit()
+
+            session_id = cursor.lastrowid
+            cursor.execute("SELECT * FROM password_reset_sessions WHERE id = ?", (session_id,))
+            return dict(cursor.fetchone())
+
+    def get_active_password_reset_session(self, email: str) -> Optional[Dict[str, Any]]:
+        email = email.strip().lower()
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT * FROM password_reset_sessions
+                WHERE email = ?
+                ORDER BY id DESC LIMIT 1
+            """, (email,))
+            row = cursor.fetchone()
+            return dict(row) if row else None
+
+    def update_otp_attempts(self, session_id: int, attempts: int, status: str = None):
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            if status:
+                cursor.execute("""
+                    UPDATE password_reset_sessions
+                    SET otp_attempts = ?, otp_status = ?, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                """, (attempts, status, session_id))
+            else:
+                cursor.execute("""
+                    UPDATE password_reset_sessions
+                    SET otp_attempts = ?, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                """, (attempts, session_id))
+            conn.commit()
+
+    def mark_otp_verified(self, session_id: int, reset_token: str, auth_ttl_seconds: int = 600):
+        import time
+        authorized_until = time.time() + auth_ttl_seconds
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE password_reset_sessions
+                SET otp_status = 'VERIFIED', reset_token = ?, reset_authorized_until = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            """, (reset_token, authorized_until, session_id))
+            conn.commit()
+
+    def validate_reset_token_authorization(self, email: str, reset_token: str) -> Tuple[bool, str, Optional[int]]:
+        import time
+        email = email.strip().lower()
+        if not email or not reset_token:
+            return False, "Invalid reset session token.", None
+
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT * FROM password_reset_sessions
+                WHERE email = ? AND reset_token = ? AND otp_status = 'VERIFIED'
+                ORDER BY id DESC LIMIT 1
+            """, (email, reset_token))
+            row = cursor.fetchone()
+            if not row:
+                return False, "No verified reset authorization found. Please request a new OTP.", None
+
+            session = dict(row)
+            if time.time() > session["reset_authorized_until"]:
+                cursor.execute("""
+                    UPDATE password_reset_sessions
+                    SET otp_status = 'EXPIRED', updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                """, (session["id"],))
+                conn.commit()
+                return False, "Your password reset authorization has expired. Please request a new OTP.", None
+
+            return True, "Reset authorized.", session["id"]
+
+    def mark_reset_session_used(self, session_id: int):
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE password_reset_sessions
+                SET otp_status = 'USED', reset_token = NULL, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            """, (session_id,))
+            conn.commit()
 
 db = DatabaseManager()

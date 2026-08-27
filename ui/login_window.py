@@ -3,8 +3,8 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
     QTabWidget, QFrame, QMessageBox, QGraphicsDropShadowEffect, QCheckBox
 )
-from PyQt6.QtCore import pyqtSignal, Qt
-from PyQt6.QtGui import QColor, QFont, QIcon, QPixmap
+from PyQt6.QtCore import pyqtSignal, Qt, QTimer
+from PyQt6.QtGui import QColor, QFont, QIcon, QPixmap, QIntValidator
 from modules.auth import AuthManager
 from modules.otp_service import otp_service
 from database.database import db
@@ -19,6 +19,11 @@ class LoginWindow(QWidget):
         super().__init__()
         self.generated_otp = None
         self.otp_email = None
+        self.reset_token = None
+        self.cooldown_remaining = 0
+        self.resend_timer = QTimer(self)
+        self.resend_timer.setInterval(1000)
+        self.resend_timer.timeout.connect(self._update_cooldown_timer)
         self.setWindowTitle("ResumeIQ — Sign In")
         self.resize(480, 580)
         self.setMinimumSize(420, 520)
@@ -218,6 +223,7 @@ class LoginWindow(QWidget):
         self.reset_otp = QLineEdit()
         self.reset_otp.setPlaceholderText("6-Digit Email Verification OTP")
         self.reset_otp.setMaxLength(6)
+        self.reset_otp.setValidator(QIntValidator(0, 999999))
 
         self.reset_new_pwd = QLineEdit()
         self.reset_new_pwd.setPlaceholderText("New Password (min. 6 chars)")
@@ -305,6 +311,17 @@ class LoginWindow(QWidget):
         else:
             self.show_message(message, is_error=True)
 
+    def _update_cooldown_timer(self):
+        if self.cooldown_remaining > 1:
+            self.cooldown_remaining -= 1
+            self.btn_send_otp.setText(f"Resend OTP in {self.cooldown_remaining}s")
+            self.btn_send_otp.setEnabled(False)
+        else:
+            self.cooldown_remaining = 0
+            self.resend_timer.stop()
+            self.btn_send_otp.setText("📧 Resend OTP")
+            self.btn_send_otp.setEnabled(True)
+
     def handle_send_otp(self):
         email = self.reset_email.text().strip()
 
@@ -312,40 +329,87 @@ class LoginWindow(QWidget):
             self.show_message("Please enter your registered Email Address.", is_error=True)
             return
 
-        # Trigger Real Free Email OTP Service Dispatch
-        success, msg = otp_service.generate_and_send_email_otp(email)
-        if success:
+        self.btn_send_otp.setEnabled(False)
+        self.show_message("Requesting verification OTP...", is_error=False)
+
+        success, msg, details = otp_service.generate_and_send_email_otp(email)
+        if success and details:
+            self.reset_token = None
             self.otp_email = email
+            self.reset_otp.clear()
             self.show_message("Verification OTP sent to your email inbox.", is_error=False)
             
+            # Start 60s cooldown timer
+            self.cooldown_remaining = details.get("cooldown_seconds", 60)
+            self.btn_send_otp.setText(f"Resend OTP in {self.cooldown_remaining}s")
+            self.resend_timer.start()
+
             GlassMessageBox.information(
                 self,
                 "Email OTP Dispatched",
-                f"A 6-digit Verification OTP has been dispatched to:\n👉 {email}\n\n"
-                f"Please check your email inbox to retrieve your 6-digit verification code. (Code valid for 5 minutes)."
+                f"Your 6-digit verification code has been sent to:\n👉 {details['masked_email']}\n\n"
+                f"The code is valid for 5 minutes and can be attempted up to 5 times. Please check your inbox/spam folder."
             )
         else:
+            self.btn_send_otp.setEnabled(True)
             self.show_message(msg, is_error=True)
 
     def handle_reset_password(self):
         email = self.reset_email.text().strip()
-        otp = self.reset_otp.text().strip()
+        otp = "".join(filter(str.isdigit, self.reset_otp.text()))
         new_pwd = self.reset_new_pwd.text()
         confirm_pwd = self.reset_confirm_pwd.text()
 
-        if not email or not otp or not new_pwd or not confirm_pwd:
-            self.show_message("Please fill in all reset password fields.", is_error=True)
+        if not email:
+            self.show_message("Please enter your registered Email Address.", is_error=True)
             return
 
-        # Real OTP Verification (5-minute TTL & Single-Use Check)
-        otp_valid, otp_msg = otp_service.verify_otp(email, otp)
-        if not otp_valid:
-            self.show_message(otp_msg, is_error=True)
+        # Step 1: If reset authorization token is not yet issued, verify OTP first
+        if not self.reset_token:
+            if not otp:
+                self.show_message("Please enter the 6-digit OTP code received in your email.", is_error=True)
+                return
+            if len(otp) != 6:
+                self.show_message("Invalid verification code. OTP must be exactly 6 numeric digits.", is_error=True)
+                return
+
+            self.btn_reset_pwd.setEnabled(False)
+            self.show_message("Validating verification code...", is_error=False)
+            otp_valid, otp_msg, token = otp_service.verify_otp(email, otp)
+            self.btn_reset_pwd.setEnabled(True)
+
+            if not otp_valid:
+                self.reset_otp.clear()
+                self.show_message(otp_msg, is_error=True)
+                return
+
+            self.reset_token = token
+            self.show_message("OTP verified! Please enter your new password below.", is_error=False)
+            self.reset_new_pwd.setFocus()
             return
 
-        success, message = AuthManager.reset_password(email, new_pwd, confirm_pwd)
+        # Step 2: Reset Password using server-side reset authorization token
+        if not new_pwd or not confirm_pwd:
+            self.show_message("Please fill in both New Password and Confirm Password fields.", is_error=True)
+            return
+
+        self.btn_reset_pwd.setEnabled(False)
+        self.show_message("Updating password...", is_error=False)
+        success, message = AuthManager.reset_password(email, self.reset_token, new_pwd, confirm_pwd)
+        self.btn_reset_pwd.setEnabled(True)
+
         if success:
+            self.reset_token = None
             self.otp_email = None
+            self.reset_email.clear()
+            self.reset_otp.clear()
+            self.reset_new_pwd.clear()
+            self.reset_confirm_pwd.clear()
+            if self.resend_timer.isActive():
+                self.resend_timer.stop()
+            self.btn_send_otp.setText("📧 Send Email OTP")
+            self.btn_send_otp.setEnabled(True)
+
             self.show_message("Password reset successful! Please sign in with your new password.", is_error=False)
             GlassMessageBox.success(
                 self,
@@ -355,6 +419,8 @@ class LoginWindow(QWidget):
             self.tabs.setCurrentIndex(0) # Switch to Sign In tab
             self.login_password.setText(new_pwd)
         else:
+            if "expired" in message.lower() or "authorization" in message.lower():
+                self.reset_token = None
             self.show_message(message, is_error=True)
 
     def closeEvent(self, event):

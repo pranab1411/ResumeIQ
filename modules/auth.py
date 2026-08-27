@@ -1,6 +1,7 @@
 from database.database import db
 from utils.security import is_valid_email
 from typing import Optional, Dict, Any, Tuple
+from modules.otp_service import otp_service
 
 class AuthManager:
     @staticmethod
@@ -24,12 +25,5 @@ class AuthManager:
         return db.register_user(name, email, password)
 
     @staticmethod
-    def reset_password(identifier: str, new_password: str, confirm_password: str) -> Tuple[bool, str]:
-        if not identifier or not new_password or not confirm_password:
-            return False, "Please fill in all fields."
-        if len(new_password) < 6:
-            return False, "New password must be at least 6 characters long."
-        if new_password != confirm_password:
-            return False, "New passwords do not match."
-
-        return db.update_user_password(identifier, new_password)
+    def reset_password(identifier: str, reset_token: str, new_password: str, confirm_password: str) -> Tuple[bool, str]:
+        return otp_service.authorize_password_reset(identifier, reset_token, new_password, confirm_password)
