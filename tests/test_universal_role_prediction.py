@@ -57,5 +57,27 @@ class TestUniversalRolePrediction(unittest.TestCase):
         self.assertGreater(len(roles), 0)
         self.assertTrue(any("Nurse" in r["role"] for r in roles))
 
+    def test_field_specific_asset_recommendations(self):
+        # Tech resume without GitHub link
+        tech_sug = ATSCalculator.generate_suggestions(
+            score=70.0, matched_skills=["Python"], missing_skills=[], contact_info={},
+            resume_text="Software engineer with 4 years experience building web applications using Python."
+        )
+        self.assertTrue(any("GitHub" in s for s in tech_sug))
+
+        # Design resume without Behance/Figma link
+        design_sug = ATSCalculator.generate_suggestions(
+            score=70.0, matched_skills=["UI/UX"], missing_skills=[], contact_info={},
+            resume_text="UI/UX Designer creating wireframes and user prototypes."
+        )
+        self.assertTrue(any("Behance" in s or "Portfolio" in s for s in design_sug))
+
+        # Healthcare resume without medical license
+        health_sug = ATSCalculator.generate_suggestions(
+            score=70.0, matched_skills=["Patient Care"], missing_skills=[], contact_info={},
+            resume_text="Nurse working in hospital ICU providing patient care."
+        )
+        self.assertTrue(any("Licensure" in s or "Medical" in s for s in health_sug))
+
 if __name__ == "__main__":
     unittest.main()

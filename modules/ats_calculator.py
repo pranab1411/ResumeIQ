@@ -484,29 +484,79 @@ class ATSCalculator:
         missing_skills: List[str],
         contact_info: Dict[str, str],
         resume_text: str,
-        mode: str = "experienced"
+        mode: str = "experienced",
+        target_category: Optional[str] = None
     ) -> List[str]:
         suggestions = []
+        text_lower = (resume_text or "").lower()
 
+        # 1. Detect candidate field/category if not provided
+        category = (target_category or "").lower()
+        if not category:
+            if any(k in text_lower for k in ["nurse", "patient", "clinical", "medical", "doctor", "triage", "hospital"]):
+                category = "healthcare"
+            elif any(k in text_lower for k in ["figma", "ui/ux", "designer", "photoshop", "illustrator", "behance", "dribbble"]):
+                category = "design"
+            elif any(k in text_lower for k in ["python", "developer", "engineer", "react", "node", "java", "sql", "code", "software"]):
+                category = "tech"
+            elif any(k in text_lower for k in ["legal", "attorney", "paralegal", "litigation", "law"]):
+                category = "legal"
+            elif any(k in text_lower for k in ["teacher", "educator", "curriculum", "lesson plan", "classroom"]):
+                category = "education"
+            elif any(k in text_lower for k in ["accounting", "financial", "cpa", "audit", "tax"]):
+                category = "finance"
+            elif any(k in text_lower for k in ["autocad", "revit", "solidworks", "civil", "mechanical", "electrical"]):
+                category = "engineering"
+            elif any(k in text_lower for k in ["sales", "b2b", "crm", "salesforce", "business development"]):
+                category = "sales"
+
+        # 2. Industry & Field-Specific Required Assets Intelligence
+        if category == "tech":
+            if not re.search(r'github\.com|gitlab\.com', text_lower):
+                suggestions.append("🚀 Tech Portfolio Requirement: Add your GitHub / GitLab profile link (e.g. github.com/username) to showcase your code repositories, open-source work, and project portfolio.")
+            if not re.search(r'linkedin\.com', text_lower):
+                suggestions.append("💼 Developer Networking: Include your LinkedIn profile URL at the top header of your resume.")
+        elif category == "design":
+            if not re.search(r'behance\.net|dribbble\.com|figma\.com|portfolio', text_lower):
+                suggestions.append("🎨 Design Portfolio Requirement: Add your Behance, Dribbble, Figma, or personal portfolio URL to visually demonstrate your UI/UX case studies and design work.")
+        elif category == "healthcare":
+            if not any(lic in text_lower for lic in ["rn", "bls", "acls", "cpr", "license", "certified"]):
+                suggestions.append("🏥 Medical Licensure: Ensure active Nursing/Medical License numbers and certifications (BLS, ACLS, CPR) are prominently displayed at the top of your resume.")
+            if not any(emr in text_lower for emr in ["epic", "cerner", "emr", "ehr"]):
+                suggestions.append("📋 Clinical Systems: Explicitly mention hands-on experience with hospital EMR/EHR systems (e.g., Epic, Cerner, Allscripts).")
+        elif category == "legal":
+            if not any(leg in text_lower for leg in ["bar", "jd", "juris doctor", "paralegal", "licensed"]):
+                suggestions.append("⚖️ Legal Credentials: State your State Bar Admission, Juris Doctor (JD) degree, or Paralegal certification near your contact header.")
+        elif category == "education":
+            if not any(ed in text_lower for ed in ["certification", "licensed", "lms", "canvas", "blackboard"]):
+                suggestions.append("🎓 Teaching Credentials: State your Teaching Certification status and familiarity with LMS platforms (Canvas, Blackboard, Moodle).")
+        elif category == "finance":
+            if not any(fin in text_lower for fin in ["cpa", "cfa", "quickbooks", "sap", "gaap", "ifrs"]):
+                suggestions.append("📊 Financial Credentials: Highlight CPA/CFA certification status and financial ERP software (QuickBooks, SAP, Excel Financial Modeling).")
+        elif category == "engineering":
+            if not any(eng in text_lower for eng in ["autocad", "revit", "solidworks", "fe", "pe", "civil 3d"]):
+                suggestions.append("📐 Engineering Tools & Licensure: Mention FE/PE License status and CAD/BIM software (AutoCAD, SolidWorks, Revit, Civil 3D).")
+        elif category == "sales":
+            if not re.search(r'linkedin\.com', text_lower):
+                suggestions.append("💼 Executive Branding: Include your LinkedIn profile URL to establish professional recruiter trust.")
+
+        # 3. Standard ATS & Layout Suggestions
         if mode == "fresher":
-            suggestions.append("Structure & Section Hierarchy: Place your Name, Contact Info (Email, Phone, LinkedIn, GitHub) at the top, followed immediately by Career Objective, Education, Academic/Personal Projects, and Technical Skills.")
-            suggestions.append("Typography & Font Sizing: Use clean, professional sans-serif fonts (e.g., Calibri, Arial, or Inter). Maintain clear font hierarchy: Name (20–24pt bold), Section Headers (14–16pt bold UPPERCASE), Body text (10–11pt regular).")
-            suggestions.append("Attention-Grabbing Headline: Use bold action-oriented project titles and highlight live demo/GitHub links to immediately capture recruiter attention.")
-            suggestions.append("Visual Margins & Spacing: Keep uniform 0.75-inch to 1-inch margins with consistent bullet spacing so your 1-page fresher resume looks well-filled and balanced.")
+            if category == "tech":
+                suggestions.append("Structure & Section Hierarchy: Place your Name, Contact Info (Email, Phone, LinkedIn, GitHub) at the top, followed immediately by Career Objective, Education, Academic/Personal Projects, and Technical Skills.")
+            else:
+                suggestions.append("Structure & Section Hierarchy: Place your Name, Contact Info (Email, Phone, LinkedIn, Portfolio) at the top, followed immediately by Professional Objective, Education, Projects/Clinical/Fieldwork, and Key Skills.")
+            suggestions.append("Typography & Font Sizing: Use clean sans-serif fonts (Calibri, Arial, or Inter). Maintain hierarchy: Name (20–24pt bold), Headers (14–16pt bold UPPERCASE), Body text (10–11pt regular).")
         else:
-            # Missing skills suggestions for experienced candidates
             if missing_skills:
                 top_missing = ", ".join(missing_skills[:5])
                 suggestions.append(f"Add critical missing job skills to your resume: {top_missing}.")
 
             if score < 50.0:
                 suggestions.append("Your resume ATS match score is low. Tailor your resume keywords specifically to match the target job description.")
-                suggestions.append("Include relevant tools, programming languages, and frameworks in a dedicated 'Technical Skills' section.")
+                suggestions.append("Include relevant tools, core skills, and frameworks in a dedicated 'Key Skills' section.")
             elif score <= 75.0:
                 suggestions.append("Good start! Adding a few more key job skills and certifications will push your ATS score above 75%.")
-                suggestions.append("Ensure skills are mentioned in both your summary section and experience bullet points.")
-            else:
-                suggestions.append("Outstanding match! Your resume closely aligns with the required job qualifications.")
 
         # Contact info checks
         if contact_info:
@@ -516,15 +566,15 @@ class ATSCalculator:
                 suggestions.append("Include a valid contact phone number.")
 
         # Action verbs check
-        action_verbs = ["managed", "developed", "created", "designed", "implemented", "increased", "reduced", "led", "architected", "built"]
-        has_verbs = any(verb in resume_text.lower() for verb in action_verbs) if resume_text else False
+        action_verbs = ["managed", "developed", "created", "designed", "implemented", "increased", "reduced", "led", "architected", "built", "spearheaded", "administered", "treated", "instructed"]
+        has_verbs = any(verb in text_lower for verb in action_verbs) if text_lower else False
         if not has_verbs:
-            suggestions.append("Use strong action verbs (e.g., 'Developed', 'Implemented', 'Created') to quantify your impact.")
+            suggestions.append("Use strong action verbs (e.g., 'Managed', 'Implemented', 'Created', 'Spearheaded') to quantify your impact.")
 
         # Metrics check
-        numbers_pattern = r'\b\d+%\b|\$\d+|\b\d+\s+users\b|\b\d+\s+projects\b'
-        if resume_text and not re.search(numbers_pattern, resume_text.lower()):
-            suggestions.append("Add measurable achievements (e.g., 'Built 3 projects', 'Optimized query speed by 25%').")
+        numbers_pattern = r'\b\d+%\b|\$\d+|\b\d+\s+users\b|\b\d+\s+projects\b|\b\d+\s+patients\b|\b\d+\s+students\b'
+        if text_lower and not re.search(numbers_pattern, text_lower):
+            suggestions.append("Add measurable achievements (e.g., 'Managed 15+ projects', 'Improved patient satisfaction by 20%', 'Increased sales revenue by 35%').")
 
         return suggestions
 
