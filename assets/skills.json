@@ -1,70 +1,79 @@
 {
   "skills_by_category": {
-    "IT Support & Desktop Engineering": [
-      "Active Directory", "Azure AD", "Entra ID", "Windows 10", "Windows 11", "Windows Server", "macOS", "Linux", "Group Policy", "GPO", "Microsoft Intune", "SCCM", "MECM", "JAMF", "MDM", "Office 365", "Microsoft 365", "Exchange Online", "ServiceNow", "Jira Service Desk", "Zendesk", "ITIL", "RDP", "TeamViewer", "AnyDesk", "TCP/IP", "DHCP", "DNS", "VPN", "LAN/WAN", "Wi-Fi Troubleshooting", "Hardware Diagnostics", "PC Repair", "Printer Setup", "OS Imaging", "MDT", "Sysprep", "BitLocker", "CrowdStrike", "Endpoint Protection", "Malware Removal", "MFA", "Asset Management", "VDI", "Hyper-V", "VMware", "Remote Desktop Support", "Ticket Management", "Google Workspace"
+    "Healthcare, Medical & Nursing": [
+      "Patient Care", "EHR/EMR", "Epic Systems", "Cerner", "Triage", "Clinical Assessment", "Pharmacology", "Medical Terminology", "CPR", "BLS", "ACLS", "Vital Signs", "HIPAA Compliance", "Diagnostics", "Surgical Support", "ICU/CCU", "Phlebotomy", "Patient Assessment", "Wound Care", "Patient Education", "Infection Control", "Anatomy", "Physiology", "Telehealth", "Medical Records", "Clinical Protocols"
     ],
-    "Programming & Scripting Languages": [
-      "Python", "Java", "C", "C++", "C#", "JavaScript", "TypeScript", "Go", "Rust", "Ruby", "PHP", "Kotlin", "Swift", "R", "Scala", "Dart", "HTML", "CSS", "Julia", "Perl", "Haskell", "Elixir", "Bash", "Shell", "PowerShell", "Assembly", "MATLAB", "VBA"
+    "Healthcare Administration & Medical Billing": [
+      "ICD-10", "CPT Coding", "Medical Billing", "Medical Coding", "Epic Systems", "Cerner", "Insurance Claims", "Practice Management", "Healthcare Analytics", "Medical Auditing", "Revenue Cycle Management", "Patient Scheduling", "Health Information Management", "CMS Regulations"
     ],
-    "Web & Frontend Engineering": [
-      "React", "Angular", "Vue.js", "Svelte", "Next.js", "Nuxt.js", "Gatsby", "HTML5", "CSS3", "SASS", "SCSS", "Tailwind CSS", "Bootstrap", "Redux", "Zustand", "Webpack", "Vite", "RxJS", "WebSockets", "PWA", "WebAssembly", "Material UI", "Chakra UI"
+    "Education, Teaching & Academic Administration": [
+      "Curriculum Development", "Lesson Planning", "Classroom Management", "EdTech", "Special Education", "Student Assessment", "E-Learning", "Academic Advising", "Pedagogy", "Higher Education", "K-12 Teaching", "Differentiated Instruction", "Educational Leadership", "Canvas LMS", "Blackboard", "Moodle", "ESL/TESOL", "Student Engagement"
     ],
-    "Backend & API Development": [
-      "Node.js", "Express.js", "Django", "Flask", "FastAPI", "Spring Boot", "ASP.NET Core", "Ruby on Rails", "NestJS", "GraphQL", "REST APIs", "gRPC", "Microservices", "Celery", "RabbitMQ", "Apache Kafka", "OAuth 2.0", "JWT", "OpenID"
+    "Legal, Regulatory & Compliance": [
+      "Legal Research", "Contract Drafting", "Litigation", "Intellectual Property", "Corporate Law", "Regulatory Compliance", "Due Diligence", "Paralegal", "Case Management", "GDPR Compliance", "Employment Law", "Westlaw", "LexisNexis", "Legal Writing", "Contract Negotiation", "Risk & Compliance", "Corporate Governance"
     ],
-    "Mobile App Development": [
-      "React Native", "Flutter", "Android Development", "iOS Development", "SwiftUI", "Jetpack Compose", "Xamarin", "Ionic", "Mobile Security", "App Store Publishing", "Push Notifications"
+    "Civil, Structural & Architectural Engineering": [
+      "AutoCAD", "Revit", "Civil 3D", "Structural Analysis", "Building Codes", "Surveying", "Concrete Technology", "Urban Planning", "Construction Management", "Geotechnical Engineering", "BIM", "Structural Design", "STAAD Pro", "ETABS", "GIS", "Hydraulics", "Site Layout"
     ],
-    "Databases & Data Storage": [
-      "SQL", "MySQL", "PostgreSQL", "SQLite", "MongoDB", "Redis", "Oracle", "Microsoft SQL Server", "Cassandra", "DynamoDB", "Elasticsearch", "Neo4j", "Firebase", "MariaDB", "Supabase", "Snowflake", "BigQuery", "ClickHouse", "Pinecone", "Chroma"
+    "Mechanical, HVAC & Industrial Engineering": [
+      "SolidWorks", "CATIA", "HVAC Systems", "Thermal Analysis", "Pneumatics", "Hydraulics", "PLC Programming", "CNC Machining", "Ansys", "Thermodynamics", "Finite Element Analysis", "FEA", "Mechanical Design", "GD&T", "Manufacturing Processes", "Plant Maintenance"
     ],
-    "Cloud & DevOps Engineering": [
-      "AWS", "Azure", "Google Cloud", "GCP", "Docker", "Kubernetes", "Git", "GitHub", "GitLab", "CI/CD", "Terraform", "Ansible", "Jenkins", "Puppet", "Chef", "Helm", "Prometheus", "Grafana", "ELK Stack", "Datadog", "Linux", "Unix", "Nginx", "Apache"
+    "Electrical, Electronics & Automation Engineering": [
+      "Circuit Design", "MATLAB", "LabVIEW", "PCB Layout", "Power Systems", "Microcontrollers", "Signal Processing", "Embedded C", "SCADA", "Instrumentation", "Control Systems", "Arduino", "Raspberry Pi", "VHDL", "Verilog", "FPGA", "Automation"
     ],
-    "AI, Machine Learning & Data Science": [
-      "Machine Learning", "Deep Learning", "Generative AI", "LLMs", "NLP", "Computer Vision", "TensorFlow", "PyTorch", "scikit-learn", "Pandas", "NumPy", "SciPy", "Keras", "OpenCV", "Hugging Face", "LangChain", "LlamaIndex", "MLOps", "MLflow", "Feature Engineering"
+    "Supply Chain, Logistics & Procurement": [
+      "Inventory Management", "Freight Forwarding", "Procurement", "Warehouse Management", "ERP", "SAP S/4HANA", "Supply Chain Optimization", "Customs Clearance", "Demand Forecasting", "Vendor Management", "Logistics Planning", "3PL", "Strategic Sourcing", "Purchase Orders"
     ],
-    "Data Engineering & Big Data": [
-      "Apache Spark", "Hadoop", "Apache Flink", "Apache Airflow", "dbt", "Data Warehousing", "ETL", "ELT", "Databricks", "Hive", "Presto", "Data Modeling", "Data Governance", "Parquet"
+    "Retail, Hospitality & Hotel Management": [
+      "POS Systems", "Customer Experience", "Hospitality Operations", "Front Desk Management", "Food Safety", "Inventory Control", "Revenue Management", "Guest Services", "Event Planning", "Visual Merchandising", "Store Operations", "Catering Management", "HACCP"
     ],
-    "Cybersecurity & Network Security": [
-      "Penetration Testing", "Ethical Hacking", "Network Security", "Information Security", "Cryptography", "OWASP Top 10", "SIEM", "Firewalls", "Vulnerability Assessment", "Incident Response", "Wireshark", "Metasploit", "CISSP", "ISO 27001", "SOC 2"
+    "Real Estate, Facility & Property Management": [
+      "Property Valuation", "Asset Management", "Commercial Real Estate", "Real Estate Contracts", "Facility Management", "Tenant Relations", "Property Inspection", "Leasing Strategy", "Lease Administration", "Building Maintenance", "Yardi", "Real Estate Law"
     ],
-    "Quality Assurance & Testing": [
-      "Automated Testing", "Manual Testing", "Selenium", "Cypress", "Playwright", "JUnit", "PyTest", "Jest", "Mocha", "Postman", "JMeter", "Performance Testing", "Regression Testing", "TDD", "BDD"
+    "Customer Service, Call Center & Support": [
+      "Call Center Operations", "CRM", "Inbound/Outbound Support", "Customer Retention", "Zendesk", "Escalation Management", "SLA Management", "Telemarketing", "Customer Experience", "Freshdesk", "Ticket Management", "Active Listening", "Problem Resolution", "Customer Onboarding"
     ],
-    "Embedded Systems & Hardware": [
-      "Embedded C", "Microcontrollers", "Arduino", "Raspberry Pi", "RTOS", "PCB Design", "IoT", "VHDL", "Verilog", "FPGA", "Firmware Development"
-    ],
-    "Product Management & Strategy": [
-      "Product Strategy", "Product Roadmap", "User Research", "Agile", "Scrum", "Wireframing", "Feature Prioritization", "Product Analytics", "Product Lifecycle Management", "Market Research", "A/B Testing", "Competitive Analysis", "PRD Writing"
-    ],
-    "Project & Operations Management": [
-      "Project Management", "Program Management", "Operations Management", "Resource Allocation", "Risk Management", "Budgeting", "Process Optimization", "Lean Management", "Six Sigma", "PMP", "Prince2", "Stakeholder Management", "Change Management", "Supply Chain Management"
-    ],
-    "Digital Marketing & Growth": [
-      "SEO", "SEM", "Content Marketing", "Social Media Marketing", "Email Marketing", "Google Analytics", "PPC", "Growth Hacking", "Brand Strategy", "CRO", "Affiliate Marketing", "Copywriting"
-    ],
-    "Sales, Business Development & CRM": [
-      "B2B Sales", "B2C Sales", "Business Development", "Account Management", "Lead Generation", "Salesforce", "HubSpot", "Cold Outreach", "Sales Pipeline Management", "Negotiation", "Deal Closing", "Key Account Strategy"
-    ],
-    "Finance, Accounting & Banking": [
-      "Financial Modeling", "Financial Analysis", "Accounting", "Corporate Finance", "Auditing", "Risk Assessment", "Tax Compliance", "Financial Reporting", "Valuation", "Wealth Management", "GAAP", "IFRS", "QuickBooks", "SAP"
+    "Banking, Finance & Corporate Accounting": [
+      "Financial Modeling", "Financial Analysis", "Accounting", "Corporate Finance", "Auditing", "Risk Assessment", "Tax Compliance", "QuickBooks", "SAP", "Wealth Management", "GAAP", "IFRS", "Financial Reporting", "Valuation", "Budgeting", "Cash Flow Management", "Credit Analysis"
     ],
     "Human Resources & Talent Acquisition": [
-      "Talent Acquisition", "Technical Recruiting", "Employee Relations", "HR Policies", "Performance Management", "Onboarding", "Compensation & Benefits", "Diversity & Inclusion", "Workday", "BambooHR"
+      "Talent Acquisition", "Technical Recruiting", "Employee Relations", "HR Policies", "Performance Management", "Onboarding", "Compensation & Benefits", "Workday", "BambooHR", "Labor Relations", "HRIS", "Diversity & Inclusion", "Payroll Processing", "Employee Retention"
     ],
-    "Customer Success & Support": [
-      "Customer Relationship Management", "Customer Success", "Customer Support", "Zendesk", "Freshdesk", "Ticket Management", "Customer Onboarding", "Churn Reduction", "SLA Management", "Escalation Management", "NPS Optimization"
+    "Sales, Business Development & CRM": [
+      "B2B Sales", "B2C Sales", "Business Development", "Account Management", "Lead Generation", "Salesforce", "HubSpot", "Sales Pipeline Management", "Strategic Negotiation", "Cold Outreach", "Deal Closing", "Key Account Strategy", "Territory Management", "CRM Management"
     ],
-    "Business Analysis & Strategy": [
-      "Business Analysis", "Requirements Gathering", "Process Mapping", "Business Intelligence", "Data Analysis", "Gap Analysis", "Strategy Consulting", "SWOT Analysis", "Feasibility Studies"
+    "Digital Marketing, PR & Brand Strategy": [
+      "SEO", "SEM", "Content Marketing", "Social Media Marketing", "Email Marketing", "Google Analytics", "PPC", "Brand Strategy", "Media Relations", "Copywriting", "Public Relations", "Growth Hacking", "CRO", "Influencer Marketing", "Ad Campaigns"
     ],
-    "Content Writing & Graphic Design": [
-      "Content Strategy", "Technical Writing", "Copywriting", "Editing", "Graphic Design", "Figma", "Adobe Photoshop", "Adobe Illustrator", "Adobe Premiere Pro", "UI/UX Design", "User Experience", "User Interface", "Storytelling", "Brand Identity"
+    "Product, Project & Process Management": [
+      "Product Strategy", "Product Roadmap", "User Research", "Agile", "Scrum", "Project Management", "Program Management", "PMP", "Risk Management", "Resource Allocation", "Process Optimization", "Six Sigma", "Lean Management", "Jira", "Sprint Planning"
     ],
-    "Soft Skills & Executive Leadership": [
-      "Leadership", "Communication", "Problem Solving", "Teamwork", "Time Management", "Critical Thinking", "Adaptability", "Emotional Intelligence", "Strategic Thinking", "Conflict Resolution", "Decision Making", "Mentorship"
+    "Architecture, Urban Planning & Interior Design": [
+      "Architectural Design", "Interior Design", "SketchUp", "3D Rendering", "V-Ray", "Architectural Drafting", "Sustainable Design", "Spatial Planning", "BIM", "Space Management", "Lighting Design", "Concept Development"
+    ],
+    "Media, Journalism, Broadcasting & Content Creation": [
+      "Journalism", "Video Editing", "Podcast Production", "News Writing", "Audio Engineering", "Adobe Premiere Pro", "Storytelling", "Technical Writing", "Copywriting", "Media Production", "Content Strategy", "Final Cut Pro", "Photoshop", "Illustrator"
+    ],
+    "Automotive, Aviation & Aerospace Engineering": [
+      "Automotive Systems", "Aerodynamics", "Flight Dynamics", "Avionics", "Propulsion", "Kaizen", "Lean Manufacturing", "ISO 9001", "Quality Control", "Root Cause Analysis", "Six Sigma", "Auto Repair", "Vehicle Diagnostics"
+    ],
+    "Biotechnology, Pharmaceuticals & Life Sciences": [
+      "Biochemistry", "Molecular Biology", "Clinical Trials", "Cell Culture", "PCR", "Chromatography", "Laboratory Safety", "HPLC", "FDA Regulations", "Microbiology", "GLP/GMP", "Assay Development", "Drug Discovery"
+    ],
+    "Environmental Science & Renewable Energy": [
+      "Environmental Impact Assessment", "GIS", "Renewable Energy", "Solar Power", "Wind Energy", "Sustainability", "Waste Management", "Carbon Accounting", "Environmental Policy", "Ecology", "Environmental Compliance"
+    ],
+    "Construction Management & Building Trades": [
+      "Construction Safety", "OSHA Compliance", "Cost Estimation", "Subcontractor Management", "Site Supervision", "Blueprint Reading", "Building Inspection", "Plumbing Standards", "Electrical Wiring", "Safety Audits", "HVAC Installation"
+    ],
+    "Executive Leadership & Business Strategy": [
+      "Strategic Planning", "Executive Management", "P&L Responsibility", "Organizational Development", "Mergers & Acquisitions", "Corporate Governance", "Crisis Management", "Business Strategy", "Stakeholder Relations", "Team Leadership"
+    ],
+    "IT Support & Desktop Infrastructure": [
+      "Active Directory", "Azure AD", "Windows 10", "Windows 11", "Windows Server", "macOS", "Linux", "Group Policy", "GPO", "Microsoft Intune", "SCCM", "MECM", "Office 365", "Microsoft 365", "Exchange Online", "ServiceNow", "Jira Service Desk", "Zendesk", "ITIL", "RDP", "VPN", "LAN/WAN", "Hardware Diagnostics", "BitLocker", "Cybersecurity", "Network Security"
+    ],
+    "Software Engineering & Web Development": [
+      "Python", "Java", "C++", "C#", "JavaScript", "TypeScript", "React", "Angular", "Vue.js", "Node.js", "Django", "Flask", "FastAPI", "Spring Boot", "SQL", "PostgreSQL", "MySQL", "MongoDB", "Redis", "HTML5", "CSS3", "Git", "REST APIs", "Docker", "Kubernetes", "AWS", "Azure", "GCP", "CI/CD", "Machine Learning", "Deep Learning", "Generative AI", "LLMs", "NLP"
     ]
   }
 }

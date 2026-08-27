@@ -32,6 +32,7 @@ NON_NAME_KEYWORDS: Set[str] = {
 }
 
 JOB_TITLES_VOCABULARY: Set[str] = {
+    # Tech & Software
     "software developer", "backend developer", "frontend developer", "full stack developer", 
     "web developer", "mobile developer", "android developer", "ios developer", "python developer",
     "java developer", "react developer", "node developer", "cloud developer",
@@ -42,11 +43,42 @@ JOB_TITLES_VOCABULARY: Set[str] = {
     "product manager", "project manager", "scrum master", "technical lead", "tech lead",
     "engineering manager", "ui/ux designer", "ui designer", "ux designer", "graphic designer",
     "system administrator", "network engineer", "database administrator", "dba",
-    "cybersecurity analyst", "security engineer", "penetration tester",
-    "fresher", "intern", "graduate", "student", "associate software engineer", "junior developer", 
-    "senior developer", "senior software engineer", "principal engineer", "lead developer",
-    "experienced professional", "consultant", "specialist", "coordinator", "director", "officer",
-    "architect", "analyst", "developer", "engineer", "designer", "manager", "lead"
+    "cybersecurity analyst", "security engineer", "penetration tester", "desktop support engineer",
+    # Healthcare & Medicine
+    "physician", "doctor", "registered nurse", "nurse practitioner", "clinical specialist",
+    "pharmacist", "lab technician", "medical billing specialist", "healthcare administrator",
+    "medical coder", "physical therapist", "radiologist", "surgeon", "dentist",
+    # Education & Academia
+    "teacher", "educator", "professor", "lecturer", "curriculum developer", "academic advisor",
+    "instructor", "principal", "headmaster", "tutor",
+    # Legal & Compliance
+    "attorney", "lawyer", "legal counsel", "paralegal", "legal assistant", "compliance officer",
+    "legal researcher", "contract administrator",
+    # Engineering & Architecture (Non-IT)
+    "civil engineer", "mechanical engineer", "electrical engineer", "structural engineer",
+    "hvac engineer", "architect", "interior designer", "urban planner", "industrial engineer",
+    "chemical engineer", "biomedical engineer",
+    # Finance, Accounting & Banking
+    "financial analyst", "accountant", "auditor", "investment banker", "tax consultant",
+    "wealth manager", "risk analyst", "controller", "cfo", "credit analyst",
+    # Human Resources & Recruiting
+    "hr manager", "hr specialist", "talent acquisition specialist", "recruiter",
+    "hr generalist", "hr business partner", "compensation analyst",
+    # Sales, Marketing & Business Development
+    "sales manager", "account executive", "business development manager", "digital marketing manager",
+    "brand manager", "content strategist", "pr specialist", "copywriter", "marketing coordinator",
+    # Supply Chain, Operations & Logistics
+    "supply chain manager", "logistics coordinator", "procurement specialist", "warehouse manager",
+    "operations manager", "inventory analyst", "buyer",
+    # Retail, Hospitality & Real Estate
+    "hotel manager", "restaurant manager", "store manager", "property manager",
+    "real estate agent", "customer service manager", "facility manager",
+    # Media & Creative
+    "journalist", "video editor", "content creator", "copywriter", "art director", "producer",
+    # General Role Standardizers
+    "fresher", "intern", "graduate", "student", "associate", "junior", "senior", "lead",
+    "principal", "manager", "director", "executive", "head", "vp", "chief", "officer",
+    "specialist", "coordinator", "consultant", "analyst", "administrator", "supervisor"
 }
 
 DEGREE_VOCABULARY: Set[str] = {

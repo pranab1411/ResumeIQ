@@ -567,6 +567,113 @@ class ATSCalculator:
 
 
 ROLE_SKILL_PROFILES: Dict[str, Dict[str, Any]] = {
+    # --- HEALTHCARE, MEDICAL & NURSING ---
+    "Registered Nurse (RN) / Clinical Specialist": {
+        "skills": ["Patient Care", "EHR/EMR", "Triage", "Clinical Assessment", "Pharmacology", "Vital Signs", "HIPAA Compliance", "CPR", "BLS", "Patient Education", "Infection Control"],
+        "category": "Healthcare & Nursing"
+    },
+    "Medical Billing & Coding Specialist": {
+        "skills": ["ICD-10", "CPT Coding", "Medical Billing", "Medical Coding", "Epic Systems", "Cerner", "Insurance Claims", "Practice Management", "Medical Records"],
+        "category": "Healthcare Administration"
+    },
+    "Healthcare Administrator / Practice Manager": {
+        "skills": ["Healthcare Analytics", "Practice Management", "EHR/EMR", "HIPAA Compliance", "Medical Records", "Revenue Cycle Management", "Patient Scheduling", "CMS Regulations"],
+        "category": "Healthcare Administration"
+    },
+
+    # --- EDUCATION & ACADEMIA ---
+    "K-12 Educator / School Teacher": {
+        "skills": ["Lesson Planning", "Classroom Management", "Curriculum Development", "Student Assessment", "Differentiated Instruction", "Special Education", "EdTech", "K-12 Teaching"],
+        "category": "Education & Teaching"
+    },
+    "Academic Administrator / Higher Education Coordinator": {
+        "skills": ["Academic Advising", "Higher Education", "Curriculum Development", "Student Assessment", "Canvas LMS", "Blackboard", "Educational Leadership", "E-Learning"],
+        "category": "Education & Teaching"
+    },
+
+    # --- LEGAL & COMPLIANCE ---
+    "Attorney / Corporate Legal Counsel": {
+        "skills": ["Legal Research", "Contract Drafting", "Litigation", "Intellectual Property", "Corporate Law", "Regulatory Compliance", "Due Diligence", "Legal Writing", "Contract Negotiation"],
+        "category": "Legal & Compliance"
+    },
+    "Paralegal / Legal Assistant": {
+        "skills": ["Legal Research", "Paralegal", "Case Management", "Westlaw", "LexisNexis", "Legal Writing", "Document Review", "Contract Drafting"],
+        "category": "Legal & Compliance"
+    },
+
+    # --- ENGINEERING & ARCHITECTURE (NON-IT) ---
+    "Civil & Structural Engineer": {
+        "skills": ["AutoCAD", "Revit", "Civil 3D", "Structural Analysis", "Building Codes", "Surveying", "Concrete Technology", "Structural Design", "BIM", "STAAD Pro"],
+        "category": "Civil & Structural Engineering"
+    },
+    "Mechanical & Industrial Engineer": {
+        "skills": ["SolidWorks", "CATIA", "HVAC Systems", "Thermal Analysis", "Pneumatics", "Hydraulics", "PLC Programming", "CNC Machining", "Mechanical Design", "GD&T"],
+        "category": "Mechanical Engineering"
+    },
+    "Electrical & Automation Engineer": {
+        "skills": ["Circuit Design", "MATLAB", "LabVIEW", "PCB Layout", "Power Systems", "Microcontrollers", "Embedded C", "SCADA", "Instrumentation", "Control Systems"],
+        "category": "Electrical Engineering"
+    },
+    "Architect / Spatial Designer": {
+        "skills": ["Architectural Design", "Interior Design", "SketchUp", "3D Rendering", "V-Ray", "Architectural Drafting", "Sustainable Design", "Spatial Planning", "BIM"],
+        "category": "Architecture & Design"
+    },
+
+    # --- SUPPLY CHAIN, LOGISTICS & PROCUREMENT ---
+    "Supply Chain & Operations Manager": {
+        "skills": ["Supply Chain Optimization", "Inventory Management", "Procurement", "Warehouse Management", "ERP", "SAP S/4HANA", "Demand Forecasting", "Vendor Management", "Logistics Planning"],
+        "category": "Supply Chain & Logistics"
+    },
+    "Logistics & Freight Coordinator": {
+        "skills": ["Freight Forwarding", "Warehouse Management", "Logistics Planning", "Customs Clearance", "3PL", "Inventory Control", "Purchase Orders"],
+        "category": "Supply Chain & Logistics"
+    },
+
+    # --- RETAIL, HOSPITALITY & REAL ESTATE ---
+    "Hotel Operations / Hospitality Manager": {
+        "skills": ["Hospitality Operations", "Front Desk Management", "Customer Experience", "POS Systems", "Food Safety", "Revenue Management", "Guest Services", "Event Planning"],
+        "category": "Hospitality & Retail"
+    },
+    "Property & Real Estate Manager": {
+        "skills": ["Property Valuation", "Asset Management", "Commercial Real Estate", "Real Estate Contracts", "Facility Management", "Tenant Relations", "Leasing Strategy"],
+        "category": "Real Estate & Property Management"
+    },
+
+    # --- FINANCE, BANKING & ACCOUNTING ---
+    "Financial Analyst / Investment Specialist": {
+        "skills": ["Financial Modeling", "Financial Analysis", "Corporate Finance", "Valuation", "Risk Assessment", "Financial Reporting", "Excel", "Budgeting", "Cash Flow Management"],
+        "category": "Finance & Banking"
+    },
+    "Corporate Accountant / Auditor": {
+        "skills": ["Accounting", "Auditing", "Tax Compliance", "Financial Reporting", "QuickBooks", "SAP", "GAAP", "IFRS", "General Ledger"],
+        "category": "Finance & Accounting"
+    },
+
+    # --- HUMAN RESOURCES & RECRUITING ---
+    "HR Manager / HR Business Partner": {
+        "skills": ["Employee Relations", "HR Policies", "Performance Management", "Onboarding", "Compensation & Benefits", "Workday", "BambooHR", "Labor Relations", "HRIS"],
+        "category": "Human Resources"
+    },
+    "Talent Acquisition / Recruiting Specialist": {
+        "skills": ["Talent Acquisition", "Technical Recruiting", "Sourcing", "Applicant Tracking Systems", "Onboarding", "Interviewing", "Employee Retention"],
+        "category": "Human Resources"
+    },
+
+    # --- SALES, MARKETING & MEDIA ---
+    "Sales Executive / Account Manager": {
+        "skills": ["B2B Sales", "B2C Sales", "Business Development", "Account Management", "Lead Generation", "Salesforce", "HubSpot", "Sales Pipeline Management", "Strategic Negotiation"],
+        "category": "Sales & Business Development"
+    },
+    "Digital Marketing & SEO Specialist": {
+        "skills": ["SEO", "SEM", "Google Analytics", "Content Marketing", "Social Media Marketing", "PPC", "Growth Hacking", "Email Marketing", "Copywriting", "CRO"],
+        "category": "Digital Marketing"
+    },
+    "Content Strategist / Technical Writer": {
+        "skills": ["Content Strategy", "Technical Writing", "Copywriting", "Editing", "Journalism", "Storytelling", "SEO Writing", "Media Production"],
+        "category": "Media & Content Creation"
+    },
+
+    # --- SOFTWARE & IT ENGINEERING ---
     "Full Stack Developer": {
         "skills": ["Python", "JavaScript", "TypeScript", "React", "Node.js", "SQL", "PostgreSQL", "HTML", "CSS", "Git", "REST APIs", "Docker", "MongoDB"],
         "category": "Software Engineering"
@@ -615,25 +722,9 @@ ROLE_SKILL_PROFILES: Dict[str, Dict[str, Any]] = {
         "skills": ["Product Strategy", "Product Roadmap", "User Research", "Agile", "Scrum", "Wireframing", "Feature Prioritization", "Product Analytics", "A/B Testing", "PRD Writing"],
         "category": "Product Management"
     },
-    "Project Manager / Scrum Master": {
-        "skills": ["Project Management", "Program Management", "Agile", "Scrum", "PMP", "Risk Management", "Resource Allocation", "Budgeting", "Jira", "Stakeholder Management"],
+    "Project Manager / Operations Lead": {
+        "skills": ["Project Management", "Program Management", "Agile", "Scrum", "PMP", "Risk Management", "Resource Allocation", "Budgeting", "Jira", "Stakeholder Management", "Six Sigma"],
         "category": "Project & Operations Management"
-    },
-    "Digital Marketing Manager": {
-        "skills": ["SEO", "SEM", "Google Analytics", "Content Marketing", "Social Media Marketing", "PPC", "Growth Hacking", "Email Marketing", "Copywriting", "CRO"],
-        "category": "Digital Marketing & Growth"
-    },
-    "Sales & Business Development Executive": {
-        "skills": ["B2B Sales", "B2C Sales", "Business Development", "Account Management", "Lead Generation", "Salesforce", "HubSpot", "Cold Outreach", "Negotiation"],
-        "category": "Sales & Business Development"
-    },
-    "Financial Analyst / Accountant": {
-        "skills": ["Financial Modeling", "Financial Analysis", "Accounting", "Corporate Finance", "Auditing", "Risk Assessment", "Tax Compliance", "Financial Reporting", "Excel"],
-        "category": "Finance & Accounting"
-    },
-    "HR Specialist / Technical Recruiter": {
-        "skills": ["Talent Acquisition", "Technical Recruiting", "Employee Relations", "HR Policies", "Performance Management", "Onboarding", "Workday", "BambooHR"],
-        "category": "Human Resources & Recruiting"
     },
     "UI/UX Designer": {
         "skills": ["Figma", "UI/UX Design", "User Experience", "User Interface", "Adobe Photoshop", "Adobe Illustrator", "Wireframing", "User Research", "Prototyping"],
