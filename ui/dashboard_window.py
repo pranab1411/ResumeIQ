@@ -708,7 +708,8 @@ class DashboardWindow(QMainWindow):
             mode = "fresher" if is_fresher else "experienced"
 
             jd_text = self.input_jd.toPlainText().strip()
-            job_title = self.input_job_title.text().strip() or ("Fresher / Entry-Level Role" if is_fresher else "General Position")
+            user_entered_title = self.input_job_title.text().strip()
+            job_title = user_entered_title
 
             # Copy resume file to local resumes/ folder
             dest_path = os.path.join(RESUMES_DIR, filename)
@@ -729,7 +730,7 @@ class DashboardWindow(QMainWindow):
                 "email": ai_res.get("email", "Not Found"),
                 "phone": ai_res.get("phone", "Not Found")
             }
-            detected_role = ai_res.get("target_role") or job_title
+            detected_role = user_entered_title or ai_res.get("target_role") or seniority_label
             score = float(ai_res.get("ats_score", 0.0))
             category = ai_res.get("score_category", ATSCalculator.get_score_category(score))
             matched = ai_res.get("matched_skills", [])

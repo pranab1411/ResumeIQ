@@ -388,7 +388,21 @@ class PDFReportGenerator:
         
         # Sanitize candidate name and job title
         display_name = candidate_name.strip() if candidate_name and candidate_name not in ["Candidate", "Not Found", ""] else "Name not confidently detected"
-        display_role = job_title.strip() if job_title and job_title not in ["General Position", ""] else "Fresher / Entry-Level Role"
+        
+        if job_title and job_title.strip() not in ["General Position", "Fresher / Entry-Level Role", ""]:
+            display_role = job_title.strip()
+        else:
+            from modules.nlp_engine import nlp_engine
+            extracted_role = nlp_engine.extract_target_role(resume_text, "")
+            seniority_info = nlp_engine.detect_candidate_seniority(resume_text)
+            
+            if extracted_role and extracted_role not in ["Professional", "General Position", "Fresher / Entry-Level Role"]:
+                display_role = extracted_role
+            elif seniority_info.get("is_fresher"):
+                display_role = "Fresher / Entry-Level Candidate"
+            else:
+                exp = seniority_info.get("experience_years", 1.0)
+                display_role = f"Experienced Professional ({exp:.1f} Yrs Exp)"
         
         # Default pillar scores if missing
         if not pillar_scores:
