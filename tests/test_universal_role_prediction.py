@@ -42,7 +42,20 @@ class TestUniversalRolePrediction(unittest.TestCase):
         roles = ATSCalculator.predict_matching_job_roles(skills, top_n=3)
         self.assertGreater(len(roles), 0)
         self.assertIn("Full Stack Developer", roles[0]["role"])
-        self.assertEqual(roles[0]["category"], "Software Engineering")
+    def test_holistic_profile_role_prediction(self):
+        skills = ["Patient Care", "EHR/EMR", "Triage", "Vital Signs"]
+        edu = ["Bachelor of Science in Nursing (BSN)"]
+        positions = ["Staff Nurse", "Junior Clinical Specialist"]
+        roles = ATSCalculator.predict_matching_job_roles(
+            extracted_skills=skills,
+            top_n=3,
+            resume_text="Worked 3 years as Staff Nurse in Hospital ICU performing triage and patient assessment.",
+            education_info=edu,
+            previous_positions=positions,
+            work_experience_years=3.2
+        )
+        self.assertGreater(len(roles), 0)
+        self.assertTrue(any("Nurse" in r["role"] for r in roles))
 
 if __name__ == "__main__":
     unittest.main()

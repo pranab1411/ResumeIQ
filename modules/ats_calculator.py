@@ -529,16 +529,123 @@ class ATSCalculator:
         return suggestions
 
     @staticmethod
-    def predict_matching_job_roles(extracted_skills: List[str], top_n: int = 4) -> List[Dict[str, Any]]:
+    def predict_matching_job_roles(
+        extracted_skills: List[str],
+        top_n: int = 4,
+        resume_text: Optional[str] = None,
+        education_info: Optional[List[str]] = None,
+        previous_positions: Optional[List[str]] = None,
+        work_experience_years: Optional[float] = None
+    ) -> List[Dict[str, Any]]:
         """
-        Predicts top matching job roles based on skills extracted from candidate resume.
+        Intelligent Universal Job Role Prediction Engine:
+        Evaluates Candidate Skills, Education Background, Previous Work Positions, and Total Work Experience (Years/Months).
+        Uses Gemini AI if available; falls back seamlessly to local multi-industry intelligence engine.
         """
-        if not extracted_skills:
+        from utils.gemini_client import gemini_available
+        if resume_text and gemini_available():
+            try:
+                gemini_roles = ATSCalculator._predict_roles_with_gemini(
+                    resume_text=resume_text,
+                    extracted_skills=extracted_skills,
+                    education_info=education_info,
+                    previous_positions=previous_positions,
+                    work_experience_years=work_experience_years,
+                    top_n=top_n
+                )
+                if gemini_roles:
+                    logger.info(f"[GEMINI AI] Successfully predicted {len(gemini_roles)} job roles based on skills, education, past positions, and experience.")
+                    return gemini_roles
+            except Exception as e:
+                logger.warning(f"[GEMINI AI] Role prediction fallback to local engine: {e}")
+
+        # Fallback to Local Intelligence Engine
+        return ATSCalculator._predict_roles_local(
+            extracted_skills=extracted_skills,
+            education_info=education_info,
+            previous_positions=previous_positions,
+            work_experience_years=work_experience_years,
+            top_n=top_n
+        )
+
+    @staticmethod
+    def _predict_roles_with_gemini(
+        resume_text: str,
+        extracted_skills: List[str],
+        education_info: Optional[List[str]] = None,
+        previous_positions: Optional[List[str]] = None,
+        work_experience_years: Optional[float] = None,
+        top_n: int = 4
+    ) -> List[Dict[str, Any]]:
+        from utils.gemini_client import gemini_generate
+        
+        skills_str = ", ".join(extracted_skills[:30]) if extracted_skills else "Not specified"
+        edu_str = ", ".join(education_info) if education_info else "Not specified"
+        pos_str = ", ".join(previous_positions) if previous_positions else "Not specified"
+        
+        if work_experience_years is not None:
+            years = int(work_experience_years)
+            months = int(round((work_experience_years - years) * 12))
+            exp_str = f"{years} years, {months} months"
+        else:
+            exp_str = "Not specified"
+
+        prompt = f"""You are an expert global HR & Talent Acquisition AI.
+Analyze the candidate's resume snippet and extracted profile parameters:
+- Candidate Skills: {skills_str}
+- Education Background: {edu_str}
+- Previous Work Positions: {pos_str}
+- Total Work Experience (Years/Months): {exp_str}
+
+Resume Content Snippet:
+"{resume_text[:2000]}"
+
+Select the top {top_n} most suitable target job roles for this candidate across ANY industry (Tech, Healthcare, Education, Legal, Engineering, Finance, Business, HR, Sales, Creative, Operations, etc.).
+
+Output ONLY a valid raw JSON array of objects without markdown wrappers:
+[
+  {{
+    "role": "Job Title",
+    "match_pct": 92.5,
+    "category": "Industry Category",
+    "matched_skills": ["Skill1", "Skill2"],
+    "reasoning": "1-sentence explanation why this role fits their skills, education background, past positions, and experience duration."
+  }}
+]
+"""
+        response = gemini_generate(prompt, temperature=0.2, max_tokens=1000, timeout=12)
+        clean_json = re.sub(r'^```(?:json)?\s*|\s*```$', '', response.strip(), flags=re.MULTILINE)
+        data = json.loads(clean_json)
+        if isinstance(data, list) and len(data) > 0:
+            formatted = []
+            for item in data[:top_n]:
+                formatted.append({
+                    "role": str(item.get("role", "Professional")),
+                    "match_pct": float(item.get("match_pct", 80.0)),
+                    "category": str(item.get("category", "General")),
+                    "matched_skills": list(item.get("matched_skills", extracted_skills[:5])),
+                    "match_count": len(item.get("matched_skills", [])),
+                    "reasoning": str(item.get("reasoning", ""))
+                })
+            return formatted
+        return []
+
+    @staticmethod
+    def _predict_roles_local(
+        extracted_skills: List[str],
+        education_info: Optional[List[str]] = None,
+        previous_positions: Optional[List[str]] = None,
+        work_experience_years: Optional[float] = None,
+        top_n: int = 4
+    ) -> List[Dict[str, Any]]:
+        if not extracted_skills and not previous_positions and not education_info:
             return [
-                {"role": "General Professional", "match_pct": 50.0, "category": "General", "matched_skills": ["Communication"], "match_count": 1}
+                {"role": "General Professional", "match_pct": 50.0, "category": "General", "matched_skills": ["Communication"], "match_count": 1, "reasoning": "General profile based on overall capabilities."}
             ]
 
-        cand_norm = {ATSCalculator._normalize_skill(x) for x in extracted_skills}
+        cand_norm = {ATSCalculator._normalize_skill(x) for x in (extracted_skills or [])}
+        prev_norm = [p.lower() for p in (previous_positions or [])]
+        edu_norm = [e.lower() for e in (education_info or [])]
         results = []
 
         for role_title, data in ROLE_SKILL_PROFILES.items():
@@ -552,14 +659,27 @@ class ATSCalculator:
                     matched.append(s)
 
             matched_unique = sorted(list(set(matched)))
-            if len(matched_unique) > 0:
-                match_pct = round(min(100.0, (len(matched_unique) / min(len(role_skills), max(3, len(cand_norm)))) * 100.0), 1)
+            base_pct = (len(matched_unique) / min(len(role_skills), max(3, len(cand_norm)))) * 100.0 if cand_norm else 0.0
+
+            # Title & Education match bonuses
+            title_bonus = 0.0
+            if any(word in role_title.lower() for p in prev_norm for word in p.split() if len(word) > 3):
+                title_bonus += 20.0
+
+            edu_bonus = 0.0
+            if any(word in data["category"].lower() for e in edu_norm for word in e.split() if len(word) > 3):
+                edu_bonus += 15.0
+
+            final_pct = round(min(98.5, base_pct + title_bonus + edu_bonus), 1)
+
+            if len(matched_unique) > 0 or title_bonus > 0:
                 results.append({
                     "role": role_title,
-                    "match_pct": match_pct,
+                    "match_pct": max(40.0, final_pct),
                     "category": data["category"],
-                    "matched_skills": matched_unique,
-                    "match_count": len(matched_unique)
+                    "matched_skills": matched_unique if matched_unique else ["Extracted Background"],
+                    "match_count": len(matched_unique),
+                    "reasoning": f"Matches {len(matched_unique)} key skills and aligns with candidate background."
                 })
 
         results.sort(key=lambda x: (x["match_pct"], x["match_count"]), reverse=True)
