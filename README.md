@@ -5,6 +5,7 @@
 ![NLP](https://img.shields.io/badge/NLP-spaCy-green)
 ![ReportLab](https://img.shields.io/badge/PDF-ReportLab%205-purple)
 ![SQLite](https://img.shields.io/badge/Database-SQLite3%20WAL-lightgrey)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Build](https://img.shields.io/badge/Build-v2.1-success)
 
 **ResumeIQ** is a 100% offline, privacy-first, NLP-powered desktop application built with Python 3.11, PyQt6, spaCy, pdfplumber, python-docx, and ReportLab. It parses resumes across multiple formats (PDF, DOCX, TXT, RTF, ODT, HTML), performs candidate entity and domain skill extraction, computes a transparent 4-Pillar Multi-Criteria Decision Analysis (MCDA) ATS compatibility score against target Job Descriptions, predicts aligned job roles, provides career optimization suggestions, and generates executive single-page PDF evaluation reports.
@@ -152,4 +153,5 @@ python build_test.py
 
 ## 📝 License & Attribution
 Designed & Engineered by **Pranab Chourasiya**.
-Built as a local, privacy-first AI Resume Intelligence & Career Optimization Desktop Application.
+
+This project is licensed under the **[MIT License](file:///d:/py%20project/ResumeIQ/LICENSE)** — see the [LICENSE](file:///d:/py%20project/ResumeIQ/LICENSE) file for details. Built as a local, privacy-first AI Resume Intelligence & Career Optimization Desktop Application.
