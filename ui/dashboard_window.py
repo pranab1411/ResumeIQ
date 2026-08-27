@@ -152,7 +152,7 @@ class DashboardWindow(QMainWindow):
             ("💬 AI Assistant", 5),
             ("👤 My Profile", 6),
             ("⚙️ Settings", 7),
-            ("👨‍💻 About Developer", 8)
+            ("ℹ️ About ResumeIQ", 8)
         ]
 
         for text, index in nav_items:
@@ -1319,68 +1319,34 @@ class DashboardWindow(QMainWindow):
         layout.setContentsMargins(25, 25, 25, 25)
         layout.setSpacing(16)
 
-        title = QLabel("System Settings & AI Engine Configuration")
+        title = QLabel("System Settings & User Preferences")
         title.setObjectName("HeaderTitle")
         layout.addWidget(title)
 
-        # AI Engine Card
-        ai_card = QFrame()
-        ai_card.setObjectName("CardFrame")
-        g_layout = QVBoxLayout(ai_card)
-        g_layout.setContentsMargins(22, 22, 22, 22)
-        g_layout.setSpacing(12)
+        # Account & Session Card
+        acc_card = QFrame()
+        acc_card.setObjectName("CardFrame")
+        a_layout = QVBoxLayout(acc_card)
+        a_layout.setContentsMargins(22, 22, 22, 22)
+        a_layout.setSpacing(10)
 
-        g_title = QLabel("🤖 Hybrid Gemini AI & On-Device Local Intelligence")
-        g_title.setObjectName("SectionHeader")
-        g_sub = QLabel(
-            "<p style='color: #CBD5E1; font-size: 13.5px; line-height: 1.5; margin: 0;'>"
-            "ResumeIQ features a hybrid architecture combining Google Gemini AI for cloud intelligence "
-            "with a 100% on-device spaCy NLP engine for privacy and offline speed.</p>"
-            "<ul style='color: #E2E8F0; font-size: 13px; line-height: 1.7; margin-top: 8px; margin-bottom: 0; padding-left: 20px;'>"
-            "<li><b>Google Gemini AI:</b> 4-part profile evaluation (Skills, Education, Past Positions, Experience Years/Months) & 50+ Universal Role Predictions.</li>"
-            "<li><b>On-Device spaCy NLP:</b> Fast candidate entity extraction, contact info parsing, and 4-pillar MCDA ATS scoring.</li>"
-            "<li><b>Field-Specific Asset Intelligence:</b> Recommends GitHub, Behance, Medical Licenses, CPA, or Bar Admission based on candidate industry.</li>"
-            "<li><b>Automatic Offline Fallback:</b> Seamlessly operates offline with zero cloud dependency if API key is not set.</li>"
-            "</ul>"
-        )
-        g_sub.setTextFormat(Qt.TextFormat.RichText)
-        g_sub.setWordWrap(True)
-        g_layout.addWidget(g_title)
-        g_layout.addWidget(g_sub)
+        a_title = QLabel("👤 Active User Account & Session")
+        a_title.setObjectName("SectionHeader")
+        a_layout.addWidget(a_title)
 
-        status_lbl = QLabel("✅ Hybrid Gemini AI & Local NLP Engines are ACTIVE and ready for intelligent analysis.")
-        status_lbl.setStyleSheet("color: #34D399; font-weight: 600; font-size: 13px; margin-top: 8px;")
-        g_layout.addWidget(status_lbl)
-        layout.addWidget(ai_card)
-
-        # System Info Card
-        frame = QFrame()
-        frame.setObjectName("CardFrame")
-        f_layout = QVBoxLayout(frame)
-        f_layout.setContentsMargins(22, 22, 22, 22)
-        f_layout.setSpacing(8)
-
-        sys_title = QLabel("ℹ️ System & Engine Information")
-        sys_title.setObjectName("SectionHeader")
-        f_layout.addWidget(sys_title)
-        f_layout.addSpacing(4)
-
-        info_items = [
-            ("Application", get_app_version_string()),
-            ("Logged In User", f"{self.user.get('name', 'User')} ({self.user.get('email', '')})"),
-            ("Primary AI Engine", "Hybrid Google Gemini AI & On-Device spaCy NLP"),
-            ("NLP & Semantic Parser", "spaCy (en_core_web_sm) & MCDA Engine"),
-            ("Database", "SQLite3 WAL Mode (local resumeiq.db)"),
-            ("Document Extractors", "pdfplumber, python-docx"),
-            ("Report Engine", "ReportLab 5 Vector PDF Compiler")
+        a_info = [
+            ("Logged In User", self.user.get('name', 'User')),
+            ("Email Address", self.user.get('email', '')),
+            ("Account Role", "Administrator / Primary User"),
+            ("Application Version", get_app_version_string())
         ]
-        for k, v in info_items:
+        for k, v in a_info:
             lbl = QLabel(f"<b>{k}:</b> {v}")
             lbl.setStyleSheet("font-size: 13.5px; color: #E2E8F0; padding: 2px 0;")
             lbl.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-            f_layout.addWidget(lbl)
+            a_layout.addWidget(lbl)
 
-        layout.addWidget(frame)
+        layout.addWidget(acc_card)
 
         # Feature 9: Dark / Light Theme Toggle Card
         # App Theme Card (Permanent 100% Glassmorphism Dark Theme)

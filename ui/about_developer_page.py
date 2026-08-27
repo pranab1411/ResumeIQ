@@ -1,6 +1,6 @@
 """
 ui/about_developer_page.py
-Dedicated About Developer & Engine Architecture Page for ResumeIQ v2.1.
+Dedicated About ResumeIQ & System Architecture Page for ResumeIQ v2.0.
 """
 
 from PyQt6.QtWidgets import (
@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtGui import QDesktopServices
+from config.version import get_app_version_string
 
 class AboutDeveloperPage(QWidget):
     def __init__(self, parent=None):
@@ -31,7 +32,7 @@ class AboutDeveloperPage(QWidget):
 
         # Header Title
         header_box = QVBoxLayout()
-        header_title = QLabel("👨‍💻 About Developer & ResumeIQ Engine")
+        header_title = QLabel("ℹ️ About ResumeIQ & System Architecture")
         header_title.setObjectName("HeaderTitle")
         header_title.setStyleSheet("font-size: 22px; font-weight: bold; color: #F8FAFC;")
         
@@ -42,7 +43,7 @@ class AboutDeveloperPage(QWidget):
         header_box.addWidget(header_sub)
         content_layout.addLayout(header_box)
 
-        # Top Section: Developer Profile Card & Mission Card
+        # Top Section: Developer Profile Card & Engine Architecture Card
         top_grid = QHBoxLayout()
         top_grid.setSpacing(20)
 
@@ -61,9 +62,9 @@ class AboutDeveloperPage(QWidget):
         dev_name.setStyleSheet("font-size: 20px; font-weight: bold; color: #F8FAFC;")
 
         dev_bio = QLabel(
-            "Designed and engineered ResumeIQ — a local, privacy-first resume analysis "
-            "and ATS matching engine built to empower job seekers with instant, defensible "
-            "resume improvements without cloud data exposure."
+            "Designed and engineered ResumeIQ — an AI-powered desktop suite that combines "
+            "Google Gemini AI with local spaCy NLP intelligence to parse multi-industry resumes, "
+            "predict universal job roles, calculate 4-pillar ATS scores, and generate vector PDF reports."
         )
         dev_bio.setWordWrap(True)
         dev_bio.setStyleSheet("font-size: 12px; color: #CBD5E1; line-height: 1.4;")
@@ -123,7 +124,7 @@ class AboutDeveloperPage(QWidget):
         dev_layout.addWidget(dev_bio)
         dev_layout.addLayout(btn_layout)
 
-        # Engine Mission Card
+        # Engine Architecture Card
         mission_card = QFrame()
         mission_card.setObjectName("CardFrame")
         mission_card.setStyleSheet("background: #1E293B; border-radius: 12px; border: 1px solid #334155;")
@@ -137,15 +138,15 @@ class AboutDeveloperPage(QWidget):
         mission_title = QLabel("🤖 Hybrid Gemini AI & Local Intelligence")
         mission_title.setStyleSheet("font-size: 18px; font-weight: bold; color: #F8FAFC;")
 
-        p1 = QLabel("• <b>Google Gemini AI:</b> Used for holistic candidate entity extraction and multi-industry target job role prediction.")
+        p1 = QLabel("• <b>Google Gemini AI:</b> 4-part candidate profile analysis (Skills, Education, Positions, Experience Years/Months) & 50+ universal role predictions.")
         p1.setWordWrap(True)
         p1.setStyleSheet("font-size: 12px; color: #CBD5E1;")
 
-        p2 = QLabel("• <b>On-Device spaCy NLP:</b> Extracts skills, contact info, and metrics locally with zero dependency when offline.")
+        p2 = QLabel("• <b>On-Device spaCy NLP:</b> Fast entity extraction, contact info parsing, and 4-pillar MCDA ATS scoring with zero cloud dependency when offline.")
         p2.setWordWrap(True)
         p2.setStyleSheet("font-size: 12px; color: #CBD5E1;")
 
-        p3 = QLabel("• <b>MCDA & Report Engine:</b> Calculates transparent ATS matching scores and generates vector PDF evaluation reports.")
+        p3 = QLabel("• <b>Field-Specific Asset Intelligence:</b> Recommends GitHub, Behance, Medical Licensure, CPA, or Bar Admission based on candidate field.")
         p3.setWordWrap(True)
         p3.setStyleSheet("font-size: 12px; color: #CBD5E1;")
 
@@ -159,6 +160,34 @@ class AboutDeveloperPage(QWidget):
         top_grid.addWidget(dev_card, 1)
         top_grid.addWidget(mission_card, 1)
         content_layout.addLayout(top_grid)
+
+        # System & Engine Information Card
+        sys_card = QFrame()
+        sys_card.setStyleSheet("background: #1E293B; border-radius: 12px; border: 1px solid #334155;")
+        sys_layout = QVBoxLayout(sys_card)
+        sys_layout.setContentsMargins(20, 20, 20, 20)
+        sys_layout.setSpacing(8)
+
+        sys_title = QLabel("ℹ️ System & Engine Information")
+        sys_title.setStyleSheet("font-size: 15px; font-weight: bold; color: #F8FAFC;")
+        sys_layout.addWidget(sys_title)
+        sys_layout.addSpacing(4)
+
+        info_items = [
+            ("Application Version", get_app_version_string()),
+            ("Primary AI Engine", "Hybrid Google Gemini AI & On-Device spaCy NLP"),
+            ("NLP & Semantic Parser", "spaCy (en_core_web_sm) & MCDA Engine"),
+            ("Database Storage", "SQLite3 WAL Mode (local resumeiq.db)"),
+            ("Document Extractors", "pdfplumber, python-docx"),
+            ("Report Engine", "ReportLab 5 Vector PDF Compiler")
+        ]
+        for k, v in info_items:
+            lbl = QLabel(f"<b>{k}:</b> {v}")
+            lbl.setStyleSheet("font-size: 12.5px; color: #CBD5E1; padding: 2px 0;")
+            lbl.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+            sys_layout.addWidget(lbl)
+
+        content_layout.addWidget(sys_card)
 
         # Tech Stack Grid Section
         stack_card = QFrame()
