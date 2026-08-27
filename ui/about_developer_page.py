@@ -72,6 +72,16 @@ class AboutDeveloperPage(QWidget):
         btn_layout = QHBoxLayout()
         btn_layout.setSpacing(10)
 
+        btn_linkedin = QPushButton("💼 LinkedIn Profile")
+        btn_linkedin.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_linkedin.setStyleSheet("""
+            QPushButton {
+                background: #0A66C2; color: white; border-radius: 6px; padding: 8px 14px; font-weight: bold; font-size: 11.5px;
+            }
+            QPushButton:hover { background: #004182; }
+        """)
+        btn_linkedin.clicked.connect(lambda: QDesktopServices.openUrl(QUrl("https://www.linkedin.com/in/pranab-chourasiya-87409735b/")))
+
         btn_github = QPushButton("🐙 GitHub Profile")
         btn_github.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_github.setStyleSheet("""
@@ -92,6 +102,7 @@ class AboutDeveloperPage(QWidget):
         """)
         btn_repo.clicked.connect(lambda: QDesktopServices.openUrl(QUrl("https://github.com/pranab1411/ResumeIQ")))
 
+        btn_layout.addWidget(btn_linkedin)
         btn_layout.addWidget(btn_github)
         btn_layout.addWidget(btn_repo)
         btn_layout.addStretch()
