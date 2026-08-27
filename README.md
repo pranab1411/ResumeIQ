@@ -1,34 +1,48 @@
 # ResumeIQ — AI Resume Analyzer & ATS Optimization Desktop Suite
 
-![Python](https://img.shields.io/badge/Python-3.12%2B-blue)
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue)
 ![PyQt6](https://img.shields.io/badge/GUI-PyQt6-indigo)
 ![NLP](https://img.shields.io/badge/NLP-spaCy-green)
-![SQLite](https://img.shields.io/badge/Database-SQLite3-lightgrey)
+![ReportLab](https://img.shields.io/badge/PDF-ReportLab%205-purple)
+![SQLite](https://img.shields.io/badge/Database-SQLite3%20WAL-lightgrey)
+![Build](https://img.shields.io/badge/Build-v2.1-success)
 
-**ResumeIQ** is an offline-capable, NLP-powered desktop application built with Python 3.12, PyQt6, spaCy, pdfplumber, python-docx, and ReportLab. It parses resumes across multiple formats (PDF, DOCX, TXT, RTF, ODT, HTML), performs entity and domain skill extraction, computes a transparent 4-Pillar Multi-Criteria Decision Analysis (MCDA) ATS compatibility score against custom Job Descriptions, predicts aligned job roles, provides career optimization suggestions, and generates executive PDF evaluation reports.
+**ResumeIQ** is a 100% offline, privacy-first, NLP-powered desktop application built with Python 3.11, PyQt6, spaCy, pdfplumber, python-docx, and ReportLab. It parses resumes across multiple formats (PDF, DOCX, TXT, RTF, ODT, HTML), performs candidate entity and domain skill extraction, computes a transparent 4-Pillar Multi-Criteria Decision Analysis (MCDA) ATS compatibility score against target Job Descriptions, predicts aligned job roles, provides career optimization suggestions, and generates executive single-page PDF evaluation reports.
+
+---
+
+## 👨‍💻 Developer Information
+
+* **Developer:** **Pranab Chourasiya**
+* **LinkedIn Profile:** [linkedin.com/in/pranab-chourasiya-87409735b](https://www.linkedin.com/in/pranab-chourasiya-87409735b/)
+* **GitHub Profile:** [github.com/pranab1411](https://github.com/pranab1411)
+* **GitHub Repository:** [github.com/pranab1411/ResumeIQ](https://github.com/pranab1411/ResumeIQ)
+* **Contact Email:** [pranabchourasiya876@gmail.com](mailto:pranabchourasiya876@gmail.com)
 
 ---
 
 ## 🌟 Key Features
 
-1. **User Authentication & Cryptographic Security**:
-   - Per-user salted Argon2 / PBKDF2-SHA256 password hashing.
-   - Secure account registration, authentication, and SQLite persistence.
+1. **100% On-Device & Private (Zero Cloud Transmission)**:
+   - Complete local processing — resumes, candidate names, and contact details never leave your computer.
 2. **Multi-Format Resume Parsing**:
    - Multi-format text extraction (PDF, DOCX, TXT, RTF, ODT, HTML) with OCR image fallback.
    - spaCy Named Entity Recognition (NER) for Candidate Name, Email, and Phone Number.
+   - Smart header recognition for *"About Me"*, *"Profile"*, *"Personal Profile"*, and *"Executive Summary"*.
    - Curated domain taxonomy skill extraction across **22 tech and non-tech role categories** (350+ skills).
 3. **4-Pillar MCDA Scoring Engine**:
    - Multi-Criteria Decision Analysis scoring model:
      $$\text{ATS Score} = (0.40 \times \text{Skills}) + (0.25 \times \text{TF-IDF Cosine}) + (0.20 \times \text{Hygiene/Format}) + (0.15 \times \text{Experience})$$
-   - Granular 5-star rating system (0.0 to 5.0 Stars) supporting fractional representations.
+   - Granular 5-star rating system (0.0 to 5.0 Stars) supporting fractional vector representations.
    - Score categorization: *Needs Improvement* (<50%), *Average* (50–75%), *Excellent* (>75%).
 4. **Target Job Role Prediction**:
    - Predicts top matching job roles based on skills extracted from the candidate's resume (e.g. *Full Stack Developer*, *Data Scientist*, *Desktop Support Engineer*, *DevOps Engineer*).
 5. **Simulated Enterprise ATS Profiles**:
-   - Heuristic multi-criteria profiling simulating ATS evaluation priorities (Workday, Oracle Taleo, Greenhouse, Lever, iCIMS).
+   - Heuristic multi-criteria profiling simulating enterprise ATS evaluation priorities (Workday, Oracle Taleo, Greenhouse, Lever, iCIMS).
 6. **Executive PDF Evaluation Report Export**:
-   - Generates an executive ReportLab PDF report containing candidate metrics, traceable MCDA contribution table, extracted evidence (verbs, % metrics), skill gap matrix, and actionable recommendations.
+   - Generates a single-page ReportLab vector PDF report containing candidate metrics, overall 5-star rating breakdown, section analysis status table, extracted evidence, and actionable recommendations.
+7. **Dedicated "About Developer" Page**:
+   - Integrated dark glassmorphic page detailing developer credentials, mission promise, tech stack matrix, and direct contact buttons.
 
 ---
 
@@ -38,8 +52,11 @@
 ResumeIQ/
 ├── assets/                  # Domain skills taxonomy & UI vector assets
 │   ├── skills.json          # 22-category tech & non-tech skills taxonomy
-│   └── names_db.json        # Global first & last names database
+│   ├── names_db.json        # Global first & last names database
+│   ├── app_icon.ico         # Application icon
+│   └── logo.png             # ResumeIQ visual logo
 ├── config/
+│   ├── version.py           # Application version & build configuration
 │   ├── ats_config.json      # Configurable ATS weights, thresholds & benchmarks
 │   └── smtp_config.py       # Environment-based SMTP configuration
 ├── database/
@@ -60,14 +77,23 @@ ResumeIQ/
 │   ├── test_parsers.py
 │   └── test_report_generator.py
 ├── ui/                      # PyQt6 GUI components & dark theme stylesheets
-│   ├── dashboard_window.py  # Main Dashboard window
+│   ├── about_developer_page.py # About Developer & Engine Architecture view
+│   ├── dashboard_window.py  # Main Dashboard window & navigation stack
 │   ├── login_window.py      # Login & Registration UI
+│   ├── profile_page.py      # Candidate Profile & Target Role settings
+│   ├── glass_message_box.py # Custom glassmorphic notifications
+│   ├── onboarding_tour.py   # Interactive onboarding tour wizard
+│   ├── floating_widget.py   # Desktop floating glass view
+│   ├── closing_screen.py    # Animated shutdown splash screen
 │   └── styles.py            # Dark theme QSS design tokens
 ├── utils/                   # Security, logging & path helpers
-│   ├── gemini_client.py     # Gemini REST client
-│   └── security.py          # Password hashing & email validation
+│   ├── gemini_client.py     # Gemini REST client fallback
+│   ├── logger.py            # Central logging utility
+│   └── security.py          # Password hashing & validation
 ├── main.py                  # Application entry point
-├── build_installer.py       # Inno Setup & PyInstaller compiler script
+├── build_test.py            # Automated Inno Setup test build compiler
+├── build_installer.py       # Inno Setup production build compiler
+├── installer_setup.iss      # Inno Setup installer script
 ├── requirements.txt         # Dependencies manifest
 └── README.md                # Documentation
 ```
@@ -77,14 +103,14 @@ ResumeIQ/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Python 3.10+ (Recommended: Python 3.12 64-bit)
+- Python 3.10+ (Recommended: Python 3.11 / 3.12 64-bit)
 - Virtual environment (`venv`)
 
 ### Installation
 
 1. Activate virtual environment (Windows):
-   ```bash
-   venv\Scripts\activate
+   ```powershell
+   .\venv\Scripts\activate
    ```
 
 2. Install required packages:
@@ -104,25 +130,26 @@ ResumeIQ/
 
 ---
 
-## 🧪 Running Automated Tests
+## 🧪 Running Automated Test Suite
 
-Run the full automated test suite:
+Run the full automated unit test suite (38 tests):
 
-```bash
-python -m unittest discover -s tests -p "test_*.py"
+```powershell
+$env:PYTHONPATH="."; python -m unittest discover -s tests -p "test_*.py"
 ```
 
 ---
 
-## 📦 Windows Installers & Automated Setup
+## 📦 Building Installers & Automated Setup
 
-Build a standard Windows installer wizard (`test_builds/ResumeIQ v2.1 test build <N>.exe`):
+Compile an installable Windows setup executable wizard (`test_builds/ResumeIQ v2.1 test build <N>.exe`):
 
-```bash
+```powershell
 python build_test.py
 ```
 
 ---
 
-## 📝 License
-Built as an MCA Minor Project / Academic Portfolio Application.
+## 📝 License & Attribution
+Designed & Engineered by **Pranab Chourasiya**.
+Built as a local, privacy-first AI Resume Intelligence & Career Optimization Desktop Application.
