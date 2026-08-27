@@ -110,7 +110,7 @@ class AboutDeveloperPage(QWidget):
             }
             QPushButton:hover { background: #047857; }
         """)
-        btn_email.clicked.connect(lambda: QDesktopServices.openUrl(QUrl("mailto:pranab.chourasiya@gmail.com")))
+        btn_email.clicked.connect(lambda: QDesktopServices.openUrl(QUrl("mailto:pranabchourasiya876@gmail.com")))
 
         btn_layout.addWidget(btn_linkedin)
         btn_layout.addWidget(btn_github)
