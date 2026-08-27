@@ -28,5 +28,42 @@
   "group policy": ["gpo"],
   "office 365": ["o365", "m365", "microsoft 365"],
   "it service management": ["itsm"],
-  "quality assurance": ["qa", "software testing"]
+  "quality assurance": ["qa", "software testing"],
+
+  "electronic medical records": ["emr", "ehr", "electronic health records", "medical records"],
+  "registered nurse": ["rn", "staff nurse", "registered nursing"],
+  "basic life support": ["bls", "cpr/bls"],
+  "advanced cardiac life support": ["acls"],
+  "cardiopulmonary resuscitation": ["cpr"],
+  "intensive care unit": ["icu", "ccu"],
+  "hipaa compliance": ["hipaa", "patient privacy compliance"],
+
+  "juris doctor": ["jd", "j.d."],
+  "general data protection regulation": ["gdpr"],
+  "intellectual property": ["ip", "ip law"],
+
+  "certified public accountant": ["cpa"],
+  "chartered financial analyst": ["cfa"],
+  "generally accepted accounting principles": ["gaap"],
+  "international financial reporting standards": ["ifrs"],
+
+  "fundamentals of engineering": ["fe", "eit"],
+  "professional engineer": ["pe"],
+  "building information modeling": ["bim"],
+  "computer-aided design": ["cad", "cadd"],
+  "heating, ventilation, and air conditioning": ["hvac"],
+  "finite element analysis": ["fea"],
+  "programmable logic controller": ["plc"],
+
+  "enterprise resource planning": ["erp"],
+  "third-party logistics": ["3pl"],
+  "warehouse management system": ["wms"],
+
+  "project management professional": ["pmp"],
+  "certified scrum master": ["csm"],
+  "customer relationship management": ["crm"],
+  "key performance indicators": ["kpi", "kpis"],
+  "search engine optimization": ["seo"],
+  "search engine marketing": ["sem"],
+  "pay-per-click": ["ppc"]
 }
