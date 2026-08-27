@@ -589,11 +589,21 @@ class PDFReportGenerator:
         text_lower = (resume_text or "").lower()
         role_lower = (display_role or "").lower()
 
-        if any(k in role_lower or k in text_lower for k in ["civil", "construction", "autocad", "structure", "site engineer", "building"]):
+        # Check IT Support, Cybersecurity, Networking, Hardware, and Tech FIRST before Civil to prevent false positive on "PC building"
+        if any(k in role_lower or k in text_lower for k in [
+            "it support", "itsupport", "active directory", "cybersecurity", "networking", "pc hardware",
+            "troubleshooting", "system administration", "computer applications", "bca", "mca", "help desk",
+            "software engineer", "python", "developer", "java", "react", "node", "sql", "devops", "cloud security"
+        ]):
+            field_cat = "tech"
+        elif any(k in role_lower or k in text_lower for k in [
+            "civil engineering", "civil engineer", "construction management", "site engineer civil",
+            "structural engineering", "quantity survey", "concrete technology", "primavera p6", "staad.pro", "peb packages"
+        ]):
             field_cat = "civil"
-        elif any(k in role_lower or k in text_lower for k in ["nurse", "medical", "patient", "clinical", "doctor", "triage", "hospital"]):
+        elif any(k in role_lower or k in text_lower for k in ["nurse", "medical", "patient", "clinical", "doctor", "triage", "hospital", "bls", "acls"]):
             field_cat = "healthcare"
-        elif any(k in role_lower or k in text_lower for k in ["finance", "account", "cpa", "audit", "tax", "budget"]):
+        elif any(k in role_lower or k in text_lower for k in ["finance", "account", "cpa", "audit", "tax", "budgeting"]):
             field_cat = "finance"
         elif any(k in role_lower or k in text_lower for k in ["legal", "law", "attorney", "paralegal", "litigation"]):
             field_cat = "legal"
@@ -601,8 +611,6 @@ class PDFReportGenerator:
             field_cat = "education"
         elif any(k in role_lower or k in text_lower for k in ["figma", "ui/ux", "designer", "graphic", "behance"]):
             field_cat = "design"
-        elif any(k in role_lower or k in text_lower for k in ["python", "developer", "software", "react", "node", "java", "sql", "code", "devops"]):
-            field_cat = "tech"
         else:
             field_cat = "general"
 
@@ -654,15 +662,27 @@ class PDFReportGenerator:
             link_glance_text = "Design portfolio URL present" if has_design_link else "Design portfolio URL not found"
             link_glance_icon = "check_green" if has_design_link else "warn_amber"
         elif field_cat == "tech":
-            item3_title = "Add GitHub / Code Repository Link"
-            item3_desc = "No GitHub, GitLab, or personal project link found."
-            item3_why = "Provides proof of your code repositories and open-source contributions."
-            item3_action = "Add your GitHub profile or live project URL."
-            rec_additions = ["System Architecture", "CI/CD & Pipeline Basics", "Cloud Services (AWS/GCP)"]
-            fallback_missing = ["REST APIs", "Docker"]
-            has_tech_link = any(k in text_lower for k in ["github.com", "gitlab.com"])
-            link_glance_text = "GitHub / GitLab repository link present" if has_tech_link else "GitHub / Portfolio link not found"
-            link_glance_icon = "check_green" if has_tech_link else "warn_amber"
+            is_it_support = any(k in text_lower or k in role_lower for k in ["it support", "itsupport", "pc hardware", "active directory", "cybersecurity", "troubleshooting", "system administration"])
+            if is_it_support:
+                item3_title = "Add IT Certifications & Hands-On Labs"
+                item3_desc = "Highlight CompTIA Security+, CCNA, or Microsoft Active Directory credentials."
+                item3_why = "Increases recruiter trust for enterprise IT support and system administration roles."
+                item3_action = "List CompTIA, CCNA, or Microsoft certifications near header."
+                rec_additions = ["Advanced Network Administration", "Cloud Security (AWS/Azure)", "PowerShell / Bash Scripting"]
+                fallback_missing = ["Cloud Security Basics", "PowerShell Scripting"]
+                has_link = any(k in text_lower for k in ["github.com", "linkedin.com"])
+                link_glance_text = "Professional profile / LinkedIn verified" if has_link else "Professional profile link missing"
+                link_glance_icon = "check_green" if has_link else "warn_amber"
+            else:
+                item3_title = "Add GitHub / Code Repository Link"
+                item3_desc = "No GitHub, GitLab, or personal project link found."
+                item3_why = "Provides proof of your code repositories and open-source contributions."
+                item3_action = "Add your GitHub profile or live project URL."
+                rec_additions = ["System Architecture", "CI/CD & Pipeline Basics", "Cloud Services (AWS/GCP)"]
+                fallback_missing = ["REST APIs", "Docker"]
+                has_tech_link = any(k in text_lower for k in ["github.com", "gitlab.com"])
+                link_glance_text = "GitHub / GitLab repository link present" if has_tech_link else "GitHub / Portfolio link not found"
+                link_glance_icon = "check_green" if has_tech_link else "warn_amber"
         else:
             item3_title = "Add Professional Branding / LinkedIn Link"
             item3_desc = "Ensure your LinkedIn profile or professional site is clearly linked."

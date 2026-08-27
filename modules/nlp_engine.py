@@ -280,6 +280,17 @@ class NLPEngine:
                                 score += 25
                             scored_candidates.append((score, clean_part))
 
+        # 1.5. Combined Two-Line Split Name Check (e.g. line 0 = "PRANAB", line 1 = "CHOURASIYA")
+        if len(lines) >= 2:
+            l0 = self.normalize_candidate_name(lines[0])
+            l1 = self.normalize_candidate_name(lines[1])
+            if l0 and l1 and len(l0.split()) == 1 and len(l1.split()) == 1:
+                combined_name = f"{l0} {l1}"
+                if self.is_valid_candidate_name(combined_name):
+                    words = [w.lower() for w in combined_name.split()]
+                    if any(w in self.global_first_names for w in words) and any(w in self.global_last_names for w in words):
+                        scored_candidates.append((150.0, combined_name))
+
         # 2. Segmented Header Lines Inspection
         for line_idx, line in enumerate(lines[:10]):
             line_lower = line.lower()
@@ -313,10 +324,24 @@ class NLPEngine:
 
     def extract_target_role(self, text: str, fallback_role: str = "") -> str:
         """
-        Extracts candidate's target job role from header lines or returns fallback role.
+        Extracts candidate's target job role from header lines, experience, or skills context.
         """
         if not text:
             return fallback_role or "General Position"
+
+        text_lower = text.lower()
+
+        # Specific High-Frequency Role Matches
+        if any(k in text_lower for k in ["itsupport engineer", "it support engineer", "it support", "pc hardware", "active directory", "help desk"]):
+            return "IT Support Engineer"
+        elif any(k in text_lower for k in ["cybersecurity", "security analyst", "iam", "identity and access management"]):
+            return "Cybersecurity Analyst"
+        elif any(k in text_lower for k in ["civil engineer", "construction management", "site engineer civil", "specialist - civil", "csa lead"]):
+            return "Civil Engineering Specialist"
+        elif any(k in text_lower for k in ["registered nurse", "staff nurse", "icu nurse", "triage nurse", "clinical nurse"]):
+            return "Registered Nurse / Clinical Specialist"
+        elif any(k in text_lower for k in ["financial analyst", "corporate finance", "cpa", "tax consultant"]):
+            return "Financial Analyst"
 
         lines = [line.strip() for line in text.split("\n") if line.strip()][:12]
         

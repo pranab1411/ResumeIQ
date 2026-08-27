@@ -110,5 +110,25 @@ class TestUniversalRolePrediction(unittest.TestCase):
         self.assertEqual(res["experience_years"], 11.0)
         self.assertIn("11.0 Yrs Exp", res["label"])
 
+    def test_pranab_chourasiya_it_support_name_and_role(self):
+        from modules.nlp_engine import nlp_engine
+        pranab_text = """
+        PRANAB
+        CHOURASIYA
+        Phone: 9630956249 | Email: pranabchourasiya876@gmail.com
+        About Me: A driven and technically adept Computer Applications graduate... passion lies in IT support, system administration, and cybersecurity where I have experience with Active Directory.
+        Work experience:
+        ITSupport Engineer
+        Vistar Technology, Vijay Nagar, Jabalpur Jan2025-Jun2025
+        Education: Bachelor of Computer Applications (BCA)
+        Hobbies: PC building & troubleshooting
+        Skills: PC Hardware, Technical Support, Active Directory, Cybersecurity Basics
+        """
+        extracted_name = nlp_engine.extract_candidate_name(pranab_text)
+        self.assertEqual(extracted_name, "Pranab Chourasiya")
+
+        extracted_role = nlp_engine.extract_target_role(pranab_text)
+        self.assertEqual(extracted_role, "IT Support Engineer")
+
 if __name__ == "__main__":
     unittest.main()
