@@ -397,22 +397,8 @@ class DashboardWindow(QMainWindow):
         left_layout.setContentsMargins(20, 20, 20, 20)
         left_layout.setSpacing(12)
 
-        # 0. Candidate Mode Selector
-        left_layout.addWidget(QLabel("Step 1: Select Candidate / Evaluation Mode"))
-        mode_box = QHBoxLayout()
-        self.radio_fresher = QRadioButton("🎓 Fresher (Without JD)")
-        self.radio_experienced = QRadioButton("💼 Experienced (With JD)")
-        self.radio_experienced.setChecked(True)
-
-        self.radio_fresher.toggled.connect(self.on_mode_changed)
-        self.radio_experienced.toggled.connect(self.on_mode_changed)
-
-        mode_box.addWidget(self.radio_fresher)
-        mode_box.addWidget(self.radio_experienced)
-        left_layout.addLayout(mode_box)
-
         # 1. File Upload Box
-        left_layout.addWidget(QLabel("Step 2: Select Resume File (PDF / DOCX)"))
+        left_layout.addWidget(QLabel("Step 1: Select Resume File (PDF / DOCX)"))
         
         file_box = QHBoxLayout()
         self.lbl_selected_file = QLabel("No file selected...")
@@ -428,14 +414,14 @@ class DashboardWindow(QMainWindow):
         left_layout.addLayout(file_box)
 
         # 2. Target Job Title
-        self.lbl_step_title = QLabel("Step 3: Target Job Title (Optional)")
+        self.lbl_step_title = QLabel("Step 2: Target Job Title (Optional)")
         left_layout.addWidget(self.lbl_step_title)
         self.input_job_title = QLineEdit()
-        self.input_job_title.setPlaceholderText("e.g. Senior Python Developer / Data Scientist")
+        self.input_job_title.setPlaceholderText("e.g. Senior Python Developer / Staff Nurse / Civil Engineer")
         left_layout.addWidget(self.input_job_title)
 
-        # Feature 4: Job Description URL Auto-Scraper
-        self.lbl_step_url = QLabel("Step 4: Scrape JD from URL (Optional)")
+        # Feature 3: Job Description URL Auto-Scraper
+        self.lbl_step_url = QLabel("Step 3: Scrape JD from URL (Optional)")
         left_layout.addWidget(self.lbl_step_url)
         url_row = QHBoxLayout()
         self.input_jd_url = QLineEdit()
@@ -449,11 +435,11 @@ class DashboardWindow(QMainWindow):
         url_row.addWidget(btn_scrape)
         left_layout.addLayout(url_row)
 
-        # 3. Job Description Text Area
-        self.lbl_step_jd = QLabel("Step 5: Paste or Edit Job Description")
+        # 4. Job Description Text Area
+        self.lbl_step_jd = QLabel("Step 4: Job Description (Optional - For ATS Matching)")
         left_layout.addWidget(self.lbl_step_jd)
         self.input_jd = QTextEdit()
-        self.input_jd.setPlaceholderText("Paste target job description skills, requirements, and responsibilities here...")
+        self.input_jd.setPlaceholderText("Paste target job description requirements here (Optional).\n\nIf left empty, ResumeIQ AI will automatically perform Structural Presentation Audit & Predict Matching Job Roles!")
         left_layout.addWidget(self.input_jd)
 
         # Analyze Button
@@ -693,42 +679,6 @@ class DashboardWindow(QMainWindow):
         page.setLayout(layout)
         return page
 
-    def on_mode_changed(self):
-        is_fresher = self.radio_fresher.isChecked()
-        if is_fresher:
-            self.lbl_step_title.setText("Step 3: Target Job Title / Stream (Optional)")
-            self.input_job_title.setPlaceholderText("e.g. Fresher / Entry-Level Software Engineer")
-            self.lbl_step_jd.setText("Step 4: Job Description (Bypassed in Fresher Mode)")
-            self.input_jd.setPlainText("")
-            self.input_jd.setPlaceholderText("🎓 Fresher Mode Active: Skill matching against Job Description is BYPASSED.\n\nResumeIQ will judge your resume structure, font choices & sizes, section ordering, and attention-grabbing elements.")
-            self.input_jd.setEnabled(False)
-            self.input_jd.setStyleSheet("background-color: #1E293B; color: #64748B;")
-            
-            # Hide skill matching UI
-            self.lbl_matched_title.hide()
-            self.txt_matched_skills.hide()
-            self.lbl_missing_title.hide()
-            self.txt_missing_skills.hide()
-
-            self.score_title.setText("Presentation & Structural Score")
-            self.lbl_suggestions_title.setText("💡 AI Structure, Fonts & Attention-Grabber Advice")
-        else:
-            self.lbl_step_title.setText("Step 3: Target Job Title (Required for ATS Match)")
-            self.input_job_title.setPlaceholderText("e.g. Senior Python Developer / Data Scientist")
-            self.lbl_step_jd.setText("Step 4: Paste Job Description")
-            self.input_jd.setPlaceholderText("Paste target job description skills, requirements, and responsibilities here...")
-            self.input_jd.setEnabled(True)
-            self.input_jd.setStyleSheet("")
-
-            # Show skill matching UI
-            self.lbl_matched_title.show()
-            self.txt_matched_skills.show()
-            self.lbl_missing_title.show()
-            self.txt_missing_skills.show()
-
-            self.score_title.setText("ATS Compatibility Score")
-            self.lbl_suggestions_title.setText("💡 AI Recommendations & Action Items")
-
     def handle_browse_file(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self, "Select Resume Document", "", "Resume Files (*.pdf *.docx *.txt)"
@@ -743,20 +693,19 @@ class DashboardWindow(QMainWindow):
             QMessageBox.warning(self, "Missing File", "Please select a resume PDF or DOCX file first.")
             return
 
-        is_fresher = self.radio_fresher.isChecked()
-        mode = "fresher" if is_fresher else "experienced"
-
-        if not is_fresher and not self.input_jd.toPlainText().strip():
-            QMessageBox.warning(self, "Job Description Required", "Please paste a Job Description for Experienced Candidate Mode, or switch to Fresher Mode.")
-            return
-
-        jd_text = "" if is_fresher else self.input_jd.toPlainText().strip()
-        job_title = self.input_job_title.text().strip() or ("Fresher / Entry-Level Role" if is_fresher else "General Position")
-
         try:
             # 1. Parse Resume Text
             extracted_text = DocumentParser.extract_text(self.selected_file_path)
             filename = os.path.basename(self.selected_file_path)
+
+            # 2. AI Automatic Candidate Seniority & Fresher Detection
+            seniority_info = nlp_engine.detect_candidate_seniority(extracted_text)
+            is_fresher = seniority_info["is_fresher"]
+            seniority_label = seniority_info["label"]
+            mode = "fresher" if is_fresher else "experienced"
+
+            jd_text = self.input_jd.toPlainText().strip()
+            job_title = self.input_job_title.text().strip() or ("Fresher / Entry-Level Role" if is_fresher else "General Position")
 
             # Copy resume file to local resumes/ folder
             dest_path = os.path.join(RESUMES_DIR, filename)
@@ -764,12 +713,12 @@ class DashboardWindow(QMainWindow):
                 with open(self.selected_file_path, "rb") as sf, open(dest_path, "wb") as df:
                     df.write(sf.read())
 
-            # 2. Save/Update DB Resume Record
+            # 3. Save/Update DB Resume Record
             resume_id = db.add_resume(self.user["id"], filename, dest_path, extracted_text)
             self.current_resume_id = resume_id
 
-            # 3. Autonomous Local AI Agent Extraction & Analysis
-            logger.info(f"Executing Free Local AI Agent analysis ({mode} mode)...")
+            # 4. Autonomous Local AI Agent Extraction & Analysis
+            logger.info(f"Executing Local AI Agent analysis (Detected: {seniority_label})...")
             ai_res = local_ai_agent.analyze_resume(extracted_text, job_title, jd_text, mode=mode)
 
             contact_info = {
@@ -792,8 +741,8 @@ class DashboardWindow(QMainWindow):
             star_rating = ATSCalculator.get_star_rating_gui(score)
             self.lbl_ats_score_val.setText(f"{score}%")
             self.progress_ats.setValue(int(score))
-            self.lbl_score_category.setText(f"Rating: {category}  |  {star_rating}  ({mode.capitalize()} Mode)")
-            self.lbl_contact_info.setText(f"Candidate: <b>{contact_info['name']}</b> &nbsp;|&nbsp; Target Role: <b>{detected_role}</b> &nbsp;|&nbsp; Email: {contact_info['email']}")
+            self.lbl_score_category.setText(f"Rating: {category}  |  {star_rating}  |  AI Detected: {seniority_label}")
+            self.lbl_contact_info.setText(f"Candidate: <b>{contact_info['name']}</b> &nbsp;|&nbsp; Seniority: <b>{seniority_label}</b> &nbsp;|&nbsp; Target Role: <b>{detected_role}</b> &nbsp;|&nbsp; Email: {contact_info['email']}")
 
             self.txt_matched_skills.setPlainText(", ".join(matched) if matched else "None detected")
             self.txt_missing_skills.setPlainText(", ".join(missing) if missing else "None")

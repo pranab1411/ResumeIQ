@@ -441,6 +441,75 @@ class NLPEngine:
             })
         return timeline
 
+    def calculate_total_experience_years(self, text: str) -> float:
+        """Calculates total work experience in years extracted from text dates and explicit duration phrases."""
+        if not text:
+            return 0.0
+        
+        # 1. Search explicit experience statements (e.g., "5+ years of experience", "3.5 years exp")
+        match = re.search(r'(\d+(?:\.\d+)?)\s*\+?\s*years?(?:\s+of)?\s+experience', text, re.IGNORECASE)
+        if match:
+            try:
+                return float(match.group(1))
+            except ValueError:
+                pass
+                
+        # 2. Parse date ranges in timeline
+        timeline = self.generate_experience_timeline(text)
+        if not timeline:
+            return 0.0
+            
+        import datetime
+        total_months = 0
+        current_year = datetime.datetime.now().year
+
+        for item in timeline:
+            start_str = item.get("start", "")
+            end_str = item.get("end", "")
+            
+            start_m = re.search(r'\b(20\d{2}|19\d{2})\b', start_str)
+            start_year = int(start_m.group(1)) if start_m else current_year
+
+            if "present" in end_str.lower() or "current" in end_str.lower():
+                end_year = current_year
+            else:
+                end_m = re.search(r'\b(20\d{2}|19\d{2})\b', end_str)
+                end_year = int(end_m.group(1)) if end_m else start_year
+
+            diff = max(0, end_year - start_year)
+            total_months += diff * 12
+
+        return round(total_months / 12.0, 1)
+
+    def detect_candidate_seniority(self, text: str) -> Dict[str, Any]:
+        """
+        Intelligently detects whether candidate is a Fresher or Experienced professional.
+        """
+        text_lower = (text or "").lower()
+        exp_years = self.calculate_total_experience_years(text)
+
+        fresher_keywords = ["fresher", "entry-level", "entry level", "graduate trainee", "intern", "trainee", "fresher / entry-level"]
+        has_fresher_kw = any(kw in text_lower for kw in fresher_keywords)
+
+        senior_keywords = ["senior", "lead", "principal", "manager", "director", "head", "chief", "vp", "architect", "supervisor"]
+        has_senior_kw = any(kw in text_lower for kw in senior_keywords)
+
+        if has_senior_kw or exp_years >= 1.5:
+            is_fresher = False
+            label = f"Experienced Professional ({exp_years:.1f} Yrs Exp)"
+        elif has_fresher_kw or exp_years < 1.0:
+            is_fresher = True
+            label = "Fresher / Entry-Level Candidate"
+        else:
+            is_fresher = False
+            label = f"Experienced Candidate ({exp_years:.1f} Yrs Exp)"
+
+        return {
+            "is_fresher": is_fresher,
+            "label": label,
+            "experience_years": exp_years
+        }
+
     def extract_keywords_from_jd(self, jd_text: str) -> List[str]:
         """Extracts key skills/technologies mentioned in Job Description."""
         return self.extract_skills(jd_text)

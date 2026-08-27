@@ -79,5 +79,18 @@ class TestUniversalRolePrediction(unittest.TestCase):
         )
         self.assertTrue(any("Licensure" in s or "Medical" in s for s in health_sug))
 
+    def test_automatic_seniority_detection(self):
+        from modules.nlp_engine import nlp_engine
+
+        fresher_text = "Graduate student looking for entry-level Software Developer role. Academic projects in Python and Java."
+        fresher_res = nlp_engine.detect_candidate_seniority(fresher_text)
+        self.assertTrue(fresher_res["is_fresher"])
+        self.assertEqual(fresher_res["label"], "Fresher / Entry-Level Candidate")
+
+        exp_text = "Senior Software Engineer with 5+ years of experience building scalable microservices in Python."
+        exp_res = nlp_engine.detect_candidate_seniority(exp_text)
+        self.assertFalse(exp_res["is_fresher"])
+        self.assertIn("5.0 Yrs Exp", exp_res["label"])
+
 if __name__ == "__main__":
     unittest.main()
