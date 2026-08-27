@@ -175,6 +175,28 @@ def create_icon_bullet(icon_type: str) -> Drawing:
         d.add(Circle(5.5, 5.5, 2.2, fillColor=colors.HexColor("#2A177E"), strokeColor=None))
     return d
 
+def create_star_rating(rating: int, max_stars: int = 5, filled_color_hex: str = "#F59E0B", empty_color_hex: str = "#E2E8F0") -> Drawing:
+    """Creates a crisp vector star rating (e.g. 5-star rating display)."""
+    d = Drawing(38, 9)
+    import math
+    for i in range(max_stars):
+        cx = i * 7.5 + 4.0
+        cy = 4.5
+        r_outer = 3.3
+        r_inner = 1.4
+        pts = []
+        for k in range(10):
+            r = r_outer if k % 2 == 0 else r_inner
+            angle = math.pi / 2 + k * math.pi / 5
+            x = cx + r * math.cos(angle)
+            y = cy + r * math.sin(angle)
+            pts.extend([x, y])
+            
+        color = colors.HexColor(filled_color_hex) if i < rating else colors.HexColor(empty_color_hex)
+        d.add(Polygon(pts, fillColor=color, strokeColor=None, strokeWidth=0))
+    return d
+
+
 def create_pill_badge(text: str, bg_hex: str, fg_hex: str) -> Drawing:
     """Creates a sleek rounded pill badge for HIGH / MEDIUM priorities."""
     d = Drawing(36, 13)
@@ -716,7 +738,7 @@ class PDFReportGenerator:
 
         # Card 3 Right: SECTION ANALYSIS Table
         def make_sec_status(icon_type: str, status_text: str, color_hex: str) -> Table:
-            t = Table([[create_icon_bullet(icon_type), Paragraph(f"<font color='{color_hex}'><b>{status_text}</b></font>", body_style)]], colWidths=[13, 44])
+            t = Table([[create_icon_bullet(icon_type), Paragraph(f"<font color='{color_hex}'><b>{status_text}</b></font>", body_style)]], colWidths=[10, 32])
             t.setStyle(TableStyle([
                 ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
                 ('LEFTPADDING', (0,0), (-1,-1), 0),
@@ -727,25 +749,26 @@ class PDFReportGenerator:
             return t
 
         sec_rows = [
-            [Paragraph("<b>SECTION ANALYSIS</b>", card_title_style), "", ""],
-            [Paragraph("<b>Section</b>", body_bold), Paragraph("<b>Status</b>", body_bold), Paragraph("<b>Recommendation</b>", body_bold)],
-            [Paragraph("Contact Info", body_style), make_sec_status("check_green", "Good", "#059669"), Paragraph("Keep as is", body_style)],
-            [Paragraph("Summary", body_style), make_sec_status("cross_red", "Missing", "#DC2626"), Paragraph("Add 2–3 line summary", body_style)],
-            [Paragraph("Education", body_style), make_sec_status("check_green", "Good", "#059669"), Paragraph("Keep as is", body_style)],
-            [Paragraph("Skills", body_style), make_sec_status("check_green", "Strong", "#059669"), Paragraph("Keep & Prioritize", body_style)],
-            [Paragraph("Projects", body_style), make_sec_status("warn_amber", "Improve", "#D97706"), Paragraph("Add metrics & impact", body_style)],
-            [Paragraph("Experience", body_style), make_sec_status("check_green", "Good", "#059669"), Paragraph("Keep as is", body_style)],
-            [Paragraph("Certifications", body_style), make_sec_status("circle_optional", "Optional", "#64748B"), Paragraph("Add if relevant", body_style)],
+            [Paragraph("<b>SECTION ANALYSIS</b>", card_title_style), "", "", ""],
+            [Paragraph("<b>Section</b>", body_bold), Paragraph("<b>Rating</b>", body_bold), Paragraph("<b>Status</b>", body_bold), Paragraph("<b>Recommendation</b>", body_bold)],
+            [Paragraph("Contact Info", body_style), create_star_rating(5, 5, "#059669"), make_sec_status("check_green", "Good", "#059669"), Paragraph("Keep as is", body_style)],
+            [Paragraph("Summary", body_style), create_star_rating(1, 5, "#DC2626"), make_sec_status("cross_red", "Missing", "#DC2626"), Paragraph("Add 2–3 line summary", body_style)],
+            [Paragraph("Education", body_style), create_star_rating(5, 5, "#059669"), make_sec_status("check_green", "Good", "#059669"), Paragraph("Keep as is", body_style)],
+            [Paragraph("Skills", body_style), create_star_rating(5, 5, "#059669"), make_sec_status("check_green", "Strong", "#059669"), Paragraph("Keep & Prioritize", body_style)],
+            [Paragraph("Projects", body_style), create_star_rating(3, 5, "#D97706"), make_sec_status("warn_amber", "Improve", "#D97706"), Paragraph("Add metrics & impact", body_style)],
+            [Paragraph("Experience", body_style), create_star_rating(4, 5, "#059669"), make_sec_status("check_green", "Good", "#059669"), Paragraph("Keep as is", body_style)],
+            [Paragraph("Certifications", body_style), create_star_rating(2, 5, "#64748B"), make_sec_status("circle_optional", "Optional", "#64748B"), Paragraph("Add if relevant", body_style)],
         ]
-        card_sec_inner = Table(sec_rows, colWidths=[54, 58, 108])
+        card_sec_inner = Table(sec_rows, colWidths=[46, 39, 43, 103])
         card_sec_inner.setStyle(TableStyle([
-            ('SPAN', (0,0), (2,0)),
+            ('SPAN', (0,0), (3,0)),
             ('INNERGRID', (0,1), (-1,-1), 0.25, colors.HexColor("#F1F5F9")),
-            ('LEFTPADDING', (0,0), (-1,-1), 1.5),
-            ('RIGHTPADDING', (0,0), (-1,-1), 1.5),
+            ('LEFTPADDING', (0,0), (-1,-1), 1.2),
+            ('RIGHTPADDING', (0,0), (-1,-1), 1.2),
             ('TOPPADDING', (0,0), (-1,-1), 0.8),
             ('BOTTOMPADDING', (0,0), (-1,-1), 0.8),
-            ('BOTTOMPADDING', (0,0), (2,0), 1.8),
+            ('BOTTOMPADDING', (0,0), (3,0), 1.8),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
         ]))
         card_section_analysis = RoundedCard(card_sec_inner, width=234, bg_color=colors.white, border_color=BORDER_LIGHT, radius=5.0, padding=4.5)
 
