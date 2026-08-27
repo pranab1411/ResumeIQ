@@ -35,7 +35,7 @@ class AboutDeveloperPage(QWidget):
         header_title.setObjectName("HeaderTitle")
         header_title.setStyleSheet("font-size: 22px; font-weight: bold; color: #F8FAFC;")
         
-        header_sub = QLabel("100% Offline AI-Powered Resume Intelligence & Career Optimization System")
+        header_sub = QLabel("Hybrid Gemini AI & spaCy NLP Resume Intelligence & Career Optimization Suite")
         header_sub.setStyleSheet("font-size: 13px; color: #94A3B8;")
         
         header_box.addWidget(header_title)
@@ -134,18 +134,18 @@ class AboutDeveloperPage(QWidget):
         mission_badge = QLabel("CORE ARCHITECTURE PROMISE")
         mission_badge.setStyleSheet("font-size: 10px; font-weight: bold; color: #34D399; letter-spacing: 1px;")
 
-        mission_title = QLabel("🔒 100% On-Device & Private")
+        mission_title = QLabel("🤖 Hybrid Gemini AI & Local Intelligence")
         mission_title.setStyleSheet("font-size: 18px; font-weight: bold; color: #F8FAFC;")
 
-        p1 = QLabel("• <b>Zero Cloud Uploads:</b> Resumes, candidate names, and contact details never leave your device.")
+        p1 = QLabel("• <b>Google Gemini AI:</b> Used for holistic candidate entity extraction and multi-industry target job role prediction.")
         p1.setWordWrap(True)
         p1.setStyleSheet("font-size: 12px; color: #CBD5E1;")
 
-        p2 = QLabel("• <b>Deterministic MCDA Engine:</b> Multi-Criteria Decision Analysis yields defensible, repeatable scores.")
+        p2 = QLabel("• <b>On-Device spaCy NLP:</b> Extracts skills, contact info, and metrics locally with zero dependency when offline.")
         p2.setWordWrap(True)
         p2.setStyleSheet("font-size: 12px; color: #CBD5E1;")
 
-        p3 = QLabel("• <b>Executive Report PDF Generator:</b> Pixel-perfect single-page ReportLab vector pdf export.")
+        p3 = QLabel("• <b>MCDA & Report Engine:</b> Calculates transparent ATS matching scores and generates vector PDF evaluation reports.")
         p3.setWordWrap(True)
         p3.setStyleSheet("font-size: 12px; color: #CBD5E1;")
 

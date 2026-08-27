@@ -8,7 +8,11 @@
 ![License](https://img.shields.io/badge/License-Proprietary%20Freeware-red.svg)
 ![Build](https://img.shields.io/badge/Build-v2.0-success)
 
-**ResumeIQ** is a 100% offline, privacy-first, NLP-powered desktop application built with Python 3.11, PyQt6, spaCy, pdfplumber, python-docx, and ReportLab. It parses resumes across multiple formats (PDF, DOCX, TXT, RTF, ODT, HTML), performs candidate entity and domain skill extraction, computes a transparent 4-Pillar Multi-Criteria Decision Analysis (MCDA) ATS compatibility score against target Job Descriptions, predicts aligned job roles, provides career optimization suggestions, and generates executive single-page PDF evaluation reports.
+**ResumeIQ** is an AI-powered desktop suite built with Python 3.11, PyQt6, spaCy NLP, Google Gemini AI, and ReportLab 5. It uses Artificial Intelligence across key modules:
+- **Google Gemini AI & spaCy NLP:** Extracts candidate entities (names, emails, phone, location), skills, education background, past job titles, and work experience duration in years and months.
+- **Universal AI Role Prediction:** Evaluates candidate profiles to predict top matching job roles across all global industries (Tech, Healthcare, Education, Legal, Engineering, Finance, Business, HR, Sales, Creative, etc.).
+- **AI Career Assistance & Optimization:** Provides tailored resume optimization suggestions and conversational AI career advice.
+- **Executive PDF Evaluation Generator:** Produces single-page ReportLab vector PDF reports with MCDA ATS matching scores and 5-Star visual ratings.
 
 ---
 
