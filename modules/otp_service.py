@@ -197,9 +197,58 @@ class RealOTPService:
         success, update_msg = db.update_user_password(email, new_password)
         if success:
             db.mark_reset_session_used(session_id)
-            logger.info(f"[REAL OTP SERVICE] Password reset completed successfully for '{email}'.")
-            return True, "Password reset successful! Please sign in with your new password."
+            # Dispatch password changed confirmation email
+            self.send_password_changed_confirmation_email(email, new_password)
+            logger.info(f"[REAL OTP SERVICE] Password reset completed successfully for '{email}'. Confirmation email sent.")
+            return True, "Your password has been changed successfully. A confirmation email has been sent to your registered email address."
         else:
             return False, update_msg
+
+    def send_password_changed_confirmation_email(self, recipient: str, new_password: str) -> Tuple[bool, str]:
+        """Dispatches password changed confirmation email after successful password reset."""
+        try:
+            from config import smtp_config
+            default_user = smtp_config.DEFAULT_SMTP_USER
+            default_pass = smtp_config.DEFAULT_SMTP_PASSWORD
+            default_host = smtp_config.DEFAULT_SMTP_HOST
+            default_port = smtp_config.DEFAULT_SMTP_PORT
+        except ImportError:
+            default_user, default_pass, default_host, default_port = "support.resumeiq@gmail.com", "", "smtp.gmail.com", 587
+
+        smtp_host = db.get_setting("smtp_host", "") or default_host
+        smtp_port = int(db.get_setting("smtp_port", "") or str(default_port))
+        smtp_user = db.get_setting("smtp_user", "") or default_user
+        smtp_password = db.get_setting("smtp_password", "") or default_pass
+
+        if not smtp_user or not smtp_password:
+            logger.warning("[REAL OTP SERVICE] SMTP credentials missing for password changed confirmation.")
+            return False, "NO_SMTP_CONFIG"
+
+        try:
+            msg = MIMEText(
+                f"Hello,\n\n"
+                f"Your ResumeIQ account password has been changed successfully.\n\n"
+                f"Your new password is:\n"
+                f"{new_password}\n\n"
+                f"If you made this change, no further action is required.\n\n"
+                f"If you did NOT make this change, please contact ResumeIQ support immediately and secure your account.\n\n"
+                f"Regards,\nResumeIQ Security Team",
+                "plain",
+                "utf-8"
+            )
+            msg["Subject"] = "ResumeIQ Password Changed Successfully"
+            msg["From"] = smtp_user
+            msg["To"] = recipient
+
+            with smtplib.SMTP(smtp_host, smtp_port, timeout=10) as server:
+                server.starttls()
+                server.login(smtp_user, smtp_password)
+                server.sendmail(smtp_user, [recipient], msg.as_string())
+
+            logger.info(f"[REAL OTP SERVICE] Successfully sent password changed confirmation to {recipient}")
+            return True, f"Password changed confirmation email sent to {recipient}"
+        except Exception as e:
+            logger.error(f"[REAL OTP SERVICE] Password changed email dispatch failed: {e}")
+            return False, str(e)
 
 otp_service = RealOTPService()

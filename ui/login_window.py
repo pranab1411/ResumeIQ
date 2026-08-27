@@ -410,11 +410,11 @@ class LoginWindow(QWidget):
             self.btn_send_otp.setText("📧 Send Email OTP")
             self.btn_send_otp.setEnabled(True)
 
-            self.show_message("Password reset successful! Please sign in with your new password.", is_error=False)
+            self.show_message("Password Reset Successfully", is_error=False)
             GlassMessageBox.success(
                 self,
-                "Password Reset Complete",
-                "Your account password has been updated successfully!\n\nYou can now sign in using your new password."
+                "Password Reset Successfully",
+                "Your password has been changed successfully. A confirmation email has been sent to your registered email address."
             )
             self.tabs.setCurrentIndex(0) # Switch to Sign In tab
             self.login_password.setText(new_pwd)
