@@ -531,6 +531,25 @@ class PDFReportGenerator:
         card_structure = RoundedCard(card_struct_inner, width=234, bg_color=colors.white, border_color=BORDER_LIGHT, radius=5.0, padding=4.5)
 
         # Card 2 Left: FIX THESE FIRST (High Priority)
+        # PROPER TYPOGRAPHY & SPACED LAYOUT
+        item_title_fix = ParagraphStyle('ItemTitleFix', fontName='Helvetica-Bold', fontSize=6.5, leading=8.2, textColor=DARK_TEXT)
+        item_desc_style = ParagraphStyle('ItemDesc', fontName='Helvetica', fontSize=5.6, leading=7.2, textColor=colors.HexColor("#334155"))
+
+        def make_action_item_block(title: str, line1: str, why: str, action: str) -> Table:
+            t = Table([
+                [Paragraph(f"<b>{title}</b>", item_title_fix)],
+                [Paragraph(f"{line1}<br/><b>Why it matters:</b> {why}<br/><b>Action:</b> {action}", item_desc_style)]
+            ], colWidths=[273])
+            t.setStyle(TableStyle([
+                ('VALIGN', (0,0), (-1,-1), 'TOP'),
+                ('LEFTPADDING', (0,0), (-1,-1), 0),
+                ('RIGHTPADDING', (0,0), (-1,-1), 0),
+                ('TOPPADDING', (0,0), (-1,-1), 0),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 0),
+                ('BOTTOMPADDING', (0,0), (0,0), 1.0),
+            ]))
+            return t
+
         fix_header = Table([
             [create_icon_bullet("target_red"), Paragraph("<b>FIX THESE FIRST (High Priority)</b>", ParagraphStyle('FTH', fontName='Helvetica-Bold', fontSize=7.0, textColor=colors.HexColor("#DC2626")))]
         ], colWidths=[13, 275])
@@ -539,36 +558,39 @@ class PDFReportGenerator:
             ('LEFTPADDING', (0,0), (-1,-1), 0),
             ('RIGHTPADDING', (0,0), (-1,-1), 0),
             ('TOPPADDING', (0,0), (-1,-1), 0),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 0.5)
+            ('BOTTOMPADDING', (0,0), (-1,-1), 0)
         ]))
 
         card_fix_inner = Table([
             [fix_header, "", ""],
             [
                 make_num_badge("1", "#DC2626"),
-                Paragraph(f"<b>Add a Professional Summary</b><br/>"
-                          f"<font color='#334155' size=5.8>No professional summary or objective found at the top of your resume.<br/>"
-                          f"<b>Why it matters:</b> Helps recruiters quickly understand your background, strengths, and target role.<br/>"
-                          f"<b>Action:</b> Add a 2–3 line summary targeting {display_role} roles.</font>",
-                          ParagraphStyle('Fix1', fontName='Helvetica', leading=7.5)),
+                make_action_item_block(
+                    "Add a Professional Summary",
+                    "No professional summary or objective found at the top of your resume.",
+                    "Helps recruiters quickly understand your background, strengths, and target role.",
+                    f"Add a 2–3 line summary targeting {display_role} roles."
+                ),
                 create_pill_badge("HIGH", "#FEE2E2", "#DC2626")
             ],
             [
                 make_num_badge("2", "#DC2626"),
-                Paragraph("<b>Improve Project Impact</b><br/>"
-                          "<font color='#334155' size=5.8>2 out of 3 projects lack measurable outcomes or impact.<br/>"
-                          "<b>Why it matters:</b> Recruiters look for results, not just responsibilities.<br/>"
-                          "<b>Action:</b> Add metrics, scale, performance improvements, or user impact.</font>",
-                          ParagraphStyle('Fix2', fontName='Helvetica', leading=7.5)),
+                make_action_item_block(
+                    "Improve Project Impact",
+                    "2 out of 3 projects lack measurable outcomes or impact.",
+                    "Recruiters look for results, not just responsibilities.",
+                    "Add metrics, scale, performance improvements, or user impact."
+                ),
                 create_pill_badge("HIGH", "#FEE2E2", "#DC2626")
             ],
             [
                 make_num_badge("3", "#DC2626"),
-                Paragraph("<b>Add GitHub / Portfolio Link</b><br/>"
-                          "<font color='#334155' size=5.8>No GitHub, portfolio, or project links found.<br/>"
-                          "<b>Why it matters:</b> Provides proof of your work and increases credibility.<br/>"
-                          "<b>Action:</b> Add your GitHub profile or portfolio URL.</font>",
-                          ParagraphStyle('Fix3', fontName='Helvetica', leading=7.5)),
+                make_action_item_block(
+                    "Add GitHub / Portfolio Link",
+                    "No GitHub, portfolio, or project links found.",
+                    "Provides proof of your work and increases credibility.",
+                    "Add your GitHub profile or portfolio URL."
+                ),
                 create_pill_badge("HIGH", "#FEE2E2", "#DC2626")
             ],
         ], colWidths=[15, 273, 40])
@@ -577,9 +599,10 @@ class PDFReportGenerator:
             ('VALIGN', (0,0), (-1,-1), 'TOP'),
             ('LEFTPADDING', (0,0), (-1,-1), 0),
             ('RIGHTPADDING', (0,0), (-1,-1), 0),
-            ('TOPPADDING', (0,0), (-1,-1), 1.2),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 1.2),
-            ('BOTTOMPADDING', (0,0), (2,0), 2.0),
+            ('TOPPADDING', (0,0), (-1,-1), 2.2),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 2.2),
+            ('TOPPADDING', (0,0), (2,0), 0),
+            ('BOTTOMPADDING', (0,0), (2,0), 2.5),
         ]))
         card_fix = RoundedCard(card_fix_inner, width=338, bg_color=colors.HexColor("#FEF2F2"), border_color=colors.HexColor("#FECACA"), radius=5.0, padding=4.5)
 
@@ -616,13 +639,28 @@ class PDFReportGenerator:
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
             ('LEFTPADDING', (0,0), (-1,-1), 0),
             ('RIGHTPADDING', (0,0), (-1,-1), 0),
-            ('TOPPADDING', (0,0), (-1,-1), 0.8),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 0.8),
-            ('BOTTOMPADDING', (0,0), (0,0), 1.8),
+            ('TOPPADDING', (0,0), (-1,-1), 0.7),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 0.7),
+            ('BOTTOMPADDING', (0,0), (0,0), 1.5),
         ]))
-        card_target_role = RoundedCard(card_role_inner, width=234, bg_color=colors.white, border_color=BORDER_LIGHT, radius=5.0, padding=4.5)
+        card_target_role = RoundedCard(card_role_inner, width=234, bg_color=colors.white, border_color=BORDER_LIGHT, radius=5.0, padding=4.0)
 
         # Card 3 Left: IMPROVE (Medium Priority)
+        def make_med_item_block(title: str, line1: str, action: str) -> Table:
+            t = Table([
+                [Paragraph(f"<b>{title}</b>", item_title_fix)],
+                [Paragraph(f"{line1}<br/><b>Action:</b> {action}", item_desc_style)]
+            ], colWidths=[273])
+            t.setStyle(TableStyle([
+                ('VALIGN', (0,0), (-1,-1), 'TOP'),
+                ('LEFTPADDING', (0,0), (-1,-1), 0),
+                ('RIGHTPADDING', (0,0), (-1,-1), 0),
+                ('TOPPADDING', (0,0), (-1,-1), 0),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 0),
+                ('BOTTOMPADDING', (0,0), (0,0), 1.0),
+            ]))
+            return t
+
         med_header = Table([
             [create_icon_bullet("arrow_amber"), Paragraph("<b>IMPROVE (Medium Priority)</b>", ParagraphStyle('MPH', fontName='Helvetica-Bold', fontSize=7.0, textColor=colors.HexColor("#D97706")))]
         ], colWidths=[13, 275])
@@ -631,33 +669,36 @@ class PDFReportGenerator:
             ('LEFTPADDING', (0,0), (-1,-1), 0),
             ('RIGHTPADDING', (0,0), (-1,-1), 0),
             ('TOPPADDING', (0,0), (-1,-1), 0),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 0.5)
+            ('BOTTOMPADDING', (0,0), (-1,-1), 0)
         ]))
 
         card_improve_inner = Table([
             [med_header, "", ""],
             [
                 make_num_badge("1", "#D97706"),
-                Paragraph("<b>Use Strong Action Verbs</b><br/>"
-                          "<font color='#334155' size=5.8>Some bullets start with weak verbs like \"worked on\", \"involved in\".<br/>"
-                          "<b>Action:</b> Use strong verbs like built, developed, optimized, implemented.</font>",
-                          ParagraphStyle('Med1', fontName='Helvetica', leading=7.5)),
+                make_med_item_block(
+                    "Use Strong Action Verbs",
+                    "Some bullets start with weak verbs like \"worked on\", \"involved in\".",
+                    "Use strong verbs like built, developed, optimized, implemented."
+                ),
                 create_pill_badge("MEDIUM", "#FEF3C7", "#D97706")
             ],
             [
                 make_num_badge("2", "#D97706"),
-                Paragraph("<b>Add More Technical Depth</b><br/>"
-                          "<font color='#334155' size=5.8>Some skills can be better demonstrated in project descriptions.<br/>"
-                          "<b>Action:</b> Mention frameworks, tools, libraries, or technologies in more detail.</font>",
-                          ParagraphStyle('Med2', fontName='Helvetica', leading=7.5)),
+                make_med_item_block(
+                    "Add More Technical Depth",
+                    "Some skills can be better demonstrated in project descriptions.",
+                    "Mention frameworks, tools, libraries, or technologies in more detail."
+                ),
                 create_pill_badge("MEDIUM", "#FEF3C7", "#D97706")
             ],
             [
                 make_num_badge("3", "#D97706"),
-                Paragraph("<b>Education Details</b><br/>"
-                          "<font color='#334155' size=5.8>Consider adding relevant coursework or academic achievements.<br/>"
-                          "<b>Action:</b> Add key courses, honors, or relevant academic projects.</font>",
-                          ParagraphStyle('Med3', fontName='Helvetica', leading=7.5)),
+                make_med_item_block(
+                    "Education Details",
+                    "Consider adding relevant coursework or academic achievements.",
+                    "Add key courses, honors, or relevant academic projects."
+                ),
                 create_pill_badge("MEDIUM", "#FEF3C7", "#D97706")
             ],
         ], colWidths=[15, 273, 40])
@@ -666,9 +707,10 @@ class PDFReportGenerator:
             ('VALIGN', (0,0), (-1,-1), 'TOP'),
             ('LEFTPADDING', (0,0), (-1,-1), 0),
             ('RIGHTPADDING', (0,0), (-1,-1), 0),
-            ('TOPPADDING', (0,0), (-1,-1), 1.2),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 1.2),
-            ('BOTTOMPADDING', (0,0), (2,0), 2.0),
+            ('TOPPADDING', (0,0), (-1,-1), 2.2),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 2.2),
+            ('TOPPADDING', (0,0), (2,0), 0),
+            ('BOTTOMPADDING', (0,0), (2,0), 2.5),
         ]))
         card_improve = RoundedCard(card_improve_inner, width=338, bg_color=colors.HexColor("#FFFBEB"), border_color=colors.HexColor("#FDE68A"), radius=5.0, padding=4.5)
 
