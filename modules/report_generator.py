@@ -234,6 +234,26 @@ def create_star_rating(
             d.add(Polygon(pts, fillColor=colors.HexColor(empty_color_hex), strokeColor=None))
     return d
 
+def has_professional_summary(resume_text: str) -> bool:
+    """Checks if resume text contains a professional summary, objective, about me, or profile section."""
+    if not resume_text:
+        return False
+    text_lower = resume_text.lower()
+    keywords = [
+        "summary", "objective", "about me", "about", "profile", 
+        "personal profile", "executive summary", "professional summary", 
+        "career summary", "background summary", "professional profile", "career objective"
+    ]
+    lines = [l.strip().lower() for l in resume_text.split("\n") if l.strip()]
+    top_lines = lines[:35]
+    for line in top_lines:
+        line_clean = line.strip(":-#* ")
+        if any(line_clean == kw or line_clean.startswith(kw) for kw in keywords):
+            return True
+    top_chunk = text_lower[:1200]
+    return any(kw in top_chunk for kw in keywords)
+
+
 
 
 def create_pill_badge(text: str, bg_hex: str, fg_hex: str) -> Drawing:
@@ -537,6 +557,8 @@ class PDFReportGenerator:
             d.add(String(5.5, 2.8, num, textAnchor="middle", fontName="Helvetica-Bold", fontSize=5.8, fillColor=colors.white))
             return d
 
+        has_summary = has_professional_summary(resume_text)
+
         # Card 1 Left: AT A GLANCE
         glance_header = Table([
             [create_icon_bullet("eye_purple"), Paragraph("<b>AT A GLANCE</b>", card_title_style)]
@@ -551,7 +573,7 @@ class PDFReportGenerator:
         
         card_glance_inner = Table([
             [glance_header, ""],
-            [make_glance_item("check_green", "Contact information is clear"), make_glance_item("warn_amber", "Professional summary is missing")],
+            [make_glance_item("check_green", "Contact information is clear"), make_glance_item("check_green" if has_summary else "warn_amber", "Professional summary present" if has_summary else "Professional summary is missing")],
             [make_glance_item("check_green", "Education section is present"), make_glance_item("warn_amber", "Several bullets lack measurable results")],
             [make_glance_item("check_green", "Technical skills are listed"), make_glance_item("warn_amber", "GitHub/Portfolio link not found")],
             [make_glance_item("check_green", "Projects section is included"), make_glance_item("warn_amber", "Some skills are missing for target role")],
@@ -622,15 +644,20 @@ class PDFReportGenerator:
             ('BOTTOMPADDING', (0,0), (-1,-1), 0)
         ]))
 
+        item1_title = "Quantify Key Achievements" if has_summary else "Add a Professional Summary"
+        item1_line1 = "Several project bullet points lack measurable outcomes or percentage metrics." if has_summary else "No professional summary or objective found at the top of your resume."
+        item1_why = "Recruiters and ATS prioritize resumes with quantifiable results." if has_summary else "Helps recruiters quickly understand your background, strengths, and target role."
+        item1_action = "Add metrics, percentages, or user scale to your key projects." if has_summary else f"Add a 2–3 line summary targeting {display_role} roles."
+
         card_fix_inner = Table([
             [fix_header, "", ""],
             [
                 make_num_badge("1", "#DC2626"),
                 make_action_item_block(
-                    "Add a Professional Summary",
-                    "No professional summary or objective found at the top of your resume.",
-                    "Helps recruiters quickly understand your background, strengths, and target role.",
-                    f"Add a 2–3 line summary targeting {display_role} roles."
+                    item1_title,
+                    item1_line1,
+                    item1_why,
+                    item1_action
                 ),
                 create_pill_badge("HIGH", "#FEE2E2", "#DC2626")
             ],
@@ -679,9 +706,14 @@ class PDFReportGenerator:
             ]))
             return t
 
+        # Card 2 Right: TARGET ROLE ANALYSIS
+        tra_title_style = ParagraphStyle('TRATitle', fontName='Helvetica-Bold', fontSize=8.5, leading=10.5, textColor=PRIMARY_PURPLE)
+        tra_role_style = ParagraphStyle('TRARole', fontName='Helvetica-Bold', fontSize=6.2, leading=8.5, textColor=colors.HexColor('#1E1B4B'))
+
         role_analysis_rows = [
-            [Paragraph(f"<b>TARGET ROLE ANALYSIS</b><br/><font color='#1E1B4B' size=6.0>Role: <b>{display_role}</b></font>", ParagraphStyle('TRA', fontName='Helvetica-Bold', leading=8.0))],
-            [Paragraph("<font color='#059669' size=6.0><b>Strong Match</b></font>", ParagraphStyle('SM', fontName='Helvetica-Bold', leading=7.5))],
+            [Paragraph("<b>TARGET ROLE ANALYSIS</b>", tra_title_style)],
+            [Paragraph(f"Role: <b>{display_role}</b>", tra_role_style)],
+            [Paragraph("<font color='#059669' size=6.0><b>Strong Match</b></font>", ParagraphStyle('SM', fontName='Helvetica-Bold', leading=8.0))],
         ]
         for s in matched_display[:4]:
             role_analysis_rows.append([make_role_skill_item("check_green_raw", s)])
@@ -702,7 +734,8 @@ class PDFReportGenerator:
             ('RIGHTPADDING', (0,0), (-1,-1), 0),
             ('TOPPADDING', (0,0), (-1,-1), 0.7),
             ('BOTTOMPADDING', (0,0), (-1,-1), 0.7),
-            ('BOTTOMPADDING', (0,0), (0,0), 1.5),
+            ('BOTTOMPADDING', (0,0), (0,0), 2.5),
+            ('BOTTOMPADDING', (0,1), (0,1), 2.0),
         ]))
         card_target_role = RoundedCard(card_role_inner, width=234, bg_color=colors.white, border_color=BORDER_LIGHT, radius=5.0, padding=4.0)
 
@@ -791,7 +824,7 @@ class PDFReportGenerator:
             [Paragraph("<b>SECTION ANALYSIS</b>", card_title_style), "", ""],
             [Paragraph("<b>Section</b>", body_bold), Paragraph("<b>Status</b>", body_bold), Paragraph("<b>Recommendation</b>", body_bold)],
             [Paragraph("Contact Info", body_style), make_sec_status("check_green", "Good", "#059669"), Paragraph("Keep as is", body_style)],
-            [Paragraph("Summary", body_style), make_sec_status("cross_red", "Missing", "#DC2626"), Paragraph("Add 2–3 line summary", body_style)],
+            [Paragraph("Summary", body_style), make_sec_status("check_green" if has_summary else "cross_red", "Good" if has_summary else "Missing", "#059669" if has_summary else "#DC2626"), Paragraph("Keep as is" if has_summary else "Add 2–3 line summary", body_style)],
             [Paragraph("Education", body_style), make_sec_status("check_green", "Good", "#059669"), Paragraph("Keep as is", body_style)],
             [Paragraph("Skills", body_style), make_sec_status("check_green", "Strong", "#059669"), Paragraph("Keep & Prioritize", body_style)],
             [Paragraph("Projects", body_style), make_sec_status("warn_amber", "Improve", "#D97706"), Paragraph("Add metrics & impact", body_style)],

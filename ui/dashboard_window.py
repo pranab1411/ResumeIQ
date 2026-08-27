@@ -531,15 +531,19 @@ class DashboardWindow(QMainWindow):
         health_grid.setSpacing(10)
 
         self.lbl_hw_words = QLabel("Word Budget:\n—")
+        self.lbl_hw_words.setTextFormat(Qt.TextFormat.RichText)
         self.lbl_hw_words.setStyleSheet("background: rgba(255,255,255,0.04); border-radius: 6px; padding: 8px; font-size: 11.5px; color: #CBD5E1;")
         
         self.lbl_hw_verbs = QLabel("Action Verbs:\n—")
+        self.lbl_hw_verbs.setTextFormat(Qt.TextFormat.RichText)
         self.lbl_hw_verbs.setStyleSheet("background: rgba(255,255,255,0.04); border-radius: 6px; padding: 8px; font-size: 11.5px; color: #CBD5E1;")
 
         self.lbl_hw_metrics = QLabel("Metrics Density:\n—")
+        self.lbl_hw_metrics.setTextFormat(Qt.TextFormat.RichText)
         self.lbl_hw_metrics.setStyleSheet("background: rgba(255,255,255,0.04); border-radius: 6px; padding: 8px; font-size: 11.5px; color: #CBD5E1;")
 
         self.lbl_hw_contact = QLabel("Contact Index:\n—")
+        self.lbl_hw_contact.setTextFormat(Qt.TextFormat.RichText)
         self.lbl_hw_contact.setStyleSheet("background: rgba(255,255,255,0.04); border-radius: 6px; padding: 8px; font-size: 11.5px; color: #CBD5E1;")
 
         health_grid.addWidget(self.lbl_hw_words, 0, 0)
@@ -548,6 +552,7 @@ class DashboardWindow(QMainWindow):
         health_grid.addWidget(self.lbl_hw_contact, 1, 1)
 
         self.lbl_health_grade = QLabel("Audit Status: Waiting for analysis...")
+        self.lbl_health_grade.setTextFormat(Qt.TextFormat.RichText)
         self.lbl_health_grade.setStyleSheet("font-size: 12px; font-weight: bold; color: #34D399; margin-top: 4px;")
         health_grid.addWidget(self.lbl_health_grade, 2, 0, 1, 2)
 
