@@ -12,5 +12,5 @@ def get_app_version_string() -> str:
 
 def get_splash_version_string() -> str:
     if BUILD_TYPE.lower() == "production":
-        return f"v{APP_VERSION} • Hybrid Gemini AI & Local Intelligence"
-    return f"v{APP_VERSION} ({BUILD_TYPE}) • Hybrid Gemini AI & Local Intelligence"
+        return f"v{APP_VERSION} • 100% Offline AI"
+    return f"v{APP_VERSION} ({BUILD_TYPE}) • 100% Offline AI"
