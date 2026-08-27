@@ -2,7 +2,7 @@
 ResumeIQ Central Version & Build Type Configuration
 """
 
-APP_VERSION = "2.1"
+APP_VERSION = "2.0"
 BUILD_TYPE = "Production"
 
 def get_app_version_string() -> str:
