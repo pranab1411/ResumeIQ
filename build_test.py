@@ -98,6 +98,41 @@ def get_splash_version_string() -> str:
     with open(version_file, "w", encoding="utf-8") as f:
         f.write(content)
 
+def archive_previous_test_builds(test_builds_dir: str, current_build_name: str):
+    """
+    Shifts all previous test build executables to the archived builds directory:
+    'D:\\py project\\test_builds\\archived builds' and local 'test_builds/archived builds'.
+    """
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    root_test_builds = os.path.abspath(os.path.join(base_dir, "..", "test_builds"))
+    
+    archived_dirs = [
+        os.path.join(test_builds_dir, "archived builds"),
+        os.path.join(root_test_builds, "archived builds")
+    ]
+
+    for arch_dir in archived_dirs:
+        os.makedirs(arch_dir, exist_ok=True)
+
+    current_exe = f"{current_build_name}.exe".lower()
+    search_dirs = [test_builds_dir, root_test_builds]
+
+    for s_dir in search_dirs:
+        if os.path.exists(s_dir):
+            for filename in os.listdir(s_dir):
+                if filename.lower().endswith(".exe") and "test build" in filename.lower():
+                    if filename.lower() != current_exe:
+                        src_path = os.path.join(s_dir, filename)
+                        target_archive = archived_dirs[0] if s_dir == test_builds_dir else archived_dirs[1]
+                        dest_path = os.path.join(target_archive, filename)
+                        try:
+                            if os.path.exists(dest_path):
+                                os.remove(dest_path)
+                            shutil.move(src_path, dest_path)
+                            print(f"  [ARCHIVED] Moved previous build '{filename}' -> '{target_archive}'")
+                        except Exception as e:
+                            print(f"  [NOTE] Could not archive '{filename}': {e}")
+
 def main():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(base_dir)
@@ -155,6 +190,9 @@ def main():
                 shutil.copy2(target_exe, root_target_exe)
             except Exception as e:
                 print(f"  [NOTE] Could not copy to {root_target_exe}: {e}")
+
+        # Archive previous test builds
+        archive_previous_test_builds(test_builds_dir, build_name)
 
         size_mb = os.path.getsize(target_exe) / (1024 * 1024)
         print(f"\n[SUCCESS] Installable Test Build Package Created Successfully:")
