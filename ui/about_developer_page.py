@@ -60,9 +60,6 @@ class AboutDeveloperPage(QWidget):
         dev_name = QLabel("Pranab Chourasiya")
         dev_name.setStyleSheet("font-size: 20px; font-weight: bold; color: #F8FAFC;")
 
-        dev_role = QLabel("Lead AI Systems Architect & Software Engineer")
-        dev_role.setStyleSheet("font-size: 12.5px; font-weight: 500; color: #38BDF8;")
-
         dev_bio = QLabel(
             "Designed and engineered ResumeIQ — a local, privacy-first resume analysis "
             "and ATS matching engine built to empower job seekers with instant, defensible "
@@ -101,7 +98,6 @@ class AboutDeveloperPage(QWidget):
 
         dev_layout.addWidget(dev_badge)
         dev_layout.addWidget(dev_name)
-        dev_layout.addWidget(dev_role)
         dev_layout.addWidget(dev_bio)
         dev_layout.addLayout(btn_layout)
 
