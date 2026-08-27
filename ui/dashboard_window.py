@@ -32,7 +32,7 @@ from modules.jd_scraper import JDScraper
 from modules.scheduler import ATSRescanScheduler
 from modules.updater import AppUpdater
 from ui.floating_widget import FloatingGlassWidget
-from ui.about_developer_page import AboutDeveloperPage
+from ui.about_developer_page import AboutAppPage, AboutDeveloperPage
 from ui.styles import DARK_THEME_QSS, LIGHT_THEME_QSS
 from utils.logger import logger
 from utils.paths import get_data_path
@@ -152,7 +152,8 @@ class DashboardWindow(QMainWindow):
             ("💬 AI Assistant", 5),
             ("👤 My Profile", 6),
             ("⚙️ Settings", 7),
-            ("ℹ️ About ResumeIQ", 8)
+            ("ℹ️ About Application", 8),
+            ("👨‍💻 Developer Profile", 9)
         ]
 
         for text, index in nav_items:
@@ -208,6 +209,7 @@ class DashboardWindow(QMainWindow):
         self.page_chatbot = self._build_chatbot_page()
         self.page_profile = self._build_profile_page()         # Feature 17
         self.page_settings = self._build_settings_page()
+        self.page_about_app = AboutAppPage()
         self.page_developer = AboutDeveloperPage()
 
         self.stacked_widget.addWidget(self.page_dashboard)   # 0
@@ -218,7 +220,8 @@ class DashboardWindow(QMainWindow):
         self.stacked_widget.addWidget(self.page_chatbot)     # 5
         self.stacked_widget.addWidget(self.page_profile)     # 6
         self.stacked_widget.addWidget(self.page_settings)    # 7
-        self.stacked_widget.addWidget(self.page_developer)   # 8
+        self.stacked_widget.addWidget(self.page_about_app)   # 8
+        self.stacked_widget.addWidget(self.page_developer)   # 9
 
         main_layout.addWidget(self.stacked_widget)
         self.switch_page(0)
