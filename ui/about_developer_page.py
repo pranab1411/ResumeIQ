@@ -102,9 +102,20 @@ class AboutDeveloperPage(QWidget):
         """)
         btn_repo.clicked.connect(lambda: QDesktopServices.openUrl(QUrl("https://github.com/pranab1411/ResumeIQ")))
 
+        btn_email = QPushButton("✉️ Contact Developer")
+        btn_email.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_email.setStyleSheet("""
+            QPushButton {
+                background: #059669; color: white; border-radius: 6px; padding: 8px 14px; font-weight: bold; font-size: 11.5px;
+            }
+            QPushButton:hover { background: #047857; }
+        """)
+        btn_email.clicked.connect(lambda: QDesktopServices.openUrl(QUrl("mailto:pranab.chourasiya@gmail.com")))
+
         btn_layout.addWidget(btn_linkedin)
         btn_layout.addWidget(btn_github)
         btn_layout.addWidget(btn_repo)
+        btn_layout.addWidget(btn_email)
         btn_layout.addStretch()
 
         dev_layout.addWidget(dev_badge)
