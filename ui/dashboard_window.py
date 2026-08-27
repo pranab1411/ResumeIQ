@@ -1319,28 +1319,28 @@ class DashboardWindow(QMainWindow):
         layout.setContentsMargins(25, 25, 25, 25)
         layout.setSpacing(16)
 
-        title = QLabel("System Settings & Local AI Engine Status")
+        title = QLabel("System Settings & AI Engine Configuration")
         title.setObjectName("HeaderTitle")
         layout.addWidget(title)
 
-        # Local AI Agent Card
+        # AI Engine Card
         ai_card = QFrame()
         ai_card.setObjectName("CardFrame")
         g_layout = QVBoxLayout(ai_card)
         g_layout.setContentsMargins(22, 22, 22, 22)
         g_layout.setSpacing(12)
 
-        g_title = QLabel("🤖 Autonomous Local AI Agent Engine")
+        g_title = QLabel("🤖 Hybrid Gemini AI & On-Device Local Intelligence")
         g_title.setObjectName("SectionHeader")
         g_sub = QLabel(
             "<p style='color: #CBD5E1; font-size: 13.5px; line-height: 1.5; margin: 0;'>"
-            "ResumeIQ runs a 100% Free Autonomous Local AI Agent powered by spaCy NLP, "
-            "semantic keyword matching, structural layout algorithms, and automated resume synthesis.</p>"
+            "ResumeIQ features a hybrid architecture combining Google Gemini AI for cloud intelligence "
+            "with a 100% on-device spaCy NLP engine for privacy and offline speed.</p>"
             "<ul style='color: #E2E8F0; font-size: 13px; line-height: 1.7; margin-top: 8px; margin-bottom: 0; padding-left: 20px;'>"
-            "<li><b>Zero API Keys Required</b></li>"
-            "<li><b>100% Free Forever & Unlimited Uses</b></li>"
-            "<li><b>Zero Rate Limits or Quota Expiration</b></li>"
-            "<li><b>100% Offline, Fast & Private</b></li>"
+            "<li><b>Google Gemini AI:</b> 4-part profile evaluation (Skills, Education, Past Positions, Experience Years/Months) & 50+ Universal Role Predictions.</li>"
+            "<li><b>On-Device spaCy NLP:</b> Fast candidate entity extraction, contact info parsing, and 4-pillar MCDA ATS scoring.</li>"
+            "<li><b>Field-Specific Asset Intelligence:</b> Recommends GitHub, Behance, Medical Licenses, CPA, or Bar Admission based on candidate industry.</li>"
+            "<li><b>Automatic Offline Fallback:</b> Seamlessly operates offline with zero cloud dependency if API key is not set.</li>"
             "</ul>"
         )
         g_sub.setTextFormat(Qt.TextFormat.RichText)
@@ -1348,7 +1348,7 @@ class DashboardWindow(QMainWindow):
         g_layout.addWidget(g_title)
         g_layout.addWidget(g_sub)
 
-        status_lbl = QLabel("✅ Autonomous Local AI Agent is ACTIVE and ready for intelligent analysis.")
+        status_lbl = QLabel("✅ Hybrid Gemini AI & Local NLP Engines are ACTIVE and ready for intelligent analysis.")
         status_lbl.setStyleSheet("color: #34D399; font-weight: 600; font-size: 13px; margin-top: 8px;")
         g_layout.addWidget(status_lbl)
         layout.addWidget(ai_card)
@@ -1368,11 +1368,11 @@ class DashboardWindow(QMainWindow):
         info_items = [
             ("Application", get_app_version_string()),
             ("Logged In User", f"{self.user.get('name', 'User')} ({self.user.get('email', '')})"),
-            ("Primary AI Engine", "Autonomous Local AI Agent (Zero API Key)"),
-            ("NLP & Semantic Parser", "spaCy (en_core_web_sm)"),
-            ("Database", "SQLite3 (local resumeiq.db)"),
+            ("Primary AI Engine", "Hybrid Google Gemini AI & On-Device spaCy NLP"),
+            ("NLP & Semantic Parser", "spaCy (en_core_web_sm) & MCDA Engine"),
+            ("Database", "SQLite3 WAL Mode (local resumeiq.db)"),
             ("Document Extractors", "pdfplumber, python-docx"),
-            ("Report Engine", "ReportLab PDF Compiler")
+            ("Report Engine", "ReportLab 5 Vector PDF Compiler")
         ]
         for k, v in info_items:
             lbl = QLabel(f"<b>{k}:</b> {v}")

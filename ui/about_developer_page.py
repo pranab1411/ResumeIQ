@@ -175,12 +175,12 @@ class AboutDeveloperPage(QWidget):
         tech_grid.setSpacing(12)
 
         tech_items = [
+            ("🤖 Google Gemini AI", "4-Part Profile Analysis & 50+ Role Prediction", "#F43F5E"),
+            ("🧠 spaCy NLP", "Name & Skill Extraction Engine", "#A78BFA"),
             ("🐍 Python 3.11", "Core Runtime & Asynchronous Engine", "#38BDF8"),
             ("🖥️ PyQt6 GUI", "Glassmorphic Dark Interface", "#818CF8"),
-            ("🧠 spaCy NLP", "Name & Skill Extraction Engine", "#A78BFA"),
             ("📑 ReportLab 5", "Single-Page Executive PDF Builder", "#F472B6"),
-            ("🗄️ SQLite WAL", "Local Encrypted Database Storage", "#34D399"),
-            ("📦 Inno Setup 6", "Automated Windows Test Installer", "#FBBF24")
+            ("🗄️ SQLite WAL", "Local Encrypted Database Storage", "#34D399")
         ]
 
         for i, (title, desc, color) in enumerate(tech_items):
@@ -204,7 +204,7 @@ class AboutDeveloperPage(QWidget):
         content_layout.addWidget(stack_card)
 
         # Footer Version Details
-        footer_lbl = QLabel("ResumeIQ v2.1 • Crafted with ❤️ by Pranab Chourasiya • All Rights Reserved")
+        footer_lbl = QLabel("ResumeIQ v2.0 • Crafted with ❤️ by Pranab Chourasiya • All Rights Reserved")
         footer_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         footer_lbl.setStyleSheet("font-size: 11.5px; color: #64748B; margin-top: 10px;")
         content_layout.addWidget(footer_lbl)
