@@ -571,12 +571,104 @@ class PDFReportGenerator:
             ('BOTTOMPADDING', (0,0), (-1,-1), 0.5)
         ]))
         
+        # Detect candidate field/category dynamically
+        text_lower = (resume_text or "").lower()
+        role_lower = (display_role or "").lower()
+
+        if any(k in role_lower or k in text_lower for k in ["civil", "construction", "autocad", "structure", "site engineer", "building"]):
+            field_cat = "civil"
+        elif any(k in role_lower or k in text_lower for k in ["nurse", "medical", "patient", "clinical", "doctor", "triage", "hospital"]):
+            field_cat = "healthcare"
+        elif any(k in role_lower or k in text_lower for k in ["finance", "account", "cpa", "audit", "tax", "budget"]):
+            field_cat = "finance"
+        elif any(k in role_lower or k in text_lower for k in ["legal", "law", "attorney", "paralegal", "litigation"]):
+            field_cat = "legal"
+        elif any(k in role_lower or k in text_lower for k in ["teacher", "education", "curriculum", "school"]):
+            field_cat = "education"
+        elif any(k in role_lower or k in text_lower for k in ["figma", "ui/ux", "designer", "graphic", "behance"]):
+            field_cat = "design"
+        elif any(k in role_lower or k in text_lower for k in ["python", "developer", "software", "react", "node", "java", "sql", "code", "devops"]):
+            field_cat = "tech"
+        else:
+            field_cat = "general"
+
+        # Field-Specific Action Items & Recommendations
+        if field_cat == "civil":
+            item3_title = "Add Professional Credentials & Certifications"
+            item3_desc = "State active FE/PE License status, Primavera P6, or CAD/BIM certifications."
+            item3_why = "Increases credibility for major infrastructure and commercial projects."
+            item3_action = "Add license numbers and project software credentials to your header."
+            rec_additions = ["Structural BIM (Revit)", "STAAD.Pro / ETABS", "Green Building / LEED"]
+            fallback_missing = ["Structural BIM", "STAAD.Pro Analysis"]
+            link_glance_text = "LinkedIn profile verified" if "linkedin.com" in text_lower else "Professional profile link missing"
+            link_glance_icon = "check_green" if "linkedin.com" in text_lower else "warn_amber"
+        elif field_cat == "healthcare":
+            item3_title = "Add Medical Licensure & EMR Systems"
+            item3_desc = "State active Nursing/Medical License (RN, BLS, ACLS, CPR) and hospital EMRs."
+            item3_why = "Crucial for healthcare compliance and clinical safety."
+            item3_action = "List license numbers and hospital EMR systems (Epic/Cerner) prominently."
+            rec_additions = ["Clinical EMR (Epic/Cerner)", "Advanced Triage", "HIPAA Compliance"]
+            fallback_missing = ["Clinical EMR Systems", "Pediatric Care"]
+            link_glance_text = "Clinical license info checked"
+            link_glance_icon = "check_green"
+        elif field_cat == "finance":
+            item3_title = "Add Financial Certifications & ERP"
+            item3_desc = "Highlight CPA/CFA credentials and SAP S/4HANA or QuickBooks expertise."
+            item3_why = "Proves financial modeling accuracy and regulatory compliance."
+            item3_action = "Mention CPA/CFA status and ERP financial modeling tools."
+            rec_additions = ["Advanced Financial Modeling", "SAP S/4HANA", "IFRS Compliance"]
+            fallback_missing = ["SAP S/4HANA", "IFRS Compliance"]
+            link_glance_text = "LinkedIn profile verified" if "linkedin.com" in text_lower else "Executive profile link missing"
+            link_glance_icon = "check_green" if "linkedin.com" in text_lower else "warn_amber"
+        elif field_cat == "legal":
+            item3_title = "Add Bar Admission & Legal Tools"
+            item3_desc = "State your State Bar Admission, JD degree, and Westlaw/LexisNexis proficiency."
+            item3_why = "Required for court admission and legal litigation trust."
+            item3_action = "Place Bar Admission and JD credentials at your contact header."
+            rec_additions = ["Westlaw / LexisNexis", "Contract Drafting", "Litigation Support"]
+            fallback_missing = ["Westlaw Research", "Litigation Support"]
+            link_glance_text = "Bar admission & credentials checked"
+            link_glance_icon = "check_green"
+        elif field_cat == "design":
+            item3_title = "Add Behance / Figma Portfolio Link"
+            item3_desc = "No Behance, Dribbble, or Figma portfolio link found."
+            item3_why = "Provides proof of visual case studies and user experience design."
+            item3_action = "Add your Behance or Figma portfolio URL."
+            rec_additions = ["User Research & Testing", "Interactive Prototyping", "Design System Specs"]
+            fallback_missing = ["Interactive Prototyping", "Design Systems"]
+            has_design_link = any(k in text_lower for k in ["behance.net", "dribbble.com", "figma.com", "portfolio"])
+            link_glance_text = "Design portfolio URL present" if has_design_link else "Design portfolio URL not found"
+            link_glance_icon = "check_green" if has_design_link else "warn_amber"
+        elif field_cat == "tech":
+            item3_title = "Add GitHub / Code Repository Link"
+            item3_desc = "No GitHub, GitLab, or personal project link found."
+            item3_why = "Provides proof of your code repositories and open-source contributions."
+            item3_action = "Add your GitHub profile or live project URL."
+            rec_additions = ["System Architecture", "CI/CD & Pipeline Basics", "Cloud Services (AWS/GCP)"]
+            fallback_missing = ["REST APIs", "Docker"]
+            has_tech_link = any(k in text_lower for k in ["github.com", "gitlab.com"])
+            link_glance_text = "GitHub / GitLab repository link present" if has_tech_link else "GitHub / Portfolio link not found"
+            link_glance_icon = "check_green" if has_tech_link else "warn_amber"
+        else:
+            item3_title = "Add Professional Branding / LinkedIn Link"
+            item3_desc = "Ensure your LinkedIn profile or professional site is clearly linked."
+            item3_why = "Establishes recruiter trust and executive branding."
+            item3_action = "Add your LinkedIn profile link to your header."
+            rec_additions = ["Project Management", "Quantified Metrics", "Stakeholder Relations"]
+            fallback_missing = ["Quantified Metrics", "Stakeholder Relations"]
+            has_link = "linkedin.com" in text_lower
+            link_glance_text = "LinkedIn profile verified" if has_link else "Professional profile link missing"
+            link_glance_icon = "check_green" if has_link else "warn_amber"
+
+        matched_display = matched_skills if matched_skills else ["Project Planning", "Quality Control", "Execution", "Safety"]
+        missing_display = missing_skills if missing_skills else fallback_missing
+
         card_glance_inner = Table([
             [glance_header, ""],
             [make_glance_item("check_green", "Contact information is clear"), make_glance_item("check_green" if has_summary else "warn_amber", "Professional summary present" if has_summary else "Professional summary is missing")],
             [make_glance_item("check_green", "Education section is present"), make_glance_item("warn_amber", "Several bullets lack measurable results")],
-            [make_glance_item("check_green", "Technical skills are listed"), make_glance_item("warn_amber", "GitHub/Portfolio link not found")],
-            [make_glance_item("check_green", "Projects section is included"), make_glance_item("warn_amber", "Some skills are missing for target role")],
+            [make_glance_item("check_green", "Technical skills are listed"), make_glance_item(link_glance_icon, link_glance_text)],
+            [make_glance_item("check_green", "Projects section is included"), make_glance_item("warn_amber" if missing_skills else "check_green", "Missing key skills for target role" if missing_skills else "Core skills aligned with role")],
             [make_glance_item("check_green_outline", "One-page resume"), make_glance_item("warn_amber", "Action verbs can be stronger")]
         ], colWidths=[164, 164])
         card_glance_inner.setStyle(TableStyle([
@@ -614,7 +706,6 @@ class PDFReportGenerator:
         card_structure = RoundedCard(card_struct_inner, width=234, bg_color=colors.white, border_color=BORDER_LIGHT, radius=5.0, padding=4.5)
 
         # Card 2 Left: FIX THESE FIRST (High Priority)
-        # PROPER TYPOGRAPHY & SPACED LAYOUT
         item_title_fix = ParagraphStyle('ItemTitleFix', fontName='Helvetica-Bold', fontSize=6.5, leading=8.2, textColor=DARK_TEXT)
         item_desc_style = ParagraphStyle('ItemDesc', fontName='Helvetica', fontSize=5.6, leading=7.2, textColor=colors.HexColor("#334155"))
 
@@ -665,19 +756,19 @@ class PDFReportGenerator:
                 make_num_badge("2", "#DC2626"),
                 make_action_item_block(
                     "Improve Project Impact",
-                    "2 out of 3 projects lack measurable outcomes or impact.",
-                    "Recruiters look for results, not just responsibilities.",
-                    "Add metrics, scale, performance improvements, or user impact."
+                    "Highlight measurable project outcomes, cost savings, or efficiency gains.",
+                    "Recruiters look for concrete project deliverables, not just general duties.",
+                    "Add metrics, cost savings (e.g. INR 40 Cr), or project scale."
                 ),
                 create_pill_badge("HIGH", "#FEE2E2", "#DC2626")
             ],
             [
                 make_num_badge("3", "#DC2626"),
                 make_action_item_block(
-                    "Add GitHub / Portfolio Link",
-                    "No GitHub, portfolio, or project links found.",
-                    "Provides proof of your work and increases credibility.",
-                    "Add your GitHub profile or portfolio URL."
+                    item3_title,
+                    item3_desc,
+                    item3_why,
+                    item3_action
                 ),
                 create_pill_badge("HIGH", "#FEE2E2", "#DC2626")
             ],
@@ -706,7 +797,6 @@ class PDFReportGenerator:
             ]))
             return t
 
-        # Card 2 Right: TARGET ROLE ANALYSIS
         tra_title_style = ParagraphStyle('TRATitle', fontName='Helvetica-Bold', fontSize=8.5, leading=10.5, textColor=PRIMARY_PURPLE)
         tra_role_style = ParagraphStyle('TRARole', fontName='Helvetica-Bold', fontSize=6.2, leading=8.5, textColor=colors.HexColor('#1E1B4B'))
 
@@ -723,9 +813,8 @@ class PDFReportGenerator:
             role_analysis_rows.append([make_role_skill_item("play_amber", s)])
             
         role_analysis_rows.append([Paragraph("<font color='#DC2626' size=6.0><b>Recommended Additions</b></font>", ParagraphStyle('RA', fontName='Helvetica-Bold', leading=7.5))])
-        role_analysis_rows.append([make_role_skill_item("plus_red", "System Design (Basics)")])
-        role_analysis_rows.append([make_role_skill_item("plus_red", "Testing Frameworks")])
-        role_analysis_rows.append([make_role_skill_item("plus_red", "Cloud (AWS/GCP Basics)")])
+        for s in rec_additions[:3]:
+            role_analysis_rows.append([make_role_skill_item("plus_red", s)])
 
         card_role_inner = Table(role_analysis_rows, colWidths=[220])
         card_role_inner.setStyle(TableStyle([

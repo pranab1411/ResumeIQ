@@ -25,10 +25,93 @@ class LocalAIAgent:
         mode: str = "experienced"
     ) -> Dict[str, Any]:
         """
-        Analyzes resume using NLP, Top MNC ATS Engines (Workday, Taleo, Greenhouse, Lever, iCIMS), and rule-based heuristics.
+        Analyzes resume using Google Gemini AI (if available) or Local spaCy NLP & MCDA engine.
         """
+        from utils.gemini_client import gemini_available, gemini_generate
         contact_info = nlp_engine.extract_contact_info(extracted_text)
         resume_skills = nlp_engine.extract_skills(extracted_text)
+
+        # 1. FORCE Gemini AI evaluation if Gemini API is available
+        if gemini_available():
+            try:
+                logger.info("[GEMINI AI] Executing full Gemini AI Candidate Evaluation & Multi-Industry Matching...")
+                prompt = f"""You are an elite ATS Candidate Evaluator and Industry Specialist.
+Analyze the following candidate resume text carefully.
+
+RESUME TEXT:
+\"\"\"
+{extracted_text[:4000]}
+\"\"\"
+
+TARGET ROLE (Optional): "{job_title}"
+TARGET JOB DESCRIPTION (Optional): "{job_description[:2000]}"
+
+Instructions:
+1. Extract candidate name, email, and phone.
+2. Determine total work experience in years (e.g. 11.0) and seniority status:
+   - "Fresher / Entry-Level Candidate" (if < 1 year experience)
+   - "Experienced Professional (X.Y Yrs Exp)" (if >= 1 year experience)
+3. Predict target job role and industry category (e.g. Civil Engineering, Healthcare, Tech, Finance, Law, Education).
+4. Identify candidate's core skills and missing skills required for their target role.
+5. Compute ATS score (0 to 100).
+6. Provide 4 tailored, industry-relevant improvement suggestions (DO NOT suggest IT/GitHub links if the candidate is in Civil Engineering, Healthcare, Finance, or Law!).
+
+Return a valid raw JSON object strictly matching this schema:
+{{
+  "candidate_name": "Full Name",
+  "email": "Email Address",
+  "phone": "Phone Number",
+  "seniority_label": "Experienced Professional (11.0 Yrs Exp)",
+  "target_role": "Predicted or Target Job Title",
+  "ats_score": 85.0,
+  "matched_skills": ["Skill1", "Skill2", "Skill3"],
+  "missing_skills": ["SkillA", "SkillB"],
+  "suggestions": ["Suggestion 1", "Suggestion 2"]
+}}
+"""
+                raw_res = gemini_generate(prompt, temperature=0.2)
+                clean_json = re.sub(r'```json\s*|\s*```', '', raw_res).strip()
+                data = json.loads(clean_json)
+
+                if not data.get("candidate_name") or data["candidate_name"] == "Full Name":
+                    data["candidate_name"] = contact_info.get("name", "Candidate")
+                if not data.get("email") or data["email"] == "Email Address":
+                    data["email"] = contact_info.get("email", "Not Found")
+                if not data.get("phone") or data["phone"] == "Phone Number":
+                    data["phone"] = contact_info.get("phone", "Not Found")
+
+                mnc_eval = TopMNCATSEngine.evaluate_mnc_ats(
+                    data.get("matched_skills", []),
+                    data.get("missing_skills", []),
+                    extracted_text,
+                    job_description,
+                    contact_info
+                )
+
+                score = float(data.get("ats_score", 75.0))
+                category = ATSCalculator.get_score_category(score)
+
+                return {
+                    "candidate_name": data.get("candidate_name", contact_info["name"]),
+                    "target_role": data.get("target_role", "Professional"),
+                    "seniority_label": data.get("seniority_label", "Experienced Professional"),
+                    "email": data.get("email", contact_info["email"]),
+                    "phone": data.get("phone", contact_info["phone"]),
+                    "ats_score": score,
+                    "score_category": category,
+                    "matched_skills": data.get("matched_skills", []),
+                    "missing_skills": data.get("missing_skills", []),
+                    "suggestions": data.get("suggestions", []),
+                    "mnc_ats": mnc_eval,
+                    "engine_used": "Google Gemini AI"
+                }
+            except Exception as e:
+                logger.warning(f"[GEMINI AI] Gemini analysis failed ({e}), falling back to local spaCy engine...")
+
+        # 2. Local spaCy NLP Fallback Engine
+        seniority_info = nlp_engine.detect_candidate_seniority(extracted_text)
+        is_fresher_candidate = seniority_info["is_fresher"]
+        seniority_label = seniority_info["label"]
 
         if mode == "fresher":
             # Fresher mode: focus on technical skills, education, projects & contact completeness

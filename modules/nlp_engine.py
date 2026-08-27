@@ -429,7 +429,7 @@ class NLPEngine:
         """Generates experience timeline events based on extracted date ranges."""
         if not text:
             return []
-        date_pattern = r'((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4}|\b20\d{2}\b)\s*(?:–|-|to)\s*((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{4}|\b20\d{2}\b|Present|Current)'
+        date_pattern = r'((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\'\s]*\d{2,4}|\b20\d{2}\b|\b19\d{2}\b)\s*(?:–|-|to)\s*((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\'\s]*\d{2,4}|\b20\d{2}\b|\b19\d{2}\b|Present|Current)'
         matches = re.findall(date_pattern, text, re.IGNORECASE)
         timeline = []
         for i, (start, end) in enumerate(matches):
@@ -446,8 +446,8 @@ class NLPEngine:
         if not text:
             return 0.0
         
-        # 1. Search explicit experience statements (e.g., "5+ years of experience", "3.5 years exp")
-        match = re.search(r'(\d+(?:\.\d+)?)\s*\+?\s*years?(?:\s+of)?\s+experience', text, re.IGNORECASE)
+        # 1. Search explicit experience statements (e.g., "11 years of experience", "5+ years of experience", "3.5 years exp")
+        match = re.search(r'\b(\d+(?:\.\d+)?)\s*\+?\s*years?\s+(?:of\s+)?experience\b', text, re.IGNORECASE)
         if match:
             try:
                 return float(match.group(1))
@@ -467,14 +467,22 @@ class NLPEngine:
             start_str = item.get("start", "")
             end_str = item.get("end", "")
             
-            start_m = re.search(r'\b(20\d{2}|19\d{2})\b', start_str)
-            start_year = int(start_m.group(1)) if start_m else current_year
+            start_m = re.search(r'\b(20\d{2}|19\d{2}|\d{2})\b', start_str)
+            if start_m:
+                val = int(start_m.group(1))
+                start_year = (2000 + val) if val < 50 else ((1900 + val) if val < 100 else val)
+            else:
+                start_year = current_year
 
             if "present" in end_str.lower() or "current" in end_str.lower():
                 end_year = current_year
             else:
-                end_m = re.search(r'\b(20\d{2}|19\d{2})\b', end_str)
-                end_year = int(end_m.group(1)) if end_m else start_year
+                end_m = re.search(r'\b(20\d{2}|19\d{2}|\d{2})\b', end_str)
+                if end_m:
+                    val = int(end_m.group(1))
+                    end_year = (2000 + val) if val < 50 else ((1900 + val) if val < 100 else val)
+                else:
+                    end_year = start_year
 
             diff = max(0, end_year - start_year)
             total_months += diff * 12
@@ -491,7 +499,7 @@ class NLPEngine:
         fresher_keywords = ["fresher", "entry-level", "entry level", "graduate trainee", "intern", "trainee", "fresher / entry-level"]
         has_fresher_kw = any(kw in text_lower for kw in fresher_keywords)
 
-        senior_keywords = ["senior", "lead", "principal", "manager", "director", "head", "chief", "vp", "architect", "supervisor"]
+        senior_keywords = ["senior", "lead", "principal", "manager", "director", "head", "chief", "vp", "architect", "supervisor", "specialist"]
         has_senior_kw = any(kw in text_lower for kw in senior_keywords)
 
         if has_senior_kw or exp_years >= 1.5:

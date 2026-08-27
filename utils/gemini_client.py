@@ -11,11 +11,18 @@ import urllib.error
 from utils.logger import logger
 
 # Current working model — update here if Google deprecates it
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash-latest")
 GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 
 
-FALLBACK_MODELS = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-pro"]
+FALLBACK_MODELS = [
+    "gemini-1.5-flash-latest",
+    "gemini-1.5-flash",
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-exp",
+    "gemini-1.5-pro-latest",
+    "gemini-1.5-pro"
+]
 
 def _get_api_key() -> str:
     """Retrieve API key from environment or DB settings."""

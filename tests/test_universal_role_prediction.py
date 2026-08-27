@@ -92,5 +92,23 @@ class TestUniversalRolePrediction(unittest.TestCase):
         self.assertFalse(exp_res["is_fresher"])
         self.assertIn("5.0 Yrs Exp", exp_res["label"])
 
+    def test_akash_chourasiya_civil_engineer_seniority(self):
+        from modules.nlp_engine import nlp_engine
+        akash_text = """
+        AKASH CHOURASIYA
+        Sanand, Gujarat, India | +91 7869881221 | Email: Chourasiya.akash29@gmail.com
+        Qualified with MTech. in Construction Management and B.E. in Civil Engineering, having 11 years of experience in Government Industrial, Commercial, Residential and Infrastructure Projects.
+        June'2025 to Present, AGRATAS ENERGY SOLUTIONS (TATA Group), Specialist – Civil.
+        Jan'2023 to May'2025, Jacobs Solutions, CSA Lead – Civil, Senior Field Engineer.
+        Feb'2020 to Jan'2023, NTPC LTD. Utility Powertech Ltd, Junior Engineer Civil.
+        March '2018 to Jan'2020, VARSMA Engineers Group, Site Engineer Civil.
+        Oct '2015 to Feb'2018, NTPC LTD. Utility Powertech Ltd, Junior Engineer Civil.
+        Training: Tendering & Contract Management | BBS, QS and Billing | AutoCAD | Primavera P6 | MSP
+        """
+        res = nlp_engine.detect_candidate_seniority(akash_text)
+        self.assertFalse(res["is_fresher"])
+        self.assertEqual(res["experience_years"], 11.0)
+        self.assertIn("11.0 Yrs Exp", res["label"])
+
 if __name__ == "__main__":
     unittest.main()
