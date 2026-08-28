@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/AI-Google%20Gemini-emerald" alt="Gemini"/>
   <img src="https://img.shields.io/badge/PDF-ReportLab%205-purple" alt="ReportLab"/>
   <img src="https://img.shields.io/badge/Database-SQLite3%20WAL-lightgrey" alt="SQLite"/>
-  <img src="https://img.shields.io/badge/Build-v2.0-success" alt="Build"/>
+  <img src="https://img.shields.io/badge/Build-v2.1-success" alt="Build"/>
 </p>
 
 **ResumeIQ** is an AI-powered desktop suite built with Python 3.11, PyQt6, spaCy NLP, Google Gemini AI, and ReportLab 5. It uses Artificial Intelligence across key modules:
@@ -54,6 +54,30 @@
    - Generates a single-page ReportLab vector PDF report containing candidate metrics, overall 5-star rating breakdown, section analysis status table, extracted evidence, and actionable recommendations.
 7. **Dedicated "About Developer" Page**:
    - Integrated dark glassmorphic page detailing developer credentials, mission promise, tech stack matrix, and direct contact buttons.
+
+---
+
+## 🔑 How to Get a Free Google Gemini API Key
+
+ResumeIQ features **Hybrid Cloud + On-Device AI Architecture**. While the application works 100% offline using spaCy NLP, configuring a **Google Gemini API Key** unlocks cloud AI candidate evaluation, dynamic multi-industry suggestions, and AI career advice.
+
+Follow these 4 quick steps to obtain your free Gemini API Key:
+
+1. **Visit Google AI Studio:**
+   - Open your browser and go to [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey).
+2. **Sign In:**
+   - Log in with any Google account.
+3. **Generate Key:**
+   - Click **"Create API Key"** (or **"Get API key"**).
+   - Select a project (or let Google create a default workspace project) and click **Create API Key in new project**.
+   - Copy your generated key (starts with `AIzaSy...`).
+4. **Configure in ResumeIQ:**
+   - Launch **ResumeIQ** and navigate to ⚙️ **Settings** (Page 7) -> **Google Gemini AI Configuration**.
+   - Paste your key into the text box and click **Save Key**.
+   - Click **⚡ Test Connection**. Once connected, your header badge will display `✨ Google Gemini AI Active` in emerald green!
+
+> [!NOTE]  
+> Google Gemini API keys from Google AI Studio are **100% free** with generous daily quota limits suitable for individual and recruiter use.
 
 ---
 

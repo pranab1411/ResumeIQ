@@ -1,13 +1,26 @@
-# ResumeIQ v2.0 Release Updates Report & Changelog
+# ResumeIQ Changelog & Release Notes
 
-**Release Date:** August 27, 2026  
-**Developer:** **Pranab Chourasiya**  
-**Repository:** [github.com/pranab1411/ResumeIQ](https://github.com/pranab1411/ResumeIQ)  
-**License:** Proprietary Freeware License (No Resale, No Modification)  
+## 🌟 [2.1.0] - August 28, 2026 (Official Production Release)
+
+### 🤖 1. 100% Dynamic Google Gemini AI Decision Architecture
+- **Zero Hardcoded Industry Branches:** Eliminated static industry `if/elif` branches. Google Gemini AI dynamically predicts candidate target roles, matched/missing skills, recommended additions, and field-specific required asset fixes (CompTIA/CCNA for IT, GitHub for Software, Behance for Design, Medical License for Healthcare, PE License for Civil, Bar Admission for Law).
+- **Gemini 2026 Model Standard (`gemini-3.5-flash`):** Updated model fallbacks to 2026 standards (`gemini-3.5-flash`, `gemini-3.5-flash-lite`, `gemini-3.7-flash`, `gemini-flash-latest`) with dynamic `ListModels` API fallback discovery.
+- **Dynamic AI Header Status Badge:** Real-time visual indicator in Dashboard Header displaying `✨ Google Gemini AI Active` (emerald green) when API key is active vs `🤖 Free Local spaCy AI Active` (purple) when using local offline engine.
+
+### 🖼️ 2. Brand New ResumeIQ Logo & Visual Refresh
+- **New Brand Assets:** Converted and integrated high-resolution ResumeIQ logo across all UI windows, taskbar icons, system tray floating widget, executable icons, installer setup wizard, and GitHub repository `README.md`.
+- **PDF Report Header Image:** Embedded high-resolution ResumeIQ logo directly into single-page executive PDF evaluation report headers.
+
+### 🔍 3. Mandatory Pre-Build Codebase Verification System
+- **Automated Sanity Check:** Integrated 65-file AST syntax check and 23-module import verification system into `build_installer.py` and `build_test.py` to prevent broken builds.
+
+### 👤 4. Candidate Profile Parsing & Seniority Improvements
+- **Split-Line Full Name Combination:** Automatically combines candidate name headers split across lines (e.g. `PRANAB` \n `CHOURASIYA` -> `Pranab Chourasiya`).
+- **Apostrophe & Non-Standard Experience Detection:** Accurately extracts apostrophe dates (`June'2025`, `Jan'2023`) and multi-year statements (`having 11 years of experience...`).
 
 ---
 
-## 🌟 Major Additions & New Features
+## 🌟 [2.0.0] - August 27, 2026
 
 ### 1. Dedicated "About Developer & Engine Architecture" Page
 - **Navigation Integration:** Added **`👨‍💻 About Developer`** to the main sidebar navigation.
