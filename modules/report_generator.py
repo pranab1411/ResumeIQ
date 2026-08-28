@@ -448,10 +448,22 @@ class PDFReportGenerator:
             ('BOTTOMPADDING', (0,0), (-1,-1), 0),
         ]))
         
+        engine_used_text = kwargs.get("engine_used", "")
+        if not engine_used_text:
+            from utils.gemini_client import gemini_available
+            engine_used_text = "Google Gemini AI" if gemini_available() else "Local spaCy Pipeline"
+
+        if "gemini" in str(engine_used_text).lower():
+            engine_label = "Google Gemini AI"
+            security_label = "Cloud AI + Local Pipeline"
+        else:
+            engine_label = "Local spaCy Pipeline"
+            security_label = "100% On-Device Processing"
+
         header_right = Table([
             [create_header_icon("calendar"), Paragraph(f"<font color='white' size=6.8><b>Generated:</b> {datetime.now().strftime('%b %d, %Y')}</font>", ParagraphStyle('HR1', fontName='Helvetica', leading=8.2))],
-            [create_header_icon("computer"), Paragraph("<font color='white' size=6.8><b>Engine:</b> Local Pipeline</font>", ParagraphStyle('HR2', fontName='Helvetica', leading=8.2))],
-            [create_header_icon("shield"), Paragraph("<font color='white' size=6.8><b>100% On-Device Processing</b></font>", ParagraphStyle('HR3', fontName='Helvetica', leading=8.2))]
+            [create_header_icon("computer"), Paragraph(f"<font color='white' size=6.8><b>Engine:</b> {engine_label}</font>", ParagraphStyle('HR2', fontName='Helvetica', leading=8.2))],
+            [create_header_icon("shield"), Paragraph(f"<font color='white' size=6.8><b>{security_label}</b></font>", ParagraphStyle('HR3', fontName='Helvetica', leading=8.2))]
         ], colWidths=[12, 140])
         header_right.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
