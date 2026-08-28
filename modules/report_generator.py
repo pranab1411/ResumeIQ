@@ -419,13 +419,18 @@ class PDFReportGenerator:
         story = []
         
         # ── 1. HEADER BANNER (ROUNDED CORNERS) ──────────────────────────────────────
-        d_logo = Drawing(24, 24)
-        d_logo.add(Rect(0, 0, 24, 24, rx=4, ry=4, fillColor=colors.white, strokeColor=None))
-        d_logo.add(String(12, 6.5, "R", textAnchor="middle", fontName="Helvetica-Bold", fontSize=16, fillColor=PRIMARY_PURPLE))
+        logo_path = get_asset_path("assets", "logo.png")
+        if os.path.exists(logo_path):
+            header_logo_widget = RLImage(logo_path, width=28, height=28)
+        else:
+            d_logo = Drawing(24, 24)
+            d_logo.add(Rect(0, 0, 24, 24, rx=4, ry=4, fillColor=colors.white, strokeColor=None))
+            d_logo.add(String(12, 6.5, "R", textAnchor="middle", fontName="Helvetica-Bold", fontSize=16, fillColor=PRIMARY_PURPLE))
+            header_logo_widget = d_logo
         
         header_left = Table([
             [
-                d_logo,
+                header_logo_widget,
                 Paragraph(
                     "<font color='white' size=13><b>ResumeIQ</b></font><br/>"
                     "<font color='white' size=9.5><b>Resume Improvement Report</b></font><br/>"
@@ -433,7 +438,7 @@ class PDFReportGenerator:
                     ParagraphStyle('HLeft', fontName='Helvetica', leading=10)
                 )
             ]
-        ], colWidths=[28, 285])
+        ], colWidths=[32, 285])
         header_left.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
             ('LEFTPADDING', (0,0), (-1,-1), 0),
