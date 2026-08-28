@@ -133,9 +133,89 @@ def archive_previous_test_builds(test_builds_dir: str, current_build_name: str):
                         except Exception as e:
                             print(f"  [NOTE] Could not archive '{filename}': {e}")
 
+def run_pre_build_code_check(base_dir: str):
+    """
+    Mandatory Pre-Build Code Check:
+    Performs full AST syntax verification on every Python file in the repository,
+    and executes module import validation across all application modules before building.
+    """
+    print("\n============================================================")
+    print(" 🔍 Executing Mandatory Pre-Build Full Codebase Verification Check")
+    print("============================================================")
+    
+    import ast
+    import importlib
+
+    if base_dir not in sys.path:
+        sys.path.insert(0, base_dir)
+    errors = []
+
+    py_count = 0
+    for root, dirs, files in os.walk(base_dir):
+        if any(skip in root for skip in ['venv', '.git', '__pycache__', 'build', 'dist', 'scratch']):
+            continue
+        for file in files:
+            if file.endswith('.py'):
+                py_count += 1
+                full_path = os.path.join(root, file)
+                rel_path = os.path.relpath(full_path, base_dir)
+                try:
+                    with open(full_path, 'r', encoding='utf-8') as f:
+                        ast.parse(f.read(), filename=rel_path)
+                except SyntaxError as se:
+                    errors.append(f"Syntax Error in {rel_path}: line {se.lineno}: {se.msg}")
+
+    print(f" [OK] Verified AST syntax across {py_count} Python files.")
+
+    modules_to_verify = [
+        'main',
+        'config.version',
+        'database.database',
+        'modules.nlp_engine',
+        'modules.local_ai_agent',
+        'modules.report_generator',
+        'modules.ats_calculator',
+        'modules.ats_benchmark',
+        'modules.otp_service',
+        'modules.jd_scraper',
+        'modules.chatbot_engine',
+        'modules.mnc_ats_engine',
+        'utils.paths',
+        'utils.logger',
+        'utils.gemini_client',
+        'utils.security',
+        'ui.dashboard_window',
+        'ui.login_window',
+        'ui.splash_screen',
+        'ui.closing_screen',
+        'ui.about_developer_page',
+        'ui.profile_page',
+        'ui.floating_widget',
+    ]
+
+    for mod in modules_to_verify:
+        try:
+            importlib.import_module(mod)
+            print(f" [OK] Verified module import: {mod}")
+        except Exception as e:
+            errors.append(f"Import/Runtime Error in {mod}: {e}")
+
+    if errors:
+        print("\n[CRITICAL ERROR] Pre-build code verification failed with errors:")
+        for err in errors:
+            print(f"  ❌ {err}")
+        print("\nBuild aborted to prevent generating a broken installer package.")
+        sys.exit(1)
+
+    print(" [SUCCESS] Pre-build code check passed cleanly with 0 errors!\n")
+
+
 def main():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(base_dir)
+
+    # MANDATORY PRE-BUILD CODE & ERROR VERIFICATION
+    run_pre_build_code_check(base_dir)
 
     version = get_current_version(base_dir)
     test_builds_dir = os.path.join(base_dir, "test_builds")
