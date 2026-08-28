@@ -986,6 +986,60 @@ class PDFReportGenerator:
         ]))
         card_good = RoundedCard(card_good_inner, width=338, bg_color=colors.HexColor("#ECFDF5"), border_color=colors.HexColor("#A7F3D0"), radius=5.0, padding=4.5)
 
+        # Card 5 Left: REPORT SYMBOL & STATUS LEGEND (Fills empty whitespace)
+        legend_header = Table([
+            [create_icon_bullet("bullet_blue"), Paragraph("<b>REPORT SYMBOL & STATUS LEGEND</b>", ParagraphStyle('LGH', fontName='Helvetica-Bold', fontSize=7.0, textColor=colors.HexColor("#2A177E")))]
+        ], colWidths=[13, 305])
+        legend_header.setStyle(TableStyle([
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('LEFTPADDING', (0,0), (-1,-1), 0),
+            ('RIGHTPADDING', (0,0), (-1,-1), 0),
+            ('TOPPADDING', (0,0), (-1,-1), 0),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 1.0)
+        ]))
+
+        def make_legend_item(icon_type: str, badge_text: str, desc: str, color_hex: str) -> Table:
+            icon_w = create_icon_bullet(icon_type)
+            t = Table([
+                [
+                    icon_w,
+                    Paragraph(f"<font color='{color_hex}'><b>{badge_text}:</b></font> <font color='#475569'>{desc}</font>", ParagraphStyle('LEG', fontName='Helvetica', fontSize=5.8, leading=7.2))
+                ]
+            ], colWidths=[11, 151])
+            t.setStyle(TableStyle([
+                ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+                ('LEFTPADDING', (0,0), (-1,-1), 0),
+                ('RIGHTPADDING', (0,0), (-1,-1), 0),
+                ('TOPPADDING', (0,0), (-1,-1), 0),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 0),
+            ]))
+            return t
+
+        card_legend_inner = Table([
+            [legend_header, ""],
+            [
+                make_legend_item("warn_red", "HIGH", "Critical gap or formatting issue to fix", "#DC2626"),
+                make_legend_item("arrow_amber", "MEDIUM", "Recommended enhancement for ATS impact", "#D97706")
+            ],
+            [
+                make_legend_item("check_green", "Good / Strong", "Meets target role standards", "#059669"),
+                make_legend_item("pointer_amber", "Needs Improvement", "Missing technical skill or tool", "#D97706")
+            ],
+            [
+                make_legend_item("plus_red", "Recommended", "Key asset/certification addition", "#DC2626"),
+                make_legend_item("circle_optional", "Optional", "Secondary content to add if applicable", "#64748B")
+            ]
+        ], colWidths=[164, 164])
+        card_legend_inner.setStyle(TableStyle([
+            ('SPAN', (0,0), (1,0)),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('LEFTPADDING', (0,0), (-1,-1), 0),
+            ('RIGHTPADDING', (0,0), (-1,-1), 0),
+            ('TOPPADDING', (0,0), (-1,-1), 0.8),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 0.8),
+        ]))
+        card_legend = RoundedCard(card_legend_inner, width=338, bg_color=colors.HexColor("#F8FAFC"), border_color=colors.HexColor("#E2E8F0"), radius=5.0, padding=4.5)
+
         # Combine Left & Right stacks with an explicit 8pt spacing column between them
         left_stack = Table([
             [card_glance],
@@ -994,7 +1048,9 @@ class PDFReportGenerator:
             [Spacer(1, 3.0)],
             [card_improve],
             [Spacer(1, 3.0)],
-            [card_good]
+            [card_good],
+            [Spacer(1, 3.0)],
+            [card_legend]
         ], colWidths=[338])
         left_stack.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'TOP'),
