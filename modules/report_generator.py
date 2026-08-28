@@ -11,11 +11,12 @@ from datetime import datetime
 from typing import Dict, Any, List, Optional
 
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Flowable
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Flowable, Image as RLImage
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.graphics.shapes import Drawing, Circle, Wedge, Rect, String, Line, Polygon, Path
 from utils.logger import logger
+from utils.paths import get_asset_path
 
 class RoundedCard(Flowable):
     """
