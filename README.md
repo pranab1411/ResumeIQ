@@ -1,12 +1,18 @@
-# ResumeIQ — AI Resume Analyzer & ATS Optimization Desktop Suite
+<p align="center">
+  <img src="assets/logo.png" alt="ResumeIQ Logo" width="200"/>
+</p>
 
-![Python](https://img.shields.io/badge/Python-3.11%2B-blue)
-![PyQt6](https://img.shields.io/badge/GUI-PyQt6-indigo)
-![NLP](https://img.shields.io/badge/NLP-spaCy-green)
-![ReportLab](https://img.shields.io/badge/PDF-ReportLab%205-purple)
-![SQLite](https://img.shields.io/badge/Database-SQLite3%20WAL-lightgrey)
-![License](https://img.shields.io/badge/License-Proprietary%20Freeware-red.svg)
-![Build](https://img.shields.io/badge/Build-v2.0-success)
+<h1 align="center">ResumeIQ — AI Resume Analyzer & ATS Optimization Desktop Suite</h1>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.11%2B-blue" alt="Python"/>
+  <img src="https://img.shields.io/badge/GUI-PyQt6-indigo" alt="PyQt6"/>
+  <img src="https://img.shields.io/badge/NLP-spaCy-green" alt="NLP"/>
+  <img src="https://img.shields.io/badge/AI-Google%20Gemini-emerald" alt="Gemini"/>
+  <img src="https://img.shields.io/badge/PDF-ReportLab%205-purple" alt="ReportLab"/>
+  <img src="https://img.shields.io/badge/Database-SQLite3%20WAL-lightgrey" alt="SQLite"/>
+  <img src="https://img.shields.io/badge/Build-v2.0-success" alt="Build"/>
+</p>
 
 **ResumeIQ** is an AI-powered desktop suite built with Python 3.11, PyQt6, spaCy NLP, Google Gemini AI, and ReportLab 5. It uses Artificial Intelligence across key modules:
 - **Google Gemini AI & spaCy NLP:** Extracts candidate entities (names, emails, phone, location), skills, education background, past job titles, and work experience duration in years and months.
