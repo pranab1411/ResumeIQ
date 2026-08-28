@@ -10,19 +10,44 @@ import urllib.request
 import urllib.error
 from utils.logger import logger
 
-# Current working model — update here if Google deprecates it
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash-latest")
+# Current working model — updated to 2026 Gemini model standards
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
 GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 
-
 FALLBACK_MODELS = [
-    "gemini-1.5-flash-latest",
-    "gemini-1.5-flash",
+    "gemini-3.5-flash",
+    "gemini-3.5-flash-lite",
+    "gemini-3.7-flash",
+    "gemini-flash-latest",
+    "gemini-flash-lite-latest",
+    "gemini-3.1-pro-preview",
+    "gemini-pro-latest",
     "gemini-2.0-flash",
-    "gemini-2.0-flash-exp",
-    "gemini-1.5-pro-latest",
-    "gemini-1.5-pro"
+    "gemini-1.5-flash-latest",
+    "gemini-1.5-pro-latest"
 ]
+
+def fetch_available_models(api_key: str) -> List[str]:
+    """Dynamically queries Google Gemini API ListModels endpoint to get all active generation models."""
+    if not api_key:
+        return []
+    try:
+        url = f"{GEMINI_API_BASE}?key={api_key}"
+        req = urllib.request.Request(url, headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=6) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            active_models = []
+            for m in data.get("models", []):
+                methods = m.get("supportedGenerationMethods", [])
+                if "generateContent" in methods:
+                    m_name = m["name"].replace("models/", "")
+                    active_models.append(m_name)
+            if active_models:
+                logger.info(f"[Gemini] Dynamically discovered {len(active_models)} available API models.")
+                return active_models
+    except Exception as e:
+        logger.warning(f"[Gemini] Dynamic model discovery fallback: {e}")
+    return []
 
 def _get_api_key() -> str:
     """Retrieve API key from environment or DB settings."""
@@ -86,13 +111,42 @@ def gemini_generate(
                 continue
             logger.error(f"[Gemini] HTTP {e.code}: {body}")
             if e.code == 429:
-                raise GeminiError("Gemini rate limit reached. Please wait and try again.")
+                raise GeminiError("Gemini API rate limit or quota exceeded. Please wait a moment and try again.")
             if e.code == 403:
                 raise GeminiError("Gemini API key invalid or quota exhausted.")
             raise GeminiError(f"Gemini HTTP error {e.code}: {body}")
         except Exception as e:
             logger.error(f"[Gemini] Request failed on model {m}: {e}")
             last_error = GeminiError(str(e))
+            continue
+
+    # Secondary Dynamic Model Discovery Fallback
+    logger.info("[Gemini] Fallback models exhausted. Attempting dynamic model discovery from Google ListModels API...")
+    discovered = fetch_available_models(api_key)
+    for m in discovered:
+        if m in models_to_try:
+            continue
+        url = f"{GEMINI_API_BASE}/{m}:generateContent?key={api_key}"
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "temperature": temperature,
+                "maxOutputTokens": max_tokens,
+            },
+        }
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            url, data=data,
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                result = json.loads(resp.read().decode("utf-8"))
+                candidates = result.get("candidates", [])
+                if candidates:
+                    return candidates[0]["content"]["parts"][0]["text"].strip()
+        except Exception:
             continue
 
     if last_error:

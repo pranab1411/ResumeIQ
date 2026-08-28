@@ -1,5 +1,6 @@
 from typing import List, Dict, Any, Tuple, Optional
 import re
+import json
 from utils.logger import logger
 from modules.ats_benchmark import ATSBenchmarkEngine
 

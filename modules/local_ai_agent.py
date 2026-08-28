@@ -1,4 +1,5 @@
 import re
+import json
 from typing import Dict, Any, List, Optional
 from modules.nlp_engine import nlp_engine
 from modules.ats_calculator import ATSCalculator
