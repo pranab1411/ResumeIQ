@@ -8,6 +8,7 @@ import json
 import os
 import urllib.request
 import urllib.error
+from typing import List, Optional, Dict, Any
 from utils.logger import logger
 
 # Current working model — updated to 2026 Gemini model standards
@@ -67,11 +68,13 @@ def gemini_generate(
     *,
     model: str = GEMINI_MODEL,
     temperature: float = 0.7,
-    max_tokens: int = 2048,
+    max_tokens: int = 4096,
     timeout: int = 20,
+    response_mime_type: Optional[str] = None,
 ) -> str:
     """
     Send a prompt to Gemini and return the text response with automatic model fallback.
+    Supports response_mime_type="application/json" to guarantee structured JSON output.
     Raises GeminiError on failure.
     """
     api_key = _get_api_key()
@@ -81,14 +84,18 @@ def gemini_generate(
     models_to_try = [model] + [m for m in FALLBACK_MODELS if m != model]
     last_error = None
 
+    gen_config: Dict[str, Any] = {
+        "temperature": temperature,
+        "maxOutputTokens": max_tokens,
+    }
+    if response_mime_type:
+        gen_config["responseMimeType"] = response_mime_type
+
     for m in models_to_try:
         url = f"{GEMINI_API_BASE}/{m}:generateContent?key={api_key}"
         payload = {
             "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {
-                "temperature": temperature,
-                "maxOutputTokens": max_tokens,
-            },
+            "generationConfig": gen_config,
         }
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(
@@ -129,10 +136,7 @@ def gemini_generate(
         url = f"{GEMINI_API_BASE}/{m}:generateContent?key={api_key}"
         payload = {
             "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {
-                "temperature": temperature,
-                "maxOutputTokens": max_tokens,
-            },
+            "generationConfig": gen_config,
         }
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(

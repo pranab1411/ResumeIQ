@@ -664,7 +664,7 @@ Output ONLY a valid raw JSON array of objects without markdown wrappers:
   }}
 ]
 """
-        response = gemini_generate(prompt, temperature=0.2, max_tokens=1000, timeout=12)
+        response = gemini_generate(prompt, temperature=0.2, max_tokens=2048, timeout=12, response_mime_type="application/json")
         clean_json = re.sub(r'^```(?:json)?\s*|\s*```$', '', response.strip(), flags=re.MULTILINE)
         data = json.loads(clean_json)
         if isinstance(data, list) and len(data) > 0:

@@ -814,7 +814,7 @@ class DashboardWindow(QMainWindow):
                 "missing_skills": missing,
                 "recommended_additions": ai_res.get("recommended_additions", []),
                 "required_asset_fix": ai_res.get("required_asset_fix", {}),
-                "engine_used": ai_res.get("engine_used", "Local spaCy Engine"),
+                "engine_used": ai_res.get("engine_used", "Local spaCy Pipeline"),
                 "suggestions": suggestions,
                 "mode": mode,
                 "resume_text": extracted_text,

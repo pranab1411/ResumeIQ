@@ -6,6 +6,69 @@ from modules.ats_calculator import ATSCalculator
 from modules.mnc_ats_engine import TopMNCATSEngine
 from utils.logger import logger
 
+def parse_and_repair_json(raw_text: str) -> dict:
+    """
+    Robust JSON parser that cleans markdown fences and repairs minor syntax issues
+    such as unclosed quotes, brackets, and braces caused by premature token boundaries.
+    """
+    cleaned = re.sub(r'^```(?:json)?\s*|\s*```$', '', raw_text.strip(), flags=re.MULTILINE).strip()
+    
+    # 1. Direct parse attempt
+    try:
+        return json.loads(cleaned)
+    except Exception:
+        pass
+        
+    # 2. Try regex match for outermost JSON object
+    match = re.search(r'(\{[\s\S]*\})', cleaned)
+    if match:
+        try:
+            return json.loads(match.group(1))
+        except Exception:
+            pass
+
+    # 3. Attempt repairing truncated JSON (e.g. unclosed strings, arrays, objects)
+    s = cleaned.rstrip()
+    in_string = False
+    escape = False
+    for char in s:
+        if char == '\\' and not escape:
+            escape = True
+            continue
+        if char == '"' and not escape:
+            in_string = not in_string
+        escape = False
+    
+    if in_string:
+        s += '"'
+    
+    # Balance open braces and brackets
+    open_braces = 0
+    open_brackets = 0
+    in_string = False
+    escape = False
+    for char in s:
+        if char == '\\' and not escape:
+            escape = True
+            continue
+        if char == '"' and not escape:
+            in_string = not in_string
+        elif not in_string:
+            if char == '{':
+                open_braces += 1
+            elif char == '}':
+                open_braces = max(0, open_braces - 1)
+            elif char == '[':
+                open_brackets += 1
+            elif char == ']':
+                open_brackets = max(0, open_brackets - 1)
+        escape = False
+
+    s += (']' * open_brackets) + ('}' * open_braces)
+    
+    return json.loads(s)
+
+
 class LocalAIAgent:
     """
     Local Resume Intelligence & Optimization Engine for ResumeIQ.
@@ -59,6 +122,7 @@ Instructions:
 7. Recommend 3 role-specific additions/skills for the candidate to learn or add.
 8. Provide a dynamic "required_asset_fix" object tailored strictly to candidate's field (e.g. for IT Support: IT Certifications/CompTIA/Labs; for Tech: GitHub; for Design: Behance/Figma; for Healthcare: Medical License/EMR; for Legal: Bar Admission; for Civil: PE License/BIM).
 9. Provide 4 tailored, industry-relevant improvement suggestions.
+10. Keep descriptions and suggestions concise (1-2 sentences each).
 
 Return a valid raw JSON object strictly matching this schema:
 {{
@@ -83,9 +147,8 @@ Return a valid raw JSON object strictly matching this schema:
   "suggestions": ["Suggestion 1", "Suggestion 2", "Suggestion 3", "Suggestion 4"]
 }}
 """
-                raw_res = gemini_generate(prompt, temperature=0.2)
-                clean_json = re.sub(r'```json\s*|\s*```', '', raw_res).strip()
-                data = json.loads(clean_json)
+                raw_res = gemini_generate(prompt, temperature=0.2, max_tokens=4096, response_mime_type="application/json")
+                data = parse_and_repair_json(raw_res)
 
                 if not data.get("candidate_name") or data["candidate_name"] in ["Full Name", "Exact Candidate Name"]:
                     data["candidate_name"] = contact_info.get("name", "Candidate")
@@ -161,7 +224,8 @@ Return a valid raw JSON object strictly matching this schema:
                 "matched_skills": matched_skills,
                 "missing_skills": missing_skills,
                 "suggestions": suggestions,
-                "mnc_ats": mnc_eval
+                "mnc_ats": mnc_eval,
+                "engine_used": "Local spaCy Pipeline"
             }
 
         else:
@@ -195,7 +259,8 @@ Return a valid raw JSON object strictly matching this schema:
                 "matched_skills": matched,
                 "missing_skills": missing,
                 "suggestions": suggestions,
-                "mnc_ats": mnc_eval
+                "mnc_ats": mnc_eval,
+                "engine_used": "Local spaCy Pipeline"
             }
 
 local_ai_agent = LocalAIAgent()
