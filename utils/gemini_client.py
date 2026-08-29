@@ -11,21 +11,19 @@ import urllib.error
 from typing import List, Optional, Dict, Any
 from utils.logger import logger
 
-# Current working model — updated to 2026 Gemini model standards
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
+# Current working model — updated to 2026 Gemini model standards (gemini-3.6-flash)
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
 GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 
 FALLBACK_MODELS = [
-    "gemini-3.5-flash",
+    "gemini-3.6-flash",
     "gemini-3.5-flash-lite",
-    "gemini-3.7-flash",
+    "gemini-3.5-flash",
     "gemini-flash-latest",
     "gemini-flash-lite-latest",
-    "gemini-3.1-pro-preview",
-    "gemini-pro-latest",
-    "gemini-2.0-flash",
-    "gemini-1.5-flash-latest",
-    "gemini-1.5-pro-latest"
+    "gemini-3.7-flash",
+    "gemini-3.1-flash-lite",
+    "gemini-pro-latest"
 ]
 
 def fetch_available_models(api_key: str) -> List[str]:
@@ -118,10 +116,13 @@ def gemini_generate(
                 continue
             logger.error(f"[Gemini] HTTP {e.code}: {body}")
             if e.code == 429:
-                raise GeminiError("Gemini API rate limit or quota exceeded. Please wait a moment and try again.")
+                logger.warning(f"[Gemini] Model '{m}' hit quota/rate limit (HTTP 429). Attempting fallback model...")
+                last_error = GeminiError("Gemini API rate limit or quota exceeded across all attempted models. Please wait a moment and try again.")
+                continue
             if e.code == 403:
                 raise GeminiError("Gemini API key invalid or quota exhausted.")
-            raise GeminiError(f"Gemini HTTP error {e.code}: {body}")
+            last_error = GeminiError(f"Gemini HTTP error {e.code}: {body}")
+            continue
         except Exception as e:
             logger.error(f"[Gemini] Request failed on model {m}: {e}")
             last_error = GeminiError(str(e))
@@ -150,7 +151,11 @@ def gemini_generate(
                 candidates = result.get("candidates", [])
                 if candidates:
                     return candidates[0]["content"]["parts"][0]["text"].strip()
-        except Exception:
+        except urllib.error.HTTPError as e:
+            logger.warning(f"[Gemini] Discovered model '{m}' returned HTTP {e.code}. Continuing...")
+            continue
+        except Exception as e:
+            logger.warning(f"[Gemini] Discovered model '{m}' failed ({e}). Continuing...")
             continue
 
     if last_error:
