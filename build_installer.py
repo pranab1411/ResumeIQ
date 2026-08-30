@@ -154,16 +154,26 @@ def main():
             iscc_found = path
             break
 
+    # Determine output executable name from installer_setup.iss
+    out_filename = "ResumeIQ_Setup.exe"
+    iss_file = os.path.join(base_dir, "installer_setup.iss")
+    if os.path.exists(iss_file):
+        with open(iss_file, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.strip().startswith("OutputBaseFilename="):
+                    out_filename = line.strip().split("=", 1)[1].strip() + ".exe"
+                    break
+
     if iscc_found:
         iscc_cmd = f'"{iscc_found}" installer_setup.iss'
-        run_step("Compiling Inno Setup Executable (ResumeIQ_Setup_v2.0.exe)", iscc_cmd, cwd=base_dir)
-        setup_exe = os.path.join(base_dir, "Output", "ResumeIQ_Setup_v2.0.exe")
+        run_step(f"Compiling Inno Setup Executable ({out_filename})", iscc_cmd, cwd=base_dir)
+        setup_exe = os.path.join(base_dir, "Output", out_filename)
         if os.path.exists(setup_exe):
-            print(f"\n[SUCCESS] Installer created at: {setup_exe}")
+            print(f"\n[SUCCESS] Installer created at: {setup_exe} ({os.path.getsize(setup_exe) / (1024*1024):.1f} MB)")
     else:
         print("\n" + "="*60)
         print(" [INFO] Inno Setup Compiler (ISCC.exe) not found on system PATH.")
-        print("        To build the single ResumeIQ_Setup_v2.0.exe file:")
+        print(f"        To build the single {out_filename} file:")
         print("        1. Download free Inno Setup 6 from: https://jrsoftware.org/isdl.php")
         print("        2. Right-click 'installer_setup.iss' and click 'Compile'.")
         print("="*60)

@@ -4,12 +4,14 @@
 
 ### 🤖 1. 100% Dynamic Google Gemini AI Decision Architecture
 - **Zero Hardcoded Industry Branches:** Eliminated static industry `if/elif` branches. Google Gemini AI dynamically predicts candidate target roles, matched/missing skills, recommended additions, and field-specific required asset fixes (CompTIA/CCNA for IT, GitHub for Software, Behance for Design, Medical License for Healthcare, PE License for Civil, Bar Admission for Law).
-- **Gemini 2026 Model Standard (`gemini-3.5-flash`):** Updated model fallbacks to 2026 standards (`gemini-3.5-flash`, `gemini-3.5-flash-lite`, `gemini-3.7-flash`, `gemini-flash-latest`) with dynamic `ListModels` API fallback discovery.
+- **Gemini Model Standards & 429 Quota Fallback:** Configured default models (`gemini-2.5-flash`, `gemini-2.0-flash`, `gemini-flash-latest`) with automatic fallthrough on HTTP 429 rate limit / quota exhaustion.
+- **JSON Truncation Protection:** Enforced `responseMimeType: "application/json"`, increased token buffer to 4,096 tokens, and implemented intelligent JSON boundary repair for unclosed responses.
 - **Dynamic AI Header Status Badge:** Real-time visual indicator in Dashboard Header displaying `✨ Google Gemini AI Active` (emerald green) when API key is active vs `🤖 Free Local spaCy AI Active` (purple) when using local offline engine.
 
 ### 🖼️ 2. Brand New ResumeIQ Logo & Visual Refresh
 - **New Brand Assets:** Converted and integrated high-resolution ResumeIQ logo across all UI windows, taskbar icons, system tray floating widget, executable icons, installer setup wizard, and GitHub repository `README.md`.
-- **PDF Report Header Image:** Embedded high-resolution ResumeIQ logo directly into single-page executive PDF evaluation report headers.
+- **PDF Report Header Image & Engine Badge:** Embedded high-resolution ResumeIQ logo and dynamic engine indicator (`Google Gemini AI Powered Evaluation` vs `Local spaCy AI Evaluation`) directly into single-page executive PDF evaluation report headers.
+- **Report Symbol & Status Legend Card:** Added a dedicated status legend card (`⭐ Exceeded`, `✓ Met`, `⚠ Partially Met`, `✕ Action Required`) in the executive PDF report right stack to optimize whitespace utilization.
 
 ### 🔍 3. Mandatory Pre-Build Codebase Verification System
 - **Automated Sanity Check:** Integrated 65-file AST syntax check and 23-module import verification system into `build_installer.py` and `build_test.py` to prevent broken builds.
