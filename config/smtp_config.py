@@ -7,8 +7,8 @@ import os
 from utils.credential_cipher import decrypt_smtp_payload
 
 # AES-256-GCM Encrypted Embedded Credentials Payload
-# Generated via encrypt_smtp.py
-ENCRYPTED_SMTP_PAYLOAD = os.getenv("RESUMEIQ_ENCRYPTED_SMTP", "")
+# Generated via encrypt_smtp.py (Scrape-proof; zero plaintext credentials)
+ENCRYPTED_SMTP_PAYLOAD = os.getenv("RESUMEIQ_ENCRYPTED_SMTP", "dSG6b6QilL6n2rcCIE1jNYmLKUpM91IWlUdJ0614GHt8g5i6vEoYDCO6lmKHcv87EjXWL7Bc8IWue7TKdBMstSD3bA9V6X1APq7N4lvA5-qA2ry8KtOY3O-0RBGg569bKAzHPVJuorQK_qfLeXEUWFM46WNSjFesaQ6OCMGU")
 
 # Decrypt credentials at runtime if embedded payload exists
 _creds = decrypt_smtp_payload(ENCRYPTED_SMTP_PAYLOAD) if ENCRYPTED_SMTP_PAYLOAD else {}
