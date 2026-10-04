@@ -71,7 +71,7 @@
 - **Cryptographic 6-Digit Generator:** Secure numeric OTP creation via `secrets.randbelow()`.
 - **SHA-256 Hashed Storage:** Salted storage; raw OTPs are never saved in plaintext.
 - **Brute-Force Guard:** Strict 5-attempt locking limit and 60-second cooldown timer.
-- **Automated Dispatch:** Confirmation notification dispatched from `support.resumeiq@gmail.com` via TLS SMTP upon successful reset.
+- **Automated Dispatch:** Confirmation notification dispatched from user-configured sender email via TLS SMTP upon successful reset.
 
 ### 7. Dedicated "About Developer & Engine Architecture" Page
 - Integrated dark glassmorphic view with interactive developer links, architecture breakdown, and full tech stack matrix.

@@ -1425,6 +1425,89 @@ class DashboardWindow(QMainWindow):
         g_layout.addLayout(key_layout)
         layout.addWidget(gemini_card)
 
+        # SMTP Email Gateway Configuration Card
+        smtp_card = QFrame()
+        smtp_card.setObjectName("CardFrame")
+        s_layout = QVBoxLayout(smtp_card)
+        s_layout.setContentsMargins(22, 20, 22, 20)
+        s_layout.setSpacing(12)
+
+        s_title = QLabel("📧 Outbound SMTP Email Gateway")
+        s_title.setObjectName("SectionHeader")
+        s_sub = QLabel("Configure your outbound SMTP server to send password reset OTP codes and security alerts. Stored securely on your local machine.")
+        s_sub.setObjectName("SubTitle")
+        s_sub.setWordWrap(True)
+
+        smtp_grid = QGridLayout()
+        smtp_grid.setHorizontalSpacing(12)
+        smtp_grid.setVerticalSpacing(10)
+
+        input_style = "background: #0F172A; color: #F8FAFC; border: 1px solid #334155; border-radius: 6px; padding: 8px 12px; font-size: 13px;"
+
+        lbl_host = QLabel("SMTP Host:")
+        lbl_host.setStyleSheet("color: #94A3B8; font-size: 13px; font-weight: bold;")
+        self.input_smtp_host = QLineEdit()
+        self.input_smtp_host.setPlaceholderText("smtp.gmail.com")
+        self.input_smtp_host.setText(db.get_setting("smtp_host", "smtp.gmail.com"))
+        self.input_smtp_host.setStyleSheet(input_style)
+
+        lbl_port = QLabel("Port:")
+        lbl_port.setStyleSheet("color: #94A3B8; font-size: 13px; font-weight: bold;")
+        self.input_smtp_port = QLineEdit()
+        self.input_smtp_port.setPlaceholderText("587")
+        self.input_smtp_port.setText(db.get_setting("smtp_port", "587"))
+        self.input_smtp_port.setStyleSheet(input_style)
+        self.input_smtp_port.setMaximumWidth(90)
+
+        lbl_user = QLabel("Sender Email:")
+        lbl_user.setStyleSheet("color: #94A3B8; font-size: 13px; font-weight: bold;")
+        self.input_smtp_user = QLineEdit()
+        self.input_smtp_user.setPlaceholderText("your-email@gmail.com")
+        self.input_smtp_user.setText(db.get_setting("smtp_user", ""))
+        self.input_smtp_user.setStyleSheet(input_style)
+
+        lbl_pass = QLabel("App Password:")
+        lbl_pass.setStyleSheet("color: #94A3B8; font-size: 13px; font-weight: bold;")
+        self.input_smtp_pass = QLineEdit()
+        self.input_smtp_pass.setEchoMode(QLineEdit.EchoMode.Password)
+        self.input_smtp_pass.setPlaceholderText("16-character Google App Password")
+        self.input_smtp_pass.setText(db.get_setting("smtp_password", ""))
+        self.input_smtp_pass.setStyleSheet(input_style)
+
+        smtp_grid.addWidget(lbl_host, 0, 0)
+        smtp_grid.addWidget(self.input_smtp_host, 0, 1)
+        smtp_grid.addWidget(lbl_port, 0, 2)
+        smtp_grid.addWidget(self.input_smtp_port, 0, 3)
+
+        smtp_grid.addWidget(lbl_user, 1, 0)
+        smtp_grid.addWidget(self.input_smtp_user, 1, 1, 1, 3)
+
+        smtp_grid.addWidget(lbl_pass, 2, 0)
+        smtp_grid.addWidget(self.input_smtp_pass, 2, 1, 1, 3)
+
+        smtp_btn_layout = QHBoxLayout()
+        smtp_btn_layout.setSpacing(10)
+
+        btn_save_smtp = QPushButton("💾 Save SMTP Gateway")
+        btn_save_smtp.setObjectName("PrimaryButton")
+        btn_save_smtp.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_save_smtp.clicked.connect(self._handle_save_smtp_settings)
+
+        btn_test_smtp = QPushButton("⚡ Test SMTP Connection")
+        btn_test_smtp.setObjectName("SecondaryButton")
+        btn_test_smtp.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_test_smtp.clicked.connect(self._handle_test_smtp_connection)
+
+        smtp_btn_layout.addWidget(btn_save_smtp)
+        smtp_btn_layout.addWidget(btn_test_smtp)
+        smtp_btn_layout.addStretch()
+
+        s_layout.addWidget(s_title)
+        s_layout.addWidget(s_sub)
+        s_layout.addLayout(smtp_grid)
+        s_layout.addLayout(smtp_btn_layout)
+        layout.addWidget(smtp_card)
+
         # App Theme Card (Permanent 100% Glassmorphism Dark Theme)
         theme_card = QFrame()
         theme_card.setObjectName("CardFrame")
@@ -1509,6 +1592,57 @@ class DashboardWindow(QMainWindow):
             GlassMessageBox.success(self, "Gemini Connection Successful", f"✨ Connection Verified!\n\nGemini Response: \"{res}\"")
         except Exception as e:
             GlassMessageBox.warning(self, "Connection Failed", f"⚠️ Failed to connect to Google Gemini API:\n\n{e}")
+
+    def _handle_save_smtp_settings(self):
+        host = self.input_smtp_host.text().strip() or "smtp.gmail.com"
+        port = self.input_smtp_port.text().strip() or "587"
+        user = self.input_smtp_user.text().strip()
+        pwd = self.input_smtp_pass.text().strip()
+
+        db.set_setting("smtp_host", host)
+        db.set_setting("smtp_port", port)
+        db.set_setting("smtp_user", user)
+        db.set_setting("smtp_password", pwd)
+
+        GlassMessageBox.success(
+            self,
+            "SMTP Gateway Saved",
+            "✨ SMTP email gateway settings have been saved successfully to your local machine."
+        )
+
+    def _handle_test_smtp_connection(self):
+        host = self.input_smtp_host.text().strip() or db.get_setting("smtp_host", "smtp.gmail.com")
+        port = self.input_smtp_port.text().strip() or db.get_setting("smtp_port", "587")
+        user = self.input_smtp_user.text().strip() or db.get_setting("smtp_user", "")
+        pwd = self.input_smtp_pass.text().strip() or db.get_setting("smtp_password", "")
+
+        if not user or not pwd:
+            GlassMessageBox.warning(
+                self,
+                "Missing Credentials",
+                "Please enter your Sender Email and App Password before testing the connection."
+            )
+            return
+
+        from modules.otp_service import otp_service
+        try:
+            port_val = int(port)
+        except ValueError:
+            port_val = 587
+
+        ok, msg = otp_service.test_smtp_connection(host, port_val, user, pwd)
+        if ok:
+            GlassMessageBox.success(
+                self,
+                "SMTP Verified",
+                f"✅ SMTP Connection & Authentication Successful!\n\nConnected to {host}:{port} as {user}."
+            )
+        else:
+            GlassMessageBox.warning(
+                self,
+                "SMTP Test Failed",
+                f"❌ SMTP Connection / Authentication Failed:\n\n{msg}\n\nTip: For Gmail, ensure 2-Step Verification is ON and you are using a 16-character App Password (not your personal Google account password)."
+            )
 
 
     def handle_reset_settings(self):

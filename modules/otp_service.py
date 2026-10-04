@@ -31,7 +31,7 @@ class RealOTPService:
             default_host = smtp_config.DEFAULT_SMTP_HOST
             default_port = smtp_config.DEFAULT_SMTP_PORT
         except ImportError:
-            default_user, default_pass, default_host, default_port = "support.resumeiq@gmail.com", "", "smtp.gmail.com", 587
+            default_user, default_pass, default_host, default_port = "", "", "smtp.gmail.com", 587
 
         smtp_host = db.get_setting("smtp_host", "") or default_host
         smtp_port = int(db.get_setting("smtp_port", "") or str(default_port))
@@ -39,7 +39,7 @@ class RealOTPService:
         smtp_password = db.get_setting("smtp_password", "") or default_pass
 
         if not smtp_user or not smtp_password or "your_" in smtp_user or "your_" in smtp_password:
-            logger.warning("[REAL OTP SERVICE] Embedded Admin SMTP credentials pending update.")
+            logger.warning("[REAL OTP SERVICE] Admin SMTP credentials pending configuration in Settings.")
             return False, "NO_SMTP_CONFIG"
 
         try:
@@ -102,7 +102,16 @@ class RealOTPService:
         logger.info(f"[REAL EMAIL OTP SERVICE] Issued new 6-digit OTP for '{email}'. Active session ID: {session_record['id']}.")
 
         # Attempt SMTP delivery
-        self.send_smtp_email(email, otp_code)
+        smtp_success, smtp_err = self.send_smtp_email(email, otp_code)
+        if not smtp_success:
+            logger.warning(f"[REAL EMAIL OTP SERVICE] Email dispatch failed for '{email}': {smtp_err}")
+            if smtp_err == "NO_SMTP_CONFIG":
+                err_detail = "SMTP gateway is not configured. Please enter your email credentials in Dashboard -> Settings."
+            elif "534" in smtp_err or "webloginrequired" in smtp_err.lower() or "disabled" in smtp_err.lower():
+                err_detail = "SMTP authentication rejected: Account locked or disabled by Google. Please check your credentials."
+            else:
+                err_detail = f"Email delivery failed: {smtp_err}"
+            return False, err_detail, None
 
         masked_addr = mask_email(email)
         details = {
@@ -213,7 +222,7 @@ class RealOTPService:
             default_host = smtp_config.DEFAULT_SMTP_HOST
             default_port = smtp_config.DEFAULT_SMTP_PORT
         except ImportError:
-            default_user, default_pass, default_host, default_port = "support.resumeiq@gmail.com", "", "smtp.gmail.com", 587
+            default_user, default_pass, default_host, default_port = "", "", "smtp.gmail.com", 587
 
         smtp_host = db.get_setting("smtp_host", "") or default_host
         smtp_port = int(db.get_setting("smtp_port", "") or str(default_port))
@@ -250,5 +259,33 @@ class RealOTPService:
         except Exception as e:
             logger.error(f"[REAL OTP SERVICE] Password changed email dispatch failed: {e}")
             return False, str(e)
+
+    def test_smtp_connection(self, host: str, port: int, user: str, password: str) -> Tuple[bool, str]:
+        """Validates connection and TLS login with provided SMTP server parameters."""
+        if not host or not user or not password:
+            return False, "Host, email username, and password are required."
+        try:
+            port_num = int(port) if port else 587
+        except ValueError:
+            return False, "Invalid port number. Default is 587."
+
+        try:
+            if port_num == 465:
+                with smtplib.SMTP_SSL(host, port_num, timeout=10) as server:
+                    server.login(user, password)
+            else:
+                with smtplib.SMTP(host, port_num, timeout=10) as server:
+                    server.ehlo()
+                    server.starttls()
+                    server.ehlo()
+                    server.login(user, password)
+            return True, "SMTP connection and authentication verified successfully!"
+        except smtplib.SMTPAuthenticationError as e:
+            err_text = str(e)
+            if "534" in err_text or "webloginrequired" in err_text.lower():
+                return False, "Authentication rejected by Google (Account blocked or App Password revoked)."
+            return False, f"Authentication failed: {str(e)}"
+        except Exception as e:
+            return False, f"SMTP Connection failed: {str(e)}"
 
 otp_service = RealOTPService()

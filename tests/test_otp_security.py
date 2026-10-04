@@ -5,8 +5,13 @@ from modules.otp_service import otp_service
 from modules.auth import AuthManager
 from utils.security import mask_email
 
+from unittest.mock import patch
+
 class TestOTPSecurityEngine(unittest.TestCase):
     def setUp(self):
+        self.smtp_patcher = patch.object(otp_service, "send_smtp_email", return_value=(True, "Mock email dispatched"))
+        self.smtp_patcher.start()
+
         self.test_email = "test.otp.user@example.com"
         self.test_password = "Password123!"
         # Clean existing test user and reset sessions
@@ -18,6 +23,9 @@ class TestOTPSecurityEngine(unittest.TestCase):
 
         # Register test user
         db.register_user("Test OTP Candidate", self.test_email, self.test_password)
+
+    def tearDown(self):
+        self.smtp_patcher.stop()
 
     def test_email_masking(self):
         self.assertEqual(mask_email("pranabchourasiya876@gmail.com"), "pr***76@gmail.com")

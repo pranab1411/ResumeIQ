@@ -25,6 +25,8 @@ env/
 
 # Local Database, Resumes & Reports
 database/*.db
+database/*.db-shm
+database/*.db-wal
 database/resumeiq.db
 reports/
 resumes/
