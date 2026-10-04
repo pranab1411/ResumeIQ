@@ -65,6 +65,10 @@ hiddenimports = [
     # HTML / Scraper
     'bs4',
     'soupsieve',
+    # Cryptography & Security Vault
+    'cryptography',
+    'cryptography.hazmat.primitives.ciphers.aead',
+    'utils.credential_cipher',
 ]
 hiddenimports += collect_submodules('encodings')
 hiddenimports += collect_submodules('spacy')
@@ -73,6 +77,7 @@ hiddenimports += collect_submodules('google.generativeai')
 hiddenimports += collect_submodules('google.ai.generativelanguage')
 hiddenimports += collect_submodules('bs4')
 hiddenimports += collect_submodules('soupsieve')
+hiddenimports += collect_submodules('cryptography')
 
 a = Analysis(
     ['main.py'],

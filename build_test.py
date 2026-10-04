@@ -184,6 +184,8 @@ def run_pre_build_code_check(base_dir: str):
         'utils.logger',
         'utils.gemini_client',
         'utils.security',
+        'utils.credential_cipher',
+        'config.smtp_config',
         'ui.dashboard_window',
         'ui.login_window',
         'ui.splash_screen',
